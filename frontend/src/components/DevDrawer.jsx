@@ -5,21 +5,36 @@ import { supabase } from '../utils/supabase'
 /**
  * DevDrawer - 개발자용 기술 지표 서랍 UI
  *
- * 3개 탭 구조:
+ * 4개 탭 구조:
  * 1. 📊 지표 원본값 - RSI, MACD 실시간 값 + 설명
  * 2. 🚨 알림 시그널 - 8개 시그널 조합 조건 시각화
  * 3. 📡 데이터 흐름 - API → DB → Frontend 흐름도
+ * 4. ⚙️ 설정 - 캐시 관리, 시스템 설정
  */
-function DevDrawer({ timeframe = '1h', whales = [] }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('indicators') // 'indicators', 'signals', 'dataflow'
-  const [alerts, setAlerts] = useState([])
+function DevDrawer({
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
+  timeframe = '1h',
+  whales = [],
+  alerts: externalAlerts = [],
+  onClearCache
+}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('indicators') // 'indicators', 'signals', 'dataflow', 'settings'
+  const [internalAlerts, setInternalAlerts] = useState([])
+
+  // Use external control if provided, otherwise internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const setIsOpen = externalOnClose ? () => externalOnClose() : setInternalIsOpen
+  const alerts = externalAlerts.length > 0 ? externalAlerts : internalAlerts
 
   // Fetch market data from Binance API (contains all indicators)
   const sentiment = useMarketData(timeframe, 'TOTAL')
 
-  // Subscribe to alerts table
+  // Subscribe to alerts table (only if not provided externally)
   useEffect(() => {
+    if (externalAlerts.length > 0) return // Skip if alerts provided externally
+
     const fetchAlerts = async () => {
       const { data, error } = await supabase
         .from('alerts')
@@ -28,7 +43,7 @@ function DevDrawer({ timeframe = '1h', whales = [] }) {
         .limit(20)
 
       if (!error && data) {
-        setAlerts(data)
+        setInternalAlerts(data)
       }
     }
 
@@ -42,14 +57,14 @@ function DevDrawer({ timeframe = '1h', whales = [] }) {
         schema: 'public',
         table: 'alerts'
       }, (payload) => {
-        setAlerts(prev => [payload.new, ...prev].slice(0, 20))
+        setInternalAlerts(prev => [payload.new, ...prev].slice(0, 20))
       })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [externalAlerts.length])
 
   // Calculate alert signal conditions
   const calculateSignalConditions = () => {
@@ -247,7 +262,7 @@ function DevDrawer({ timeframe = '1h', whales = [] }) {
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('indicators')}
-              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-3 py-2 rounded-lg font-medium transition-all text-sm ${
                 activeTab === 'indicators'
                   ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
                   : 'bg-gray-800/50 border border-white/10 text-white/60 hover:text-white'
@@ -257,7 +272,7 @@ function DevDrawer({ timeframe = '1h', whales = [] }) {
             </button>
             <button
               onClick={() => setActiveTab('signals')}
-              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-3 py-2 rounded-lg font-medium transition-all text-sm ${
                 activeTab === 'signals'
                   ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
                   : 'bg-gray-800/50 border border-white/10 text-white/60 hover:text-white'
@@ -267,13 +282,23 @@ function DevDrawer({ timeframe = '1h', whales = [] }) {
             </button>
             <button
               onClick={() => setActiveTab('dataflow')}
-              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-3 py-2 rounded-lg font-medium transition-all text-sm ${
                 activeTab === 'dataflow'
                   ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
                   : 'bg-gray-800/50 border border-white/10 text-white/60 hover:text-white'
               }`}
             >
               📡 흐름
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`flex-1 px-3 py-2 rounded-lg font-medium transition-all text-sm ${
+                activeTab === 'settings'
+                  ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
+                  : 'bg-gray-800/50 border border-white/10 text-white/60 hover:text-white'
+              }`}
+            >
+              ⚙️ 설정
             </button>
           </div>
         </div>
@@ -453,7 +478,104 @@ function DevDrawer({ timeframe = '1h', whales = [] }) {
             </div>
           )}
 
-          {/* Tab 3: Data Flow */}
+          {/* Tab 3: Settings */}
+          {activeTab === 'settings' && (
+            <div className="space-y-4">
+              {/* Cache Management */}
+              <div className="bg-gray-800/50 border border-white/10 rounded-lg p-4">
+                <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                  <span>🗑️</span>
+                  <span>캐시 관리</span>
+                </h3>
+                <p className="text-xs text-white/60 mb-4">
+                  브라우저 캐시가 오래되어 데이터가 표시되지 않을 때 사용하세요.
+                </p>
+
+                {/* Cache Info */}
+                <div className="bg-gray-900/50 border border-white/10 rounded-lg p-3 mb-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-white/60">localStorage 사용</span>
+                      <span className="font-mono text-white">
+                        {Object.keys(localStorage).length}개 항목
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">Zustand Store</span>
+                      <span className="font-mono text-white">
+                        {localStorage.getItem('trading-storage-v2') ? '✓ 존재' : '✗ 없음'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">캐시 버전</span>
+                      <span className="font-mono text-white">v3</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Cache Button */}
+                {onClearCache && (
+                  <button
+                    onClick={onClearCache}
+                    className="w-full px-4 py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-500 text-red-400 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <span className="text-xl">🗑️</span>
+                    <span>캐시 모두 삭제</span>
+                  </button>
+                )}
+
+                {!onClearCache && (
+                  <div className="text-xs text-white/40 text-center p-3 bg-gray-900/50 border border-white/10 rounded">
+                    캐시 삭제 기능이 활성화되지 않았습니다.
+                  </div>
+                )}
+
+                <div className="mt-3 text-xs text-white/40">
+                  <p>⚠️ 캐시를 삭제하면:</p>
+                  <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                    <li>거래 데이터 초기화</li>
+                    <li>로그인 세션 삭제</li>
+                    <li>설정 정보 초기화</li>
+                    <li>페이지 자동 새로고침</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* System Info */}
+              <div className="bg-gray-800/50 border border-white/10 rounded-lg p-4">
+                <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                  <span>💻</span>
+                  <span>시스템 정보</span>
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">User Agent</span>
+                    <span className="font-mono text-white/80 text-xs truncate max-w-xs">
+                      {navigator.userAgent.split(' ').slice(-2).join(' ')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">화면 크기</span>
+                    <span className="font-mono text-white">
+                      {window.innerWidth} × {window.innerHeight}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">언어</span>
+                    <span className="font-mono text-white">{navigator.language}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">온라인 상태</span>
+                    <span className={`font-mono ${navigator.onLine ? 'text-green-400' : 'text-red-400'}`}>
+                      {navigator.onLine ? '✓ 연결됨' : '✗ 오프라인'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 4: Data Flow */}
           {activeTab === 'dataflow' && (
             <div className="space-y-4">
               <div className="bg-gray-800/50 border border-white/10 rounded-lg p-4">

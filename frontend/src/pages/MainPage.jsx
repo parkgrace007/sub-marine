@@ -3,7 +3,6 @@ import Header from '../components/Header'
 import MainVisualizationSet from '../components/MainVisualizationSet'
 import AlertDualPanel from '../components/AlertDualPanel'
 import CryptoTrendsFeed from '../components/CryptoTrendsFeed'
-import DevDrawer from '../components/DevDrawer'
 import { useIndicatorLogger } from '../hooks/useIndicatorLogger' // Indicator change detection + logs
 import { useWhaleData } from '../hooks/useWhaleData'
 import soundManager from '../utils/SoundManager'
@@ -24,8 +23,6 @@ function MainPage() {
 
   // State variables
   const [alerts, setAlerts] = useState([])
-  const [isDevDashboardOpen, setIsDevDashboardOpen] = useState(false)
-  const [showToast, setShowToast] = useState(false)
 
   // Refs
   const whaleCanvasRef = useRef(null)
@@ -205,38 +202,12 @@ function MainPage() {
         </div>
       </main>
 
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-surface-200 border border-danger text-white px-6 py-4 rounded-md shadow-lg flex items-center gap-3 animate-slide-in-fade">
-          <span>💾</span>
-          <div>
-            <h4 className="font-bold text-sm">Settings Saved</h4>
-            <p className="text-xs opacity-80">Your preferences have been updated.</p>
-          </div>
-        </div>
-      )}
-
       {/* Whale Loading Overlay */}
       {whalesLoading && (
         <div className="fixed top-20 right-6 z-50 bg-surface-200 border border-surface-300 px-4 py-2 rounded shadow-lg">
           고래 데이터 로딩 중...
         </div>
       )}
-
-      {/* Dev Dashboard Drawer */}
-      <DevDrawer
-        isOpen={isDevDashboardOpen}
-        onClose={() => setIsDevDashboardOpen(false)}
-        alerts={alerts}
-        whales={whales}
-      />
-
-      {/* Developer Trigger Area (Bottom Left Corner) */}
-      <div
-        className="fixed bottom-0 left-0 w-4 h-4 z-50 cursor-crosshair opacity-0 hover:opacity-100"
-        onDoubleClick={() => setIsDevDashboardOpen(true)}
-        title="Double click for Dev Dashboard"
-      />
     </div>
   )
 }

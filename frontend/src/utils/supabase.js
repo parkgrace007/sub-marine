@@ -22,15 +22,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Test Supabase connection on initialization
-if (import.meta.env.DEV || import.meta.env.VITE_DEV_MODE === 'true') {
-  // Only test in development to avoid production console spam
+// Test Supabase connection on initialization (always run in non-production)
+const isProduction = import.meta.env.VITE_DEV_MODE === 'false'
+if (!isProduction) {
+  console.log('🔍 Testing Supabase connection...')
+  console.log('   ENV.DEV:', import.meta.env.DEV)
+  console.log('   ENV.VITE_DEV_MODE:', import.meta.env.VITE_DEV_MODE)
+
   supabase.from('whale_events').select('count', { count: 'exact', head: true })
     .then(({ count, error }) => {
       if (error) {
         console.error('❌ Supabase connection test FAILED:', error.message)
         console.error('   URL:', supabaseUrl)
         console.error('   Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'MISSING')
+        console.error('   Full error:', error)
       } else {
         console.log('✅ Supabase connection test PASSED')
         console.log(`   Connected to: ${supabaseUrl}`)

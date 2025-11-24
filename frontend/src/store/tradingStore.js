@@ -23,6 +23,7 @@ export const useTradingStore = create()(
             positions: [],
             orders: [],
             tradeHistory: [],
+            _cacheTimestamp: Date.now(), // Cache creation time (2025-11-24)
 
             submitOrder: (orderParams, currentPrice, fromOrderId) => {
                 const state = get();
@@ -519,7 +520,42 @@ export const useTradingStore = create()(
         }),
         {
             name: 'trading-storage-v2',
-            version: 2,
+            version: 3, // Incremented to force cache invalidation (2025-11-24)
+            migrate: (persistedState, version) => {
+                // Force clear stale cache if version mismatch
+                if (version !== 3) {
+                    console.log('🧹 Clearing stale trading store (version upgrade: v' + version + ' → v3)')
+                    return {
+                        balance: 10000,
+                        config: {
+                            positionMode: 'ONE_WAY',
+                            defaultMarginMode: 'ISOLATED',
+                            defaultLeverage: 20,
+                            confirmationsEnabled: false,
+                        },
+                        positions: [],
+                        orders: [],
+                        tradeHistory: [],
+                        _cacheTimestamp: Date.now(),
+                    }
+                }
+                return persistedState
+            },
+            onRehydrateStorage: () => (state) => {
+                // Check cache TTL (15 minutes)
+                if (state && state._cacheTimestamp) {
+                    const cacheAge = Date.now() - state._cacheTimestamp
+                    const maxAge = 15 * 60 * 1000 // 15 minutes
+
+                    if (cacheAge > maxAge) {
+                        console.log(`🧹 Cache expired (${Math.floor(cacheAge / 60000)} minutes old), clearing...`)
+                        localStorage.removeItem('trading-storage-v2')
+                        window.location.reload()
+                    } else {
+                        console.log(`✅ Cache valid (${Math.floor(cacheAge / 60000)} minutes old)`)
+                    }
+                }
+            }
         }
     )
 );
