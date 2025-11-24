@@ -61,7 +61,7 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = 'í†µí•
           .from('whale_events')
           .select('id, timestamp, symbol, amount_usd, flow_type, blockchain, from_owner_type, to_owner_type, from_address, to_address')
           .gte('timestamp', cutoffTimestamp)
-          // (2025-11-23: Renamed flow types - inflow/outflow instead of buy/sell)
+          // Flow types: inflow, outflow, internal, exchange, defi
           .gte('amount_usd', MIN_WHALE_USD)  // Tier 1+ filter ($10M+)
 
         // Add flow_type filter if specified (2025-11-24: CRITICAL FIX for production performance)
