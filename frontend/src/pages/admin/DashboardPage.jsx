@@ -17,37 +17,19 @@ export default function DashboardPage() {
   const [apiStats, setApiStats] = useState(null)
   const [dbStats, setDbStats] = useState(null)
   const [services, setServices] = useState(null)
-  const [activeUserCount, setActiveUserCount] = useState(0)
-  const [recentVisitors, setRecentVisitors] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchDashboardData()
-    // TEMPORARILY DISABLED: Activity tracking causing production issues
-    // fetchActiveUsers()
 
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
       fetchDashboardData()
-      // fetchActiveUsers()
     }, 30000)
-
-    // TEMPORARILY DISABLED: Realtime subscription to user_activity_logs
-    // const channel = supabase
-    //   .channel('activity_changes')
-    //   .on('postgres_changes', {
-    //     event: '*',
-    //     schema: 'public',
-    //     table: 'user_activity_logs'
-    //   }, () => {
-    //     fetchActiveUsers()
-    //   })
-    //   .subscribe()
 
     return () => {
       clearInterval(interval)
-      // supabase.removeChannel(channel)
     }
   }, [])
 
@@ -98,31 +80,6 @@ export default function DashboardPage() {
     }
   }
 
-  const fetchActiveUsers = async () => {
-    try {
-      // Fetch active user count (last 5 minutes)
-      const { count, error: countError } = await supabase
-        .from('user_activity_logs')
-        .select('*', { count: 'exact', head: true })
-        .gt('last_activity_at', new Date(Date.now() - 5 * 60 * 1000).toISOString())
-
-      if (countError) throw countError
-      setActiveUserCount(count || 0)
-
-      // Fetch recent visitors (last 20)
-      const { data: visitors, error: visitorsError } = await supabase
-        .from('user_activity_logs')
-        .select('*')
-        .order('last_activity_at', { ascending: false })
-        .limit(20)
-
-      if (visitorsError) throw visitorsError
-      setRecentVisitors(visitors || [])
-    } catch (err) {
-      console.error('Failed to fetch active users:', err)
-    }
-  }
-
   const formatBytes = (bytes) => {
     if (!bytes) return '0 B'
     const k = 1024
@@ -137,23 +94,6 @@ export default function DashboardPage() {
     const hours = Math.floor((seconds % 86400) / 3600)
     const mins = Math.floor((seconds % 3600) / 60)
     return `${days}d ${hours}h ${mins}m`
-  }
-
-  const formatRelativeTime = (timestamp) => {
-    const now = Date.now()
-    const then = new Date(timestamp).getTime()
-    const diffMs = now - then
-    const diffSecs = Math.floor(diffMs / 1000)
-
-    if (diffSecs < 60) return `${diffSecs}초 전`
-    if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}분 전`
-    if (diffSecs < 86400) return `${Math.floor(diffSecs / 3600)}시간 전`
-    return `${Math.floor(diffSecs / 86400)}일 전`
-  }
-
-  const isUserActive = (timestamp) => {
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
-    return new Date(timestamp).getTime() > fiveMinutesAgo
   }
 
   if (loading) {
@@ -222,16 +162,6 @@ export default function DashboardPage() {
               {apiStats?.apiCalls?.avgResponseTime?.toFixed(0)}ms avg
             </div>
           </div>
-
-          {/* TEMPORARILY DISABLED: Active Users card
-          <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
-            <div className="text-surface-400 text-sm mb-1">Active Users</div>
-            <div className="text-2xl font-bold text-white">
-              {activeUserCount}
-            </div>
-            <div className="text-xs text-green-400 mt-1">● Last 5 minutes</div>
-          </div>
-          */}
         </div>
 
         {/* System Metrics Chart */}
@@ -327,57 +257,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* TEMPORARILY DISABLED: Recent Visitors section
-        <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Recent Visitors ({recentVisitors.length})</h2>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {recentVisitors.length === 0 ? (
-              <div className="text-surface-400 text-center py-8">No recent visitors</div>
-            ) : (
-              recentVisitors.map((visitor) => {
-                const active = isUserActive(visitor.last_activity_at)
-                return (
-                  <div
-                    key={visitor.id}
-                    className="flex items-center justify-between bg-surface-100 rounded p-4 hover:bg-surface-300 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className={`w-2 h-2 rounded-full ${active ? 'bg-green-500' : 'bg-surface-400'}`} />
-                      <div className="flex-1">
-                        <div className="font-medium text-white">
-                          {visitor.nickname || 'Anonymous'}
-                          {visitor.is_authenticated && (
-                            <span className="ml-2 text-xs text-primary">● Authenticated</span>
-                          )}
-                        </div>
-                        <div className="text-xs text-surface-400">
-                          {visitor.current_page || '/'}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-surface-400">
-                        {formatRelativeTime(visitor.last_activity_at)}
-                      </div>
-                      {active && (
-                        <div className="text-xs text-green-400 mt-1">Online</div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        </div>
-        */}
-
         {/* Refresh Button */}
         <div className="text-center">
           <button
-            onClick={() => {
-              fetchDashboardData()
-              // fetchActiveUsers()
-            }}
+            onClick={fetchDashboardData}
             className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded transition-colors"
           >
             Refresh Dashboard
