@@ -1,0 +1,12 @@
+# Supabase Edge Functions Configuration
+# Project: SubMarine Real Whale
+# Generated: 2025-11-22
+
+[functions.submarine-briefing]
+# Schedule: Every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
+# Cron format: minute hour day month weekday
+verify_jwt = false
+
+[functions.submarine-briefing.schedule]
+# Run every 4 hours
+cron = "0 */4 * * *"

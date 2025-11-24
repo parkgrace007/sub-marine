@@ -1,0 +1,40 @@
+# Render 배포 설정
+# 이 파일은 Render에서 자동으로 인식합니다
+
+services:
+  # 백엔드 API 서버
+  - type: web
+    name: submarine-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      # 아래 변수들은 Render 대시보드에서 수동으로 추가해야 합니다
+      # - WHALE_ALERT_API_KEY
+      # - SUPABASE_URL
+      # - SUPABASE_SERVICE_KEY
+      # - ADMIN_TOKEN
+
+  # 프론트엔드 정적 사이트
+  - type: web
+    name: submarine-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # 아래 변수들은 빌드 전에 설정해야 합니다
+      # - VITE_SUPABASE_URL
+      # - VITE_SUPABASE_ANON_KEY
+      # - VITE_API_URL (백엔드 배포 후 URL 입력)
