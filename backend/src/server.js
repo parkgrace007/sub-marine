@@ -23,9 +23,10 @@ const corsOptions = {
     // Allowed origins based on environment
     const allowedOrigins = process.env.NODE_ENV === 'production'
       ? [
+          'https://submarine-frontend-vb92.onrender.com',  // Frontend URL
+          'https://submarine-ch8s.onrender.com',           // Backend URL (for admin)
           'https://submarine.app',
-          'https://www.submarine.app',
-          'https://real-whale.onrender.com'
+          'https://www.submarine.app'
         ].filter(Boolean) // Remove undefined values
       : [
           'http://localhost:5173',
