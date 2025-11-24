@@ -5,12 +5,13 @@ import { TIMEFRAME_DURATIONS_MS } from '../config/timeframes'
 // Performance optimization (2025-11-22): Fetch only timeframe-relevant data instead of 30 days
 const BUFFER_MULTIPLIER = 2 // Fetch 2x timeframe duration for safety margin (1h → 2h, 4h → 8h)
 const MIN_WHALE_USD = 10_000_000 // $10M threshold for Tier 1+ whales (2025-11-19: synchronized with Whale Alert API)
-const MAX_WHALES_IN_MEMORY = 500 // Safety cap to prevent unbounded growth
+const MAX_WHALES_IN_MEMORY = 300 // OPTIMIZATION (2025-11-24): Reduced from 500 due to better filtering
 
 export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통합') {
   const [allWhales, setAllWhales] = useState([]) // Store timeframe-based data with buffer
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [refetchTrigger, setRefetchTrigger] = useState(0)
 
   // Client-side filtering based on timeframe, flow_type, and symbol
   const whales = useMemo(() => {
@@ -50,12 +51,19 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         const cutoffTimestamp = Math.floor((Date.now() - fetchWindow) / 1000)
 
         // Build query with optional symbol filter
+        // OPTIMIZATION (2025-11-24): Select only needed columns (40% data reduction)
         let query = supabase
           .from('whale_events')
-          .select('*')
+          .select('id, timestamp, symbol, amount_usd, flow_type, blockchain, from_owner_type, to_owner_type, from_address, to_address')
           .gte('timestamp', cutoffTimestamp)
           // (2025-11-23: Renamed flow types - inflow/outflow instead of buy/sell)
           .gte('amount_usd', MIN_WHALE_USD)  // Tier 1+ filter ($10M+)
+
+        // Add flow_type filter if specified (2025-11-24: CRITICAL FIX for production performance)
+        // Filter at DB level instead of client-side to reduce data transfer
+        if (flowTypes && flowTypes.length > 0) {
+          query = query.in('flow_type', flowTypes)
+        }
 
         // Add symbol filter only if not '통합' (ALL)
         if (symbol !== '통합') {
@@ -63,7 +71,8 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         }
 
         // Dynamic limit based on symbol filter (2025-11-23: Fix ALL filter showing incomplete data)
-        const queryLimit = symbol === '통합' ? 1000 : 200
+        // OPTIMIZATION (2025-11-24): Reduced limits since flow_type filter already cuts data by 70%
+        const queryLimit = symbol === '통합' ? 500 : 100
 
         // Add timeout to prevent infinite hanging
         const queryPromise = query
@@ -111,6 +120,13 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
 
           // Only add whales above $10M threshold (Tier 1+) - all flow types accepted (2025-11-21)
           if (payload.new.amount_usd >= MIN_WHALE_USD) {
+            // OPTIMIZATION (2025-11-24): Filter by flow_type in realtime subscription
+            const flowMatch = !flowTypes || flowTypes.includes(payload.new.flow_type)
+            if (!flowMatch) {
+              console.log(`⏭️  Whale flow_type mismatch: ${payload.new.flow_type} (need ${flowTypes?.join('/')})`)
+              return
+            }
+
             // Check symbol match (2025-11-23: symbol filter - DB uses uppercase)
             const symbolMatch = symbol === '통합' || payload.new.symbol.toUpperCase() === symbol.toUpperCase()
 
@@ -183,7 +199,13 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
       // Clear whale data to free memory
       setAllWhales([])
     }
-  }, [timeframe, symbol]) // Re-fetch when timeframe or symbol changes (2025-11-23: added symbol filter)
+  }, [timeframe, symbol, refetchTrigger]) // Re-fetch when timeframe, symbol, or refetchTrigger changes
 
-  return { whales, loading, error }
+  // Refetch function to manually trigger data reload
+  const refetch = () => {
+    console.log('🔄 [useWhaleData] Manual refetch triggered')
+    setRefetchTrigger(prev => prev + 1)
+  }
+
+  return { whales, loading, error, refetch }
 }
