@@ -172,7 +172,7 @@ function MainPage() {
       <Header />
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-[1400px] mx-auto px-6 py-6">
+      <main className="relative z-10 max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
         <div className="flex flex-col gap-6">
           {/* Whale Error Notification */}
           {whalesError && (

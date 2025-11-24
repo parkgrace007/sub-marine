@@ -22,7 +22,7 @@ function Header() {
 
   return (
     <header className="sticky top-0 w-full z-50 bg-surface-100 border-b border-surface-300">
-      <div className="max-w-[1400px] mx-auto px-6 py-3">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 py-3">
         <div className="grid grid-cols-3 items-center gap-4">
 
           {/* Left: Logo */}

@@ -41,9 +41,9 @@ function WhaleVolumeGauge({ whales = [], timeframe = '1h' }) {
   const segments = Array.from({ length: 20 }, (_, i) => i)
 
   return (
-    <div className="w-full h-full flex items-center justify-between px-4 gap-4">
+    <div className="w-full h-full flex items-center justify-between px-2 sm:px-4 gap-2 sm:gap-4">
       {/* OUTFLOW side (left-aligned, fills right) */}
-      <div className="flex-1 flex items-center gap-1">
+      <div className="flex-1 flex items-center gap-0.5 sm:gap-1">
         {segments.map((i) => (
           <div
             key={`outflow-${i}`}
@@ -57,7 +57,7 @@ function WhaleVolumeGauge({ whales = [], timeframe = '1h' }) {
             }}
           />
         ))}
-        <span className="text-xs font-mono text-danger ml-2 min-w-[60px] text-right">
+        <span className="text-[10px] sm:text-xs font-mono text-danger ml-1 sm:ml-2 min-w-[40px] sm:min-w-[60px] text-right">
           ${(outflowVolume / 1_000_000).toFixed(1)}M
         </span>
       </div>
@@ -66,7 +66,7 @@ function WhaleVolumeGauge({ whales = [], timeframe = '1h' }) {
       <div className="w-px h-3 bg-surface-300" />
 
       {/* INFLOW side (right-aligned, fills left) */}
-      <div className="flex-1 flex items-center gap-1 flex-row-reverse">
+      <div className="flex-1 flex items-center gap-0.5 sm:gap-1 flex-row-reverse">
         {segments.map((i) => (
           <div
             key={`inflow-${i}`}
@@ -80,7 +80,7 @@ function WhaleVolumeGauge({ whales = [], timeframe = '1h' }) {
             }}
           />
         ))}
-        <span className="text-xs font-mono text-success mr-2 min-w-[60px] text-left">
+        <span className="text-[10px] sm:text-xs font-mono text-success mr-1 sm:mr-2 min-w-[40px] sm:min-w-[60px] text-left">
           ${(inflowVolume / 1_000_000).toFixed(1)}M
         </span>
       </div>
