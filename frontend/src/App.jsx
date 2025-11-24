@@ -1,7 +1,8 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import { useActivityTracker } from './hooks/useActivityTracker'
+// TEMPORARILY DISABLED FOR DEBUGGING
+// import { useActivityTracker } from './hooks/useActivityTracker'
 
 // Critical pages - loaded immediately
 import MainPage from './pages/MainPage'
@@ -30,9 +31,10 @@ const LoadingFallback = () => (
   </div>
 )
 
-// Activity Tracker Wrapper
+// Activity Tracker Wrapper (TEMPORARILY DISABLED FOR DEBUGGING)
 function ActivityTrackerWrapper({ children }) {
-  useActivityTracker()
+  // FIXME: Temporarily disabled to debug whale data issue
+  // useActivityTracker()
   return children
 }
 
