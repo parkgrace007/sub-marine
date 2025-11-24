@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../utils/supabase'
 import TierSummaryPanel from './TierSummaryPanel'
 import AlertTerminal from './AlertTerminal'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
 
 /**
  * AlertDashboard - Main container for the dual-panel alert system
