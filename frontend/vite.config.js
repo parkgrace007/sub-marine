@@ -14,7 +14,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks - split large dependencies
+          // Vendor chunks only - let Vite handle feature chunks automatically
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
               return 'vendor-react'
@@ -29,14 +29,7 @@ export default defineConfig({
               return 'vendor-utils'
             }
           }
-
-          // Feature chunks - split by functionality
-          if (id.includes('src/pages/admin/') || id.includes('src/components/admin/')) {
-            return 'admin'
-          }
-          if (id.includes('src/pages/TradingPage') || id.includes('src/components/Trading')) {
-            return 'trading'
-          }
+          // Removed manual feature chunk splitting to fix initialization order issues
         }
       }
     }
