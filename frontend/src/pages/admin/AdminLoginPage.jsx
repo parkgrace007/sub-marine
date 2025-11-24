@@ -47,14 +47,31 @@ export default function AdminLoginPage() {
     setError(null)
     setLoading(true)
 
+    // Timeout handler
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError('Login timeout - Please check your connection and try again')
+    }, 15000) // 15 second timeout
+
     try {
+      console.log('🔐 Attempting login for:', email)
+
       // 1. Sign in with Supabase
       const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       })
 
-      if (signInError) throw signInError
+      if (signInError) {
+        console.error('❌ Sign in error:', signInError)
+        throw signInError
+      }
+
+      if (!session) {
+        throw new Error('No session returned from login')
+      }
+
+      console.log('✅ Sign in successful, checking role...')
 
       // 2. Verify user has admin role
       const { data: profile, error: profileError } = await supabase
@@ -63,7 +80,12 @@ export default function AdminLoginPage() {
         .eq('id', session.user.id)
         .single()
 
-      if (profileError) throw profileError
+      if (profileError) {
+        console.error('❌ Profile fetch error:', profileError)
+        throw profileError
+      }
+
+      console.log('📋 Profile fetched:', { nickname: profile.nickname, role: profile.role })
 
       // 3. Check role
       if (profile.role !== 'admin' && profile.role !== 'super_admin') {
@@ -72,13 +94,15 @@ export default function AdminLoginPage() {
         throw new Error('Access denied: Admin role required')
       }
 
-      // 4. Success - store JWT token and navigate to dashboard
+      // 4. Success - clear timeout and navigate to dashboard
+      clearTimeout(timeoutId)
       console.log('✅ Admin login successful:', profile.nickname)
       navigate('/admin/dashboard')
 
     } catch (err) {
+      clearTimeout(timeoutId)
       console.error('❌ Login error:', err)
-      setError(err.message)
+      setError(err.message || 'Login failed - please try again')
     } finally {
       setLoading(false)
     }
