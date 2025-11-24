@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { useActivityTracker } from './hooks/useActivityTracker'
 
 // Critical pages - loaded immediately
 import MainPage from './pages/MainPage'
@@ -29,6 +30,12 @@ const LoadingFallback = () => (
   </div>
 )
 
+// Activity Tracker Wrapper
+function ActivityTrackerWrapper({ children }) {
+  useActivityTracker()
+  return children
+}
+
 /**
  * App - Root component with routing
  * Routes:
@@ -44,9 +51,10 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
-          {/* Page Routes */}
-          <Routes>
+        <ActivityTrackerWrapper>
+          <Suspense fallback={<LoadingFallback />}>
+            {/* Page Routes */}
+            <Routes>
             {/* Main App Routes - critical pages loaded immediately */}
             <Route path="/" element={<MainPage />} />
             <Route path="/whale-alerts" element={<WhaleAlertsPage />} />
@@ -78,6 +86,7 @@ function App() {
             } />
           </Routes>
         </Suspense>
+        </ActivityTrackerWrapper>
       </BrowserRouter>
     </AuthProvider>
   )
