@@ -154,7 +154,7 @@ function MainPage() {
   // Fetch market data + generate logs on indicator changes
   const sentiment = useIndicatorLogger(timeframe, symbol, handleLogGenerated)
 
-  // Fetch whale data (only inflow/outflow = market pressure, filtered by symbol)
+  // Fetch whale data (only inflow/outflow = market buy/sell pressure, filtered by symbol)
   const { whales, loading: whalesLoading, error: whalesError } = useWhaleData(timeframe, ['inflow', 'outflow'], symbol)
 
   // Use real bull_ratio from sentiment, fallback to default if loading

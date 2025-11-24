@@ -17,7 +17,7 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
     const now = Date.now()
     const cutoff = now - TIMEFRAME_DURATIONS_MS[timeframe]
 
-    return allWhales.filter((whale) => {
+    const filtered = allWhales.filter((whale) => {
       const whaleTime = whale.timestamp * 1000 // Convert to milliseconds
       const timeMatch = whaleTime >= cutoff
 
@@ -30,16 +30,16 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
 
       return timeMatch && flowMatch && symbolMatch
     })
+
+    return filtered
   }, [allWhales, timeframe, flowTypes, symbol])
 
   useEffect(() => {
-    console.log('🚀 [useWhaleData] useEffect triggered', { timeframe, symbol })
     let channel
     let cleanupInterval
 
     async function fetchWhales() {
       try {
-        console.log('🔍 [useWhaleData] fetchWhales started', { timeframe, symbol })
         setLoading(true)
         setError(null)
 
@@ -48,15 +48,6 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         const timeframeDuration = TIMEFRAME_DURATIONS_MS[timeframe] || TIMEFRAME_DURATIONS_MS['1h']
         const fetchWindow = timeframeDuration * BUFFER_MULTIPLIER
         const cutoffTimestamp = Math.floor((Date.now() - fetchWindow) / 1000)
-
-        console.log('🔍 [useWhaleData] Query params:', {
-          timeframe,
-          timeframeDuration,
-          fetchWindow,
-          cutoffTimestamp,
-          cutoffDate: new Date(cutoffTimestamp * 1000).toISOString(),
-          minUSD: MIN_WHALE_USD
-        })
 
         // Build query with optional symbol filter
         let query = supabase
@@ -68,32 +59,28 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
 
         // Add symbol filter only if not '통합' (ALL)
         if (symbol !== '통합') {
-          console.log('🔍 [useWhaleData] Adding symbol filter:', symbol.toUpperCase())
           query = query.eq('symbol', symbol.toUpperCase())  // DB stores uppercase symbols
-        } else {
-          console.log('🔍 [useWhaleData] No symbol filter (통합 mode)')
         }
 
         // Dynamic limit based on symbol filter (2025-11-23: Fix ALL filter showing incomplete data)
         const queryLimit = symbol === '통합' ? 1000 : 200
 
-        console.log('🔍 [useWhaleData] Executing Supabase query...', { queryLimit })
-        const { data, error: fetchError } = await query
+        // Add timeout to prevent infinite hanging
+        const queryPromise = query
           .order('timestamp', { ascending: false })
           .limit(queryLimit)  // 통합: 1000개, 특정 심볼: 200개
 
-        console.log('🔍 [useWhaleData] Query completed:', {
-          dataLength: data?.length,
-          hasError: !!fetchError,
-          error: fetchError
-        })
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Query timeout after 10 seconds')), 10000)
+        )
+
+        const { data, error: fetchError } = await Promise.race([queryPromise, timeoutPromise])
 
         if (fetchError) {
           console.error('❌ [useWhaleData] Supabase error:', fetchError)
           throw fetchError
         }
 
-        console.log('🔍 [useWhaleData] Sample whale data:', data?.[0])
         setAllWhales(data || [])
         const symbolLabel = symbol === '통합' ? 'ALL' : symbol
         console.log(`✅ Fetched ${data?.length || 0} whales (${timeframe} × ${BUFFER_MULTIPLIER} window, ${symbolLabel})`)
@@ -101,7 +88,6 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         console.error('❌ [useWhaleData] Error fetching whales:', err)
         setError(err.message)
       } finally {
-        console.log('🔍 [useWhaleData] fetchWhales finished, setting loading=false')
         setLoading(false)
       }
     }
