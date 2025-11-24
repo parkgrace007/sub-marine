@@ -41,6 +41,9 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
 
     async function fetchWhales() {
       try {
+        console.log('🔍 [DIAGNOSTIC] Starting fetchWhales...')
+        console.log(`   Timeframe: ${timeframe}, Symbol: ${symbol}, FlowTypes: ${flowTypes?.join('/')}`)
+
         setLoading(true)
         setError(null)
 
@@ -49,9 +52,11 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         const timeframeDuration = TIMEFRAME_DURATIONS_MS[timeframe] || TIMEFRAME_DURATIONS_MS['1h']
         const fetchWindow = timeframeDuration * BUFFER_MULTIPLIER
         const cutoffTimestamp = Math.floor((Date.now() - fetchWindow) / 1000)
+        console.log(`   Fetch window: ${fetchWindow}ms, Cutoff timestamp: ${cutoffTimestamp}`)
 
         // Build query with optional symbol filter
         // OPTIMIZATION (2025-11-24): Select only needed columns (40% data reduction)
+        console.log('🔍 [DIAGNOSTIC] Building Supabase query...')
         let query = supabase
           .from('whale_events')
           .select('id, timestamp, symbol, amount_usd, flow_type, blockchain, from_owner_type, to_owner_type, from_address, to_address')
@@ -63,18 +68,24 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         // Filter at DB level instead of client-side to reduce data transfer
         if (flowTypes && flowTypes.length > 0) {
           query = query.in('flow_type', flowTypes)
+          console.log(`   Applied flow_type filter: ${flowTypes.join(', ')}`)
         }
 
         // Add symbol filter only if not '통합' (ALL)
         if (symbol !== '통합') {
           query = query.eq('symbol', symbol.toUpperCase())  // DB stores uppercase symbols
+          console.log(`   Applied symbol filter: ${symbol}`)
         }
 
         // Dynamic limit based on symbol filter (2025-11-23: Fix ALL filter showing incomplete data)
         // OPTIMIZATION (2025-11-24): Reduced limits since flow_type filter already cuts data by 70%
         const queryLimit = symbol === '통합' ? 500 : 100
+        console.log(`   Query limit: ${queryLimit}`)
 
         // Add timeout to prevent infinite hanging
+        console.log('🔍 [DIAGNOSTIC] Executing query with 30s timeout...')
+        const queryStartTime = Date.now()
+
         const queryPromise = query
           .order('timestamp', { ascending: false })
           .limit(queryLimit)  // 통합: 1000개, 특정 심볼: 200개
@@ -85,18 +96,30 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
 
         const { data, error: fetchError } = await Promise.race([queryPromise, timeoutPromise])
 
+        const queryDuration = Date.now() - queryStartTime
+        console.log(`🔍 [DIAGNOSTIC] Query completed in ${queryDuration}ms`)
+
         if (fetchError) {
-          console.error('❌ [useWhaleData] Supabase error:', fetchError)
+          console.error('❌ [DIAGNOSTIC] Supabase query error:', fetchError)
+          console.error('   Error details:', JSON.stringify(fetchError, null, 2))
           throw fetchError
         }
 
+        console.log(`🔍 [DIAGNOSTIC] Query succeeded! Received ${data?.length || 0} records`)
+        console.log(`   Data size: ${JSON.stringify(data).length} bytes`)
+
         setAllWhales(data || [])
         const symbolLabel = symbol === '통합' ? 'ALL' : symbol
-        console.log(`✅ Fetched ${data?.length || 0} whales (${timeframe} × ${BUFFER_MULTIPLIER} window, ${symbolLabel})`)
+        console.log(`✅ [DIAGNOSTIC] Fetched ${data?.length || 0} whales (${timeframe} × ${BUFFER_MULTIPLIER} window, ${symbolLabel})`)
+        console.log('🔍 [DIAGNOSTIC] fetchWhales completed successfully')
       } catch (err) {
-        console.error('❌ [useWhaleData] Error fetching whales:', err)
+        console.error('❌ [DIAGNOSTIC] Error in fetchWhales:', err)
+        console.error('   Error name:', err.name)
+        console.error('   Error message:', err.message)
+        console.error('   Error stack:', err.stack)
         setError(err.message)
       } finally {
+        console.log('🔍 [DIAGNOSTIC] Setting loading to false')
         setLoading(false)
       }
     }
@@ -104,6 +127,15 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
     // Initial fetch
     fetchWhales()
 
+    // ===== DIAGNOSTIC (2025-11-24): Realtime TEMPORARILY DISABLED =====
+    // Testing if WebSocket connection is causing production timeout
+    // If data loads successfully without this, issue is Realtime WebSocket
+    // If still times out, issue is REST API or network routing
+    // TODO: Re-enable after diagnostic test completes
+
+    console.log('⚠️ DIAGNOSTIC MODE: Realtime subscription DISABLED for timeout isolation test')
+
+    /* TEMPORARILY COMMENTED OUT FOR DIAGNOSTIC
     // Subscribe to real-time updates
     // Use unique channel name per symbol/timeframe to avoid multiple subscriptions
     channel = supabase
@@ -163,6 +195,7 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
       .subscribe((status) => {
         console.log('Realtime subscription status:', status)
       })
+    END DIAGNOSTIC COMMENT */
 
     // Cleanup old whales every 5 minutes (2025-11-22: optimized to timeframe-based)
     cleanupInterval = setInterval(() => {
@@ -189,15 +222,20 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
     // Cleanup
     return () => {
       const symbolLabel = symbol === '통합' ? 'ALL' : symbol
-      console.log(`🧹 Cleaning up whale subscription (${timeframe}/${symbolLabel})`)
+      console.log(`🧹 [DIAGNOSTIC] Cleaning up (${timeframe}/${symbolLabel})`)
       if (channel) {
+        console.log('   Removing Realtime channel')
         supabase.removeChannel(channel)
+      } else {
+        console.log('   No Realtime channel to remove (diagnostic mode)')
       }
       if (cleanupInterval) {
+        console.log('   Clearing cleanup interval')
         clearInterval(cleanupInterval)
       }
       // Clear whale data to free memory
       setAllWhales([])
+      console.log('   Cleanup complete')
     }
   }, [timeframe, symbol, refetchTrigger]) // Re-fetch when timeframe, symbol, or refetchTrigger changes
 
