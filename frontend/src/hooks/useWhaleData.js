@@ -80,7 +80,7 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
           .limit(queryLimit)  // 통합: 1000개, 특정 심볼: 200개
 
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Query timeout after 10 seconds')), 10000)
+          setTimeout(() => reject(new Error('Query timeout after 30 seconds')), 30000)
         )
 
         const { data, error: fetchError } = await Promise.race([queryPromise, timeoutPromise])

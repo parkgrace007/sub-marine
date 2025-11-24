@@ -152,7 +152,7 @@ function MainPage() {
   const sentiment = useIndicatorLogger(timeframe, symbol, handleLogGenerated)
 
   // Fetch whale data (only inflow/outflow = market buy/sell pressure, filtered by symbol)
-  const { whales, loading: whalesLoading, error: whalesError } = useWhaleData(timeframe, ['inflow', 'outflow'], symbol)
+  const { whales, loading: whalesLoading, error: whalesError, refetch: refetchWhales } = useWhaleData(timeframe, ['inflow', 'outflow'], symbol)
 
   // Use real bull_ratio from sentiment, fallback to default if loading
   const bullRatio = sentiment.loading ? 0.5 : sentiment.bull_ratio
@@ -163,6 +163,16 @@ function MainPage() {
     setIsMuted(newMutedState)
   }
 
+  // Retry handler for database connection errors
+  const handleRetry = () => {
+    console.log('🔄 [MainPage] Retrying data fetch...')
+    if (refetchWhales) {
+      refetchWhales()
+    } else {
+      window.location.reload()
+    }
+  }
+
   return (
     <div className="min-h-screen bg-surface-100 text-surface-600 relative">
       {/* Header */}
@@ -171,13 +181,6 @@ function MainPage() {
       {/* Main Content */}
       <main className="relative z-10 max-w-[1400px] mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
         <div className="flex flex-col gap-6">
-          {/* Whale Error Notification */}
-          {whalesError && (
-            <div className="bg-danger/10 border border-danger text-danger px-4 py-3 rounded">
-              고래 데이터 로드 실패: {whalesError}
-            </div>
-          )}
-
           <MainVisualizationSet
             timeframe={timeframe}
             symbol={symbol}
@@ -189,6 +192,8 @@ function MainPage() {
             sentiment={sentiment}
             whales={whales}
             loading={whalesLoading}
+            error={whalesError ? { message: whalesError } : null}
+            onRetry={handleRetry}
             whaleCanvasRef={whaleCanvasRef}
           />
 

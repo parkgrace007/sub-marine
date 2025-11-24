@@ -10,6 +10,7 @@ import scheduler from './services/scheduler.js'
 import { getLunarCrushData, clearCache as clearLunarCache } from './services/lunarcrush.js'
 import { getNewsAPIData, clearCache as clearNewsCache, getNextRefreshTime, cleanupExistingArticles } from './services/newsapi.js'
 import adminRouter from './routes/admin.js'
+import diagnosticRouter from './routes/diagnostic.js'
 import metricsCollector from './services/metricsCollector.js'
 
 dotenv.config()
@@ -21,18 +22,37 @@ const PORT = process.env.PORT || 3000
 const corsOptions = {
   origin: function (origin, callback) {
     // Allowed origins based on environment
-    const allowedOrigins = process.env.NODE_ENV === 'production'
-      ? [
+    // Production: Use ALLOWED_ORIGINS env var (comma-separated) or default list
+    // Development: Use localhost variants
+    let allowedOrigins
+
+    if (process.env.NODE_ENV === 'production') {
+      // Check for custom ALLOWED_ORIGINS environment variable
+      if (process.env.ALLOWED_ORIGINS) {
+        // Parse comma-separated list of origins
+        allowedOrigins = process.env.ALLOWED_ORIGINS
+          .split(',')
+          .map(origin => origin.trim())
+          .filter(Boolean)
+        console.log('🔒 [CORS] Using custom allowed origins from env:', allowedOrigins)
+      } else {
+        // Fallback to default production origins
+        allowedOrigins = [
           'https://submarine-frontend-vb92.onrender.com',  // Frontend URL
           'https://submarine-ch8s.onrender.com',           // Backend URL (for admin)
           'https://submarine.app',
           'https://www.submarine.app'
-        ].filter(Boolean) // Remove undefined values
-      : [
-          'http://localhost:5173',
-          'http://localhost:3000',
-          'http://127.0.0.1:5173'
-        ]
+        ].filter(Boolean)
+        console.log('🔒 [CORS] Using default allowed origins:', allowedOrigins)
+      }
+    } else {
+      // Development: Allow localhost variants
+      allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173'
+      ]
+    }
 
     // Allow requests with no origin (Postman, curl, mobile apps)
     if (!origin || allowedOrigins.includes(origin)) {
@@ -204,6 +224,11 @@ function analyzeSentiment(title) {
 // ===== ADMIN ROUTES =====
 // Mount admin router (all /api/admin/* routes)
 app.use('/api/admin', adminRouter)
+
+// ===== DIAGNOSTIC ROUTES =====
+// Mount diagnostic router (all /api/diagnostic/* routes)
+// These endpoints help diagnose database connection and deployment issues
+app.use('/api/diagnostic', diagnosticRouter)
 
 // Health check endpoint
 app.get('/health', healthCheckLimiter, (req, res) => {

@@ -149,6 +149,284 @@ Test the following after deployment:
 
 ---
 
+## Render-Specific Deployment Guide
+
+### Environment Variable Setup on Render
+
+#### Frontend Service (Static Site)
+
+1. **Go to Render Dashboard** → Your Frontend Service → **Environment** tab
+2. **Add the following environment variables**:
+
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs... (your anon key)
+VITE_API_URL=https://your-backend.onrender.com
+VITE_DEV_MODE=false
+```
+
+3. **IMPORTANT**: After adding/changing environment variables:
+   - Click **Manual Deploy** → **Clear build cache & deploy**
+   - Vite embeds env vars at **BUILD TIME**, not runtime
+   - Any change requires a full rebuild
+
+#### Backend Service (Web Service)
+
+1. **Go to Render Dashboard** → Your Backend Service → **Environment** tab
+2. **Add the following environment variables**:
+
+```bash
+# Required
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIs... (service role key, NOT anon key)
+WHALE_ALERT_API_KEY=your-whale-alert-api-key
+ADMIN_TOKEN=your-secure-admin-token (min 32 chars)
+NODE_ENV=production
+
+# Optional (with defaults)
+PORT=3000
+ALLOWED_ORIGINS=https://your-frontend.onrender.com,https://yourdomain.com
+```
+
+3. **Save** and the backend will automatically restart (no rebuild needed)
+
+### Pre-Deployment Verification
+
+Before deploying, run the verification script to check all environment variables:
+
+```bash
+# Check backend environment variables
+node backend/scripts/verifyDeployment.js backend
+
+# Check frontend environment variables
+node backend/scripts/verifyDeployment.js frontend
+```
+
+**Expected Output**:
+```
+🚀 SubMarine Deployment Verification
+
+📋 Checking BACKEND environment variables...
+
+✅ https://xxxxx.supabase.co...          SUPABASE_URL
+   Supabase project URL
+
+✅ eyJhbGciOiJIUzI1NiIsInR5cCI6...      SUPABASE_SERVICE_KEY
+   Supabase service role key (long JWT token)
+
+✅ DEPLOYMENT READY - All checks passed
+```
+
+### Database Connection Troubleshooting
+
+If your deployment shows no data or database errors:
+
+#### Step 1: Use Diagnostic Endpoints
+
+**Test Database Connection**:
+```bash
+curl https://your-backend.onrender.com/api/diagnostic/test-db
+```
+
+**Expected Response** (success):
+```json
+{
+  "timestamp": "2025-11-24T...",
+  "success": true,
+  "environment": {
+    "nodeEnv": "production",
+    "hasSupabaseUrl": true,
+    "hasServiceKey": true
+  },
+  "tables": {
+    "whale_events": {
+      "accessible": true,
+      "totalCount": 1234,
+      "sampleData": [...]
+    }
+  }
+}
+```
+
+**Failure Response** (indicates issue):
+```json
+{
+  "success": false,
+  "errors": [
+    {
+      "table": "whale_events",
+      "error": "JWT expired"
+    }
+  ]
+}
+```
+
+**Health Check**:
+```bash
+curl https://your-backend.onrender.com/api/diagnostic/health
+```
+
+**Environment Variables Check**:
+```bash
+curl https://your-backend.onrender.com/api/diagnostic/env
+```
+
+#### Step 2: Common Issues & Fixes
+
+**Issue 1: Frontend shows "Database Connection Error"**
+
+**Symptoms**:
+- Frontend displays red error banner
+- Browser console shows connection errors
+- No whale data or alerts display
+
+**Diagnosis**:
+```bash
+# 1. Open browser DevTools → Console
+# 2. Look for Supabase connection test logs:
+🔍 Testing Supabase connection...
+   SUPABASE_URL: undefined  ❌ BAD
+   ANON_KEY: MISSING        ❌ BAD
+```
+
+**Fix**:
+1. Verify environment variables in Render Dashboard (Frontend service)
+2. Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set
+3. Click **Manual Deploy** → **Clear build cache & deploy**
+4. Wait for deployment to complete
+5. Refresh browser with hard reload (Cmd+Shift+R / Ctrl+Shift+R)
+
+**Issue 2: Backend can't connect to Supabase**
+
+**Symptoms**:
+- Diagnostic endpoint returns errors
+- Backend logs show Supabase errors
+- "JWT expired" or "Invalid API key" errors
+
+**Diagnosis**:
+```bash
+curl https://your-backend.onrender.com/api/diagnostic/test-db
+```
+
+**Fix**:
+1. Go to Render Dashboard → Backend Service → Environment
+2. Verify `SUPABASE_SERVICE_KEY` is the **service role key** (not anon key)
+   - Get from: Supabase Dashboard → Settings → API → Service Role Key
+3. Verify `SUPABASE_URL` matches your project URL
+4. Save changes (backend restarts automatically)
+5. Test again with diagnostic endpoint
+
+**Issue 3: CORS Errors**
+
+**Symptoms**:
+- Browser console shows: "blocked by CORS policy"
+- Network tab shows preflight OPTIONS request fails
+- API calls return no data
+
+**Diagnosis**:
+```bash
+# Check browser DevTools → Network tab
+# Look for OPTIONS requests with status 0 or 403
+```
+
+**Fix**:
+1. Go to Render Dashboard → Backend Service → Environment
+2. Add `ALLOWED_ORIGINS` environment variable:
+   ```
+   ALLOWED_ORIGINS=https://your-frontend.onrender.com
+   ```
+3. Or update hardcoded origins in `backend/src/server.js:40-45`
+4. Save and restart backend
+
+**Issue 4: Realtime Updates Not Working**
+
+**Symptoms**:
+- Initial data loads but no live updates
+- New whale alerts don't appear
+- Console shows WebSocket disconnected
+
+**Diagnosis**:
+```bash
+# Check browser console for:
+Realtime subscription status: CHANNEL_ERROR
+```
+
+**Fix**:
+1. Verify RLS policies in Supabase:
+   ```sql
+   -- Run in Supabase SQL Editor
+   SELECT tablename, policyname, roles::text
+   FROM pg_policies
+   WHERE schemaname = 'public'
+   AND tablename IN ('whale_events', 'indicator_alerts');
+   ```
+2. Expected: Policies with `{anon,authenticated}` roles
+3. If missing, run: `backend/sql/emergency_rls_fix.sql`
+
+### Render-Specific Gotchas
+
+**1. Cold Starts (Free Tier)**
+- **Issue**: First request takes 30-60 seconds
+- **Impact**: Frontend may timeout
+- **Solution**: Keep backend warm with ping service or upgrade to paid plan
+
+**2. Build Cache Issues**
+- **Issue**: Environment variable changes not reflected
+- **Solution**: Always use "Clear build cache & deploy"
+
+**3. Static Site Routing (Frontend)**
+- **Issue**: Direct URL navigation returns 404
+- **Solution**: Add `_redirects` file (already configured):
+   ```
+   /* /index.html 200
+   ```
+
+**4. Environment Variables Case Sensitivity**
+- **Issue**: `vite_supabase_url` won't work
+- **Solution**: Must be uppercase: `VITE_SUPABASE_URL`
+
+### Monitoring Deployed Application
+
+**1. Backend Logs**:
+```bash
+# View in Render Dashboard → Backend Service → Logs
+# Or use Render CLI
+render logs -s your-backend-service
+```
+
+**2. Frontend Error Tracking**:
+- Open browser DevTools → Console
+- Look for red error messages
+- Check Network tab for failed requests
+
+**3. Database Metrics**:
+- Supabase Dashboard → Project → Database → Reports
+- Monitor connection pool usage
+- Check for slow queries
+
+**4. API Health Check**:
+```bash
+# Set up uptime monitoring (UptimeRobot, Pingdom, etc.)
+# Endpoint: https://your-backend.onrender.com/api/diagnostic/health
+# Interval: 5 minutes
+# Alert if down for > 2 minutes
+```
+
+### Deployment Checklist for Render
+
+- [ ] **Backend**: All environment variables set in Render Dashboard
+- [ ] **Frontend**: All `VITE_*` variables set in Render Dashboard
+- [ ] **Backend**: `SUPABASE_SERVICE_KEY` is service role key (not anon)
+- [ ] **Frontend**: `VITE_API_URL` points to backend URL
+- [ ] **CORS**: `ALLOWED_ORIGINS` includes frontend URL
+- [ ] **Verification**: Run `verifyDeployment.js` script
+- [ ] **Test**: `/api/diagnostic/test-db` returns success
+- [ ] **Test**: Frontend loads and displays data
+- [ ] **Test**: Realtime updates work (new whales appear)
+- [ ] **Monitor**: Set up uptime monitoring for backend
+
+---
+
 ## Production Configuration Details
 
 ### CORS Whitelist Update

@@ -30,6 +30,8 @@ function MainVisualizationSet({
   sentiment,
   whales,
   loading,
+  error,
+  onRetry,
   whaleCanvasRef
 }) {
   // Container ref for measuring dimensions
@@ -60,6 +62,89 @@ function MainVisualizationSet({
         isMuted={isMuted}
         onMuteToggle={onMuteToggle}
       />
+
+      {/* Error Boundary - Database Connection Error */}
+      {error && (
+        <div className="w-full bg-danger/10 border-2 border-danger rounded-lg p-6 mb-4 animate-pulse">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            {/* Error Icon */}
+            <div className="w-16 h-16 rounded-full bg-danger/20 flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-danger"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+
+            {/* Error Title */}
+            <h3 className="text-xl font-bold text-danger">
+              Database Connection Error
+            </h3>
+
+            {/* Error Message */}
+            <div className="text-center max-w-md">
+              <p className="text-surface-500 mb-2">
+                Unable to connect to the database. This may be due to:
+              </p>
+              <ul className="text-sm text-surface-400 text-left list-disc list-inside space-y-1">
+                <li>Missing environment variables</li>
+                <li>Network connectivity issues</li>
+                <li>Database service unavailable</li>
+                <li>CORS configuration mismatch</li>
+              </ul>
+              {error.message && (
+                <p className="mt-3 text-xs font-mono text-danger bg-danger/5 p-2 rounded border border-danger/20">
+                  {error.message}
+                </p>
+              )}
+            </div>
+
+            {/* Retry Button */}
+            <button
+              onClick={() => {
+                console.log('🔄 Retrying connection...')
+                if (onRetry) {
+                  onRetry()
+                } else {
+                  window.location.reload()
+                }
+              }}
+              className="px-6 py-3 bg-danger hover:bg-danger/80 text-white font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Retry Connection
+            </button>
+
+            {/* Diagnostic Links */}
+            <div className="flex space-x-4 text-sm text-surface-400">
+              <a
+                href="/api/diagnostic/test-db"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-info underline"
+              >
+                Run Diagnostics
+              </a>
+              <a
+                href="/api/diagnostic/health"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-info underline"
+              >
+                Check Health
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Graph container with relative positioning */}
       <div className="relative w-full">
