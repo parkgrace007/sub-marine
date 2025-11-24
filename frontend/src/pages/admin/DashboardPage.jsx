@@ -24,29 +24,30 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboardData()
-    fetchActiveUsers()
+    // TEMPORARILY DISABLED: Activity tracking causing production issues
+    // fetchActiveUsers()
 
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
       fetchDashboardData()
-      fetchActiveUsers()
+      // fetchActiveUsers()
     }, 30000)
 
-    // Subscribe to real-time activity updates
-    const channel = supabase
-      .channel('activity_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'user_activity_logs'
-      }, () => {
-        fetchActiveUsers()
-      })
-      .subscribe()
+    // TEMPORARILY DISABLED: Realtime subscription to user_activity_logs
+    // const channel = supabase
+    //   .channel('activity_changes')
+    //   .on('postgres_changes', {
+    //     event: '*',
+    //     schema: 'public',
+    //     table: 'user_activity_logs'
+    //   }, () => {
+    //     fetchActiveUsers()
+    //   })
+    //   .subscribe()
 
     return () => {
       clearInterval(interval)
-      supabase.removeChannel(channel)
+      // supabase.removeChannel(channel)
     }
   }, [])
 
@@ -222,7 +223,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Active Users (Last 5 minutes) */}
+          {/* TEMPORARILY DISABLED: Active Users card
           <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
             <div className="text-surface-400 text-sm mb-1">Active Users</div>
             <div className="text-2xl font-bold text-white">
@@ -230,6 +231,7 @@ export default function DashboardPage() {
             </div>
             <div className="text-xs text-green-400 mt-1">● Last 5 minutes</div>
           </div>
+          */}
         </div>
 
         {/* System Metrics Chart */}
@@ -325,7 +327,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Visitors */}
+        {/* TEMPORARILY DISABLED: Recent Visitors section
         <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
           <h2 className="text-xl font-semibold text-white mb-4">Recent Visitors ({recentVisitors.length})</h2>
           <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -367,13 +369,14 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+        */}
 
         {/* Refresh Button */}
         <div className="text-center">
           <button
             onClick={() => {
               fetchDashboardData()
-              fetchActiveUsers()
+              // fetchActiveUsers()
             }}
             className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded transition-colors"
           >
