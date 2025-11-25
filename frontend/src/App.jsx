@@ -2,7 +2,6 @@ import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { WhaleDataProvider } from './contexts/WhaleDataContext'
-import VisitorTracker from './components/VisitorTracker'
 
 // Critical pages - loaded immediately
 import MainPage from './pages/MainPage'
@@ -47,8 +46,6 @@ function App() {
     <AuthProvider>
       <WhaleDataProvider>
         <BrowserRouter>
-          {/* 방문자 추적 (BrowserRouter 내부, Routes 외부) */}
-          <VisitorTracker />
           <Suspense fallback={<LoadingFallback />}>
           {/* Page Routes */}
           <Routes>

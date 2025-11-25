@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../utils/supabase'
-import VisitorCount from './VisitorCount'
 
 /**
  * AdminLayout - Main layout for admin pages
@@ -175,7 +174,6 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-6 text-sm text-surface-400">
-            <VisitorCount />
             <div className="flex items-center gap-2">
               <span>v1.0</span>
               <span className="w-2 h-2 bg-green-500 rounded-full" title="System Online"></span>
