@@ -1,6 +1,29 @@
 import React from 'react'
 import CoinIcon from './CoinIcon'
 
+// 거래소 이름 한글화 매핑
+const EXCHANGE_NAME_KR = {
+  'Binance': '바이낸스',
+  'Coinbase': '코인베이스',
+  'Coinbase Institutional': '코인베이스',
+  'Kraken': '크라켄',
+  'OKX': 'OKX',
+  'Bybit': '바이비트',
+  'Huobi': '후오비',
+  'HTX': '후오비',
+  'Bitfinex': '비트파이넥스',
+  'KuCoin': '쿠코인',
+  'Gate.io': '게이트아이오',
+  'Upbit': '업비트',
+  'Bithumb': '빗썸',
+  'Gemini': '제미니',
+  'Bitstamp': '비트스탬프',
+  'Crypto.com': '크립토닷컴',
+  'FTX': 'FTX',
+  'Robinhood': '로빈후드',
+  'unknown': '거래소'
+}
+
 /**
  * TransactionRow - Individual transaction display with animations
  */
@@ -111,51 +134,55 @@ function TransactionRow({ transaction, isNew = false }) {
   }
 
   // Get owner label based on flow_type (when owner name is unknown)
+  // 이모지 제거, 한글 라벨만 사용
   const getOwnerLabel = (owner, ownerType, position) => {
-    // If we have the actual owner name, use it
-    if (owner) return owner
+    // If we have the actual owner name, translate to Korean if it's a known exchange
+    if (owner && owner !== 'unknown wallet') {
+      return EXCHANGE_NAME_KR[owner] || owner
+    }
 
     const flow = transaction.flow_type
 
-    // Use flow_type to determine the correct label
+    // Use flow_type to determine the correct label (no emoji)
     if (flow === 'inflow') {
       // inflow: exchange → wallet
-      return position === 'from' ? '🏦 거래소' : '👛 개인지갑'
+      return position === 'from' ? '거래소' : '개인지갑'
     }
     if (flow === 'outflow') {
       // outflow: wallet → exchange
-      return position === 'from' ? '👛 개인지갑' : '🏦 거래소'
+      return position === 'from' ? '개인지갑' : '거래소'
     }
     if (flow === 'exchange') {
       // exchange: exchange ↔ exchange
-      return '🏦 거래소'
+      return '거래소'
     }
     if (flow === 'defi') {
       // defi: use owner_type if available
-      return ownerType === 'contract' ? '📜 컨트랙트' : '👛 개인지갑'
+      return ownerType === 'contract' ? '스마트컨트랙트' : '개인지갑'
     }
     // internal: wallet ↔ wallet
-    return '👛 개인지갑'
+    return '개인지갑'
   }
 
   // Get transaction label
+  // 형식: $12.3M • 바이낸스 → 개인지갑
   const getTransactionLabel = () => {
     const type = transaction.transaction_type
     const symbol = transaction.symbol?.toUpperCase() || ''
-    const amount = formatAmount(transaction.amount)
+    const amountUSD = formatAmount(transaction.amount_usd)
 
     if (type === 'mint') {
-      return `Minted ${amount} ${symbol}`
+      return `$${amountUSD} 발행`
     }
 
     if (type === 'burn') {
-      return `Burned ${amount} ${symbol}`
+      return `$${amountUSD} 소각`
     }
 
-    // Default: show amount + symbol + from → to
+    // Default: $금액 • from → to
     const from = getOwnerLabel(transaction.from_owner, transaction.from_owner_type, 'from')
     const to = getOwnerLabel(transaction.to_owner, transaction.to_owner_type, 'to')
-    return `${amount} ${symbol} • ${from} → ${to}`
+    return `$${amountUSD} • ${from} → ${to}`
   }
 
   const style = getTransactionStyle()

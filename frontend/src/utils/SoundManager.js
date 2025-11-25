@@ -7,9 +7,10 @@ class SoundManager {
     // Audio pool for each tier (pre-loaded)
     this.sounds = {}
 
-    // Settings
-    this.volume = 0.5 // 50% default volume
-    this.isMuted = false
+    // Settings (2025-11-25: Default muted, volume -3dB)
+    // -3dB ≈ 0.708 multiplier, 50% * 0.708 ≈ 0.35
+    this.volume = 0.35 // 35% default volume (-3dB from 50%)
+    this.isMuted = true // 기본 음소거 상태
     this.maxConcurrent = 3 // Max simultaneous sounds
     this.activeSounds = []
 
@@ -20,7 +21,7 @@ class SoundManager {
       'alert-medium': 3 // B-tier alerts
     }
 
-    // Load mute state from localStorage
+    // Load mute state from localStorage (only if previously saved)
     this.loadSettings()
 
     // Initialize sounds for all tiers (1-7)

@@ -148,11 +148,12 @@ const WhaleCanvas = forwardRef(({ sentiment, timeframe, symbol, whales = [], loa
 
     if (newWhales.length === 0) return
 
-    // If only a few new whales (realtime updates), spawn immediately
+    // If only a few new whales (realtime updates), spawn immediately with sound
     if (newWhales.length <= 5) {
       newWhales.forEach((dbWhale) => {
         const targetXRatio = 0.5 // Fixed center position
-        manager.spawnFromEvent(dbWhale, canvas.width, canvas.height, targetXRatio, timeframe)
+        // playSound = true for realtime updates (2025-11-25)
+        manager.spawnFromEvent(dbWhale, canvas.width, canvas.height, targetXRatio, timeframe, true)
         syncedWhaleIdsRef.current.add(dbWhale.id)
         if (process.env.NODE_ENV === 'development') {
           console.log('🐋 Spawned whale (realtime):', dbWhale.id, `$${(dbWhale.amount_usd / 1e6).toFixed(2)}M`)
@@ -162,8 +163,9 @@ const WhaleCanvas = forwardRef(({ sentiment, timeframe, symbol, whales = [], loa
     }
 
     // For bulk loading (initial page load or timeframe change), spawn in batches
+    // playSound = false (default) to prevent sound spam on refresh (2025-11-25)
     let spawnIndex = 0
-    console.log(`📦 Progressive loading: ${newWhales.length} whales in batches of ${SPAWN_BATCH_SIZE}`)
+    console.log(`📦 Progressive loading: ${newWhales.length} whales in batches of ${SPAWN_BATCH_SIZE} (no sound)`)
 
     // Clear any existing interval before creating new one (memory leak fix)
     if (spawnIntervalRef.current) {

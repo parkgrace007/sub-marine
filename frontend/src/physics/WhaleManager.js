@@ -75,7 +75,8 @@ class WhaleManager {
   // ===== SPAWNING =====
 
   // Spawn whale from Supabase event data (2025-11-23: flow_type terminology)
-  spawnFromEvent(event, canvasWidth, canvasHeight, targetXRatio, timeframe = '1h') {
+  // playSound: only true for realtime updates (2025-11-25: prevent sound on page refresh)
+  spawnFromEvent(event, canvasWidth, canvasHeight, targetXRatio, timeframe = '1h', playSound = false) {
     const type = event.flow_type // 'inflow' or 'outflow' (2025-11-23: renamed from buy/sell)
     const amountUSD = event.amount_usd
 
@@ -146,8 +147,10 @@ class WhaleManager {
     // Invalidate filter cache (whale added - 2025-11-23)
     this.invalidateFilterCache()
 
-    // Play tier-based sound effect
-    soundManager.play(tier)
+    // Play tier-based sound effect (only for realtime updates - 2025-11-25)
+    if (playSound) {
+      soundManager.play(tier)
+    }
 
     return whale
   }

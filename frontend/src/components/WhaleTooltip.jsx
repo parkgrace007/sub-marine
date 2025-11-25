@@ -3,6 +3,35 @@ import whaleSprites from '../utils/WhaleSprites'
 import CoinIcon from './CoinIcon'
 import ExchangeIcon from './ExchangeIcon'
 
+// 거래소 이름 한글화 매핑
+const EXCHANGE_NAME_KR = {
+  'Binance': '바이낸스',
+  'Coinbase': '코인베이스',
+  'Coinbase Institutional': '코인베이스',
+  'Kraken': '크라켄',
+  'OKX': 'OKX',
+  'Bybit': '바이비트',
+  'Huobi': '후오비',
+  'HTX': '후오비',
+  'Bitfinex': '비트파이넥스',
+  'KuCoin': '쿠코인',
+  'Gate.io': '게이트아이오',
+  'Upbit': '업비트',
+  'Bithumb': '빗썸',
+  'Gemini': '제미니',
+  'Bitstamp': '비트스탬프',
+  'Crypto.com': '크립토닷컴',
+  'FTX': 'FTX',
+  'Robinhood': '로빈후드',
+  'unknown': '거래소'
+}
+
+// 소유자 라벨 한글화 (이모지 없음)
+const getOwnerLabelKR = (owner) => {
+  if (!owner) return '개인지갑'
+  return EXCHANGE_NAME_KR[owner] || owner
+}
+
 /**
  * WhaleTooltip - Displays detailed whale transaction information
  * Enhanced with sprite animation and user-friendly information
@@ -148,14 +177,14 @@ function WhaleTooltip({ whale, position, onClose }) {
 
           {/* Transaction Info */}
           <div className="flex-1 min-w-0">
-            {/* FROM → TO */}
+            {/* FROM → TO (한글화) */}
             <div className="flex items-center gap-1 text-xs mb-1">
               <div className="flex items-center gap-1 truncate max-w-[90px]">
                 {fromOwnerType === 'exchange' && fromOwner && (
                   <ExchangeIcon name={fromOwner} size={14} />
                 )}
                 <span className="text-surface-600 opacity-80 font-medium truncate">
-                  {fromOwner || 'Private'}
+                  {getOwnerLabelKR(fromOwner)}
                 </span>
               </div>
               <span className="text-surface-600 opacity-40 flex-shrink-0">→</span>
@@ -164,19 +193,19 @@ function WhaleTooltip({ whale, position, onClose }) {
                   <ExchangeIcon name={toOwner} size={14} />
                 )}
                 <span className="text-surface-600 opacity-80 font-medium truncate">
-                  {toOwner || 'Private'}
+                  {getOwnerLabelKR(toOwner)}
                 </span>
               </div>
             </div>
 
-            {/* INFLOW/OUTFLOW Badge - Optimized: Removed PNG image loading (2025-11-24) */}
+            {/* INFLOW/OUTFLOW Badge (이모지 제거) */}
             <div className="flex items-center gap-2">
               <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
                 whale.type === 'inflow'
                   ? 'bg-success/20 text-success'
                   : 'bg-danger/20 text-danger'
               }`}>
-                {whale.type === 'inflow' ? '📈 INFLOW' : '📉 OUTFLOW'}
+                {whale.type === 'inflow' ? '거래소 유입' : '거래소 유출'}
               </span>
             </div>
           </div>
