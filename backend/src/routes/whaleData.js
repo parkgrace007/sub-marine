@@ -66,6 +66,8 @@ function setCache(key, data) {
  *   - timeframe: 1h, 4h, 8h, 12h, 1d (default: 8h)
  *   - symbol: BTC, ETH, or 통합 for all (default: 통합)
  *   - flowTypes: comma-separated list (default: inflow,outflow)
+ *   - noTimeframe: 'true' to fetch latest N records without time restriction
+ *   - limit: number of records to fetch (default: 300 for noTimeframe mode)
  */
 router.get('/', whaleApiLimiter, async (req, res) => {
   try {
@@ -73,11 +75,15 @@ router.get('/', whaleApiLimiter, async (req, res) => {
     const symbol = req.query.symbol || '통합'
     const flowTypesParam = req.query.flowTypes || 'inflow,outflow'
     const flowTypes = flowTypesParam.split(',').filter(Boolean)
+    const noTimeframe = req.query.noTimeframe === 'true'
+    const requestedLimit = parseInt(req.query.limit) || (noTimeframe ? 300 : null)
 
-    console.log(`🐋 [WhaleAPI] Request: timeframe=${timeframe}, symbol=${symbol}, flowTypes=${flowTypes.join(',')}`)
+    console.log(`🐋 [WhaleAPI] Request: timeframe=${timeframe}, symbol=${symbol}, flowTypes=${flowTypes.join(',')}, noTimeframe=${noTimeframe}`)
 
     // Check cache
-    const cacheKey = getCacheKey(timeframe, symbol, flowTypes)
+    const cacheKey = noTimeframe
+      ? `latest_${requestedLimit}_${symbol}_${flowTypes?.join(',') || 'all'}`
+      : getCacheKey(timeframe, symbol, flowTypes)
     const cached = getFromCache(cacheKey)
     if (cached) {
       console.log(`   ✅ Cache hit (${Math.floor((Date.now() - cached.timestamp) / 1000)}s old)`)
@@ -90,17 +96,19 @@ router.get('/', whaleApiLimiter, async (req, res) => {
       })
     }
 
-    // Calculate time window
-    const timeframeDuration = TIMEFRAME_DURATIONS_MS[timeframe] || TIMEFRAME_DURATIONS_MS['8h']
-    const fetchWindow = timeframeDuration * BUFFER_MULTIPLIER
-    const cutoffTimestamp = Math.floor((Date.now() - fetchWindow) / 1000)
-
     // Build query - SERVICE_ROLE key bypasses RLS
     let query = supabase
       .from('whale_events')
       .select('id, timestamp, symbol, amount_usd, flow_type, blockchain, from_owner, to_owner, from_owner_type, to_owner_type, from_address, to_address')
-      .gte('timestamp', cutoffTimestamp)
       .gte('amount_usd', MIN_WHALE_USD)
+
+    // Only apply time filter if NOT in noTimeframe mode
+    if (!noTimeframe) {
+      const timeframeDuration = TIMEFRAME_DURATIONS_MS[timeframe] || TIMEFRAME_DURATIONS_MS['8h']
+      const fetchWindow = timeframeDuration * BUFFER_MULTIPLIER
+      const cutoffTimestamp = Math.floor((Date.now() - fetchWindow) / 1000)
+      query = query.gte('timestamp', cutoffTimestamp)
+    }
 
     // Add flow_type filter
     if (flowTypes && flowTypes.length > 0) {
@@ -113,7 +121,7 @@ router.get('/', whaleApiLimiter, async (req, res) => {
     }
 
     // Execute query
-    const queryLimit = symbol === '통합' ? 500 : 100
+    const queryLimit = requestedLimit || (symbol === '통합' ? 500 : 100)
     const startTime = Date.now()
 
     const { data, error: queryError } = await query

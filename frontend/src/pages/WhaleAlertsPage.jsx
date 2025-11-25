@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Header from '../components/Header'
 import TransactionFeed from '../components/TransactionFeed'
 
@@ -7,7 +7,9 @@ import TransactionFeed from '../components/TransactionFeed'
  * Displays real-time whale transactions with filtering and timeline controls
  */
 function WhaleAlertsPage() {
-  const [timeframe, setTimeframe] = useState('1h')
+  // 고래알림 본진: 1D 기준, internal(지갑간 거래) 제외
+  const timeframe = '1d'
+  const flowTypes = ['inflow', 'outflow', 'exchange', 'defi']
 
   return (
     <div className="min-h-screen bg-surface-100 text-surface-600 relative">
@@ -19,7 +21,7 @@ function WhaleAlertsPage() {
         <div className="h-[calc(100vh-120px)]">
           <TransactionFeed
             timeframe={timeframe}
-            flowTypes={['inflow', 'outflow', 'exchange', 'defi']}
+            flowTypes={flowTypes}
           />
         </div>
       </main>
