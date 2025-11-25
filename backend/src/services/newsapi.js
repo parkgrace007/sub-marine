@@ -218,12 +218,11 @@ async function fetchCryptoNews(pageSize = 40) {
   }
 
   try {
-    // Fetch only articles from the last 6 hours (ultra-fresh news)
-    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000)
-    const from = sixHoursAgo.toISOString()
-
-    const url = `${BASE_URL}/everything?q=${encodeURIComponent(CRYPTO_KEYWORDS)}&from=${from}&language=en&sortBy=publishedAt&pageSize=${pageSize}`
-    console.log(`🔍 Fetching crypto news from last 6 hours...`)
+    // NewsAPI free tier does NOT support 'from' parameter - fetch latest articles instead (2025-11-24)
+    const url = `${BASE_URL}/everything?q=${encodeURIComponent(CRYPTO_KEYWORDS)}&language=en&sortBy=publishedAt&pageSize=${pageSize}`
+    console.log(`🔍 Fetching latest crypto news (NewsAPI free tier - no date filter)...`)
+    console.log(`   📍 URL: ${url}`)
+    console.log(`   🔑 API Key: ${API_KEY?.substring(0, 8)}...${API_KEY?.substring(API_KEY.length - 4)}`)
 
     const response = await fetch(url, {
       headers: {
@@ -231,11 +230,28 @@ async function fetchCryptoNews(pageSize = 40) {
       }
     })
 
+    console.log(`   📡 Response status: ${response.status} ${response.statusText}`)
+
     if (!response.ok) {
       throw new Error(`API error: ${response.status} ${response.statusText}`)
     }
 
     const json = await response.json()
+
+    console.log(`   📊 API Response:`, {
+      status: json.status,
+      totalResults: json.totalResults,
+      articlesLength: json.articles?.length || 0,
+      firstArticle: json.articles?.[0] ? {
+        title: json.articles[0].title?.substring(0, 50) + '...',
+        publishedAt: json.articles[0].publishedAt
+      } : 'none'
+    })
+
+    // Log full response if it's an error or has unexpected results
+    if (json.status === 'error' || json.totalResults === 0) {
+      console.log(`   🔍 Full API Response:`, JSON.stringify(json, null, 2))
+    }
 
     if (json.status === 'error') {
       throw new Error(json.message || 'Unknown API error')

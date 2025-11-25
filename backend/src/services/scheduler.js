@@ -72,6 +72,12 @@ class SchedulerService {
       console.log('🚨 Running initial alert system check...\n')
       this.runAlertCheck()
     }, 5000) // Wait 5 seconds for services to initialize
+
+    // Check and refresh news if stale (Render Free tier fix - 2025-11-24)
+    setTimeout(async () => {
+      console.log('📰 Checking news freshness on startup...\n')
+      await this.checkAndRefreshNews()
+    }, 10000) // Wait 10 seconds for services to initialize
   }
 
   /**
@@ -167,9 +173,48 @@ class SchedulerService {
   }
 
   /**
+   * Check News Freshness and Refresh if Stale
+   * Render Free tier fix: Check on server startup to handle cold starts
+   * If news is older than 3 hours, immediately refresh
+   */
+  async checkAndRefreshNews() {
+    try {
+      // Check last update time from Supabase
+      const { data, error } = await supabase
+        .from('translated_news')
+        .select('created_at')
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (error) {
+        console.error('   ❌ Error checking news freshness:', error.message)
+        return
+      }
+
+      if (!data || data.length === 0) {
+        console.log('   📰 No news found in database, fetching initial news...')
+        await this.runNewsRefresh()
+        return
+      }
+
+      const lastUpdate = new Date(data[0].created_at)
+      const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60)
+
+      if (hoursSinceUpdate >= 3) {
+        console.log(`   📰 News is ${hoursSinceUpdate.toFixed(1)} hours old (>3h), refreshing now...`)
+        await this.runNewsRefresh()
+      } else {
+        console.log(`   ✅ News is fresh (${hoursSinceUpdate.toFixed(1)} hours old), skipping refresh`)
+      }
+    } catch (err) {
+      console.error('   ❌ Error checking news freshness:', err.message)
+    }
+  }
+
+  /**
    * News Refresh Job
-   * Fetches latest crypto news from NewsAPI.org (last 6 hours)
-   * Runs every 3 hours to keep news ultra-fresh
+   * Fetches latest crypto news from NewsAPI.org (last 24 hours)
+   * Runs every 3 hours to keep news fresh
    */
   async runNewsRefresh() {
     const startTime = Date.now()
@@ -185,7 +230,7 @@ class SchedulerService {
       const articleCount = data.totalResults || 0
 
       console.log(`\n✅ News refresh completed in ${duration}ms`)
-      console.log(`   Fetched ${articleCount} fresh articles (last 6 hours)`)
+      console.log(`   Fetched ${articleCount} fresh articles (last 24 hours)`)
       console.log('━'.repeat(30) + '\n')
     } catch (error) {
       console.error('\n❌ News refresh job failed:', error.message)
@@ -196,10 +241,12 @@ class SchedulerService {
 
   /**
    * Database Cleanup Job
-   * Deletes old whale events to stay within Supabase free tier limits
+   * Deletes old data to stay within Supabase free tier limits (500MB)
    *
    * Retention policy:
    * - whale_events: Keep 30 days
+   * - alerts: Keep 90 days
+   * - market_sentiment: Keep 7 days
    */
   async runDatabaseCleanup() {
     const startTime = Date.now()
@@ -225,6 +272,44 @@ class SchedulerService {
           console.log(`   ✓ Deleted ${deleted} old whale_events (>30d)`)
         } else {
           console.log(`   ✓ No old whale_events to delete`)
+        }
+      }
+
+      // Delete alerts older than 90 days (2025-11-25: Supabase free tier optimization)
+      const alertsCutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+
+      const { count: alertsDeleted, error: alertsError } = await supabase
+        .from('alerts')
+        .delete({ count: 'exact' })
+        .lt('created_at', alertsCutoff)
+
+      if (alertsError) {
+        console.error('   ❌ Error deleting alerts:', alertsError.message)
+      } else {
+        const deleted = alertsDeleted || 0
+        if (deleted > 0) {
+          console.log(`   ✓ Deleted ${deleted} old alerts (>90d)`)
+        } else {
+          console.log(`   ✓ No old alerts to delete`)
+        }
+      }
+
+      // Delete market_sentiment older than 7 days (2025-11-25: Supabase free tier optimization)
+      const sentimentCutoff = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000)
+
+      const { count: sentimentDeleted, error: sentimentError } = await supabase
+        .from('market_sentiment')
+        .delete({ count: 'exact' })
+        .lt('timestamp', sentimentCutoff)
+
+      if (sentimentError) {
+        console.error('   ❌ Error deleting market_sentiment:', sentimentError.message)
+      } else {
+        const deleted = sentimentDeleted || 0
+        if (deleted > 0) {
+          console.log(`   ✓ Deleted ${deleted} old market_sentiment (>7d)`)
+        } else {
+          console.log(`   ✓ No old market_sentiment to delete`)
         }
       }
 

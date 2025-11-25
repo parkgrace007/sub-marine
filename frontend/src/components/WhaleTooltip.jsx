@@ -169,19 +169,14 @@ function WhaleTooltip({ whale, position, onClose }) {
               </div>
             </div>
 
-            {/* INFLOW/OUTFLOW Badge */}
+            {/* INFLOW/OUTFLOW Badge - Optimized: Removed PNG image loading (2025-11-24) */}
             <div className="flex items-center gap-2">
-              <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded flex items-center gap-1 ${
+              <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
                 whale.type === 'inflow'
                   ? 'bg-success/20 text-success'
                   : 'bg-danger/20 text-danger'
               }`}>
-                <img
-                  src={whale.type === 'inflow' ? '/icons/inflow.png' : '/icons/outflow.png'}
-                  alt={whale.type}
-                  className="w-4 h-4"
-                />
-                {whale.type === 'inflow' ? 'INFLOW' : 'OUTFLOW'}
+                {whale.type === 'inflow' ? '📈 INFLOW' : '📉 OUTFLOW'}
               </span>
             </div>
           </div>

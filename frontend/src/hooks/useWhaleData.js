@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase'
 import { TIMEFRAME_DURATIONS_MS } from '../config/timeframes'
 
 // Performance optimization (2025-11-22): Fetch only timeframe-relevant data instead of 30 days
-const BUFFER_MULTIPLIER = 2 // Fetch 2x timeframe duration for safety margin (1h → 2h, 4h → 8h)
+const BUFFER_MULTIPLIER = 1.5 // Fetch 1.5x timeframe duration (8h → 12h) - OPTIMIZED 2025-11-24
 const MIN_WHALE_USD = 10_000_000 // $10M threshold for Tier 1+ whales (2025-11-19: synchronized with Whale Alert API)
 const MAX_WHALES_IN_MEMORY = 300 // OPTIMIZATION (2025-11-24): Reduced from 500 due to better filtering
 
@@ -13,27 +13,21 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
   const [error, setError] = useState(null)
   const [refetchTrigger, setRefetchTrigger] = useState(0)
 
-  // Client-side filtering based on timeframe, flow_type, and symbol
+  // Client-side filtering: ONLY timeframe trimming (DB already filtered flow_type & symbol)
+  // Refactored 2025-11-24: Removed duplicate filtering - DB query already applies flow_type and symbol filters
   const whales = useMemo(() => {
     const now = Date.now()
     const cutoff = now - TIMEFRAME_DURATIONS_MS[timeframe]
 
+    // Trim BUFFER (1.5x) to exact timeframe window
+    // DB query already filtered by flow_type and symbol, so no duplicate filtering needed
     const filtered = allWhales.filter((whale) => {
       const whaleTime = whale.timestamp * 1000 // Convert to milliseconds
-      const timeMatch = whaleTime >= cutoff
-
-      // If flowTypes specified, filter by flow_type (e.g., ['inflow', 'outflow'] for dashboard)
-      // If null, accept all types (for whale alerts page)
-      const flowMatch = !flowTypes || flowTypes.includes(whale.flow_type)
-
-      // Symbol filter: '통합' shows all, otherwise match exact symbol (case-insensitive)
-      const symbolMatch = symbol === '통합' || whale.symbol.toUpperCase() === symbol.toUpperCase()
-
-      return timeMatch && flowMatch && symbolMatch
+      return whaleTime >= cutoff
     })
 
     return filtered
-  }, [allWhales, timeframe, flowTypes, symbol])
+  }, [allWhales, timeframe]) // Removed flowTypes and symbol from dependencies
 
   useEffect(() => {
     let channel
@@ -127,16 +121,7 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
     // Initial fetch
     fetchWhales()
 
-    // ===== DIAGNOSTIC (2025-11-24): Realtime TEMPORARILY DISABLED =====
-    // Testing if WebSocket connection is causing production timeout
-    // If data loads successfully without this, issue is Realtime WebSocket
-    // If still times out, issue is REST API or network routing
-    // TODO: Re-enable after diagnostic test completes
-
-    console.log('⚠️ DIAGNOSTIC MODE: Realtime subscription DISABLED for timeout isolation test')
-
-    /* TEMPORARILY COMMENTED OUT FOR DIAGNOSTIC
-    // Subscribe to real-time updates
+    // Subscribe to real-time updates (Re-enabled 2025-11-25 for production)
     // Use unique channel name per symbol/timeframe to avoid multiple subscriptions
     channel = supabase
       .channel(`whale-realtime-${timeframe}-${symbol}`)
@@ -195,7 +180,6 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
       .subscribe((status) => {
         console.log('Realtime subscription status:', status)
       })
-    END DIAGNOSTIC COMMENT */
 
     // Cleanup old whales every 5 minutes (2025-11-22: optimized to timeframe-based)
     cleanupInterval = setInterval(() => {

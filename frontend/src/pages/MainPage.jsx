@@ -151,9 +151,8 @@ function MainPage() {
   // Fetch market data + generate logs on indicator changes
   const sentiment = useIndicatorLogger(timeframe, symbol, handleLogGenerated)
 
-  // Fetch whale data (EMERGENCY FIX 2025-11-24: Show ALL flow types to diagnose production issue)
-  // TODO: Restore to ['inflow', 'outflow'] after confirming data loads
-  const { whales, loading: whalesLoading, error: whalesError, refetch: refetchWhales } = useWhaleData(timeframe, null, symbol)
+  // Fetch whale data - Dashboard shows ONLY inflow/outflow (Refactored 2025-11-24)
+  const { whales, loading: whalesLoading, error: whalesError, refetch: refetchWhales } = useWhaleData(timeframe, ['inflow', 'outflow'], symbol)
 
   // Use real bull_ratio from sentiment, fallback to default if loading
   const bullRatio = sentiment.loading ? 0.5 : sentiment.bull_ratio
