@@ -11,14 +11,26 @@ export default function VisitorCount() {
   const [count, setCount] = useState(null)
   const [error, setError] = useState(false)
 
-  const fetchCount = useCallback(async () => {
+  const fetchCount = useCallback(async (retryCount = 0) => {
     try {
-      const res = await fetch(`${API_URL}/api/visitors/count`)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10초 타임아웃
+
+      const res = await fetch(`${API_URL}/api/visitors/count`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+
       if (!res.ok) throw new Error('Failed')
       const data = await res.json()
       setCount(data.count)
       setError(false)
     } catch (err) {
+      // 네트워크 에러 시 한 번 재시도
+      if (retryCount < 1 && (err.name === 'AbortError' || err.message === 'Failed to fetch')) {
+        setTimeout(() => fetchCount(retryCount + 1), 2000)
+        return
+      }
       setError(true)
     }
   }, [])

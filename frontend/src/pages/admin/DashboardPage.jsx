@@ -33,28 +33,55 @@ export default function DashboardPage() {
     }
   }, [])
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isRetry = false) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      // 토큰 갱신 시도 (만료된 경우 자동 갱신)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-      const token = session.access_token
+      if (sessionError || !session) {
+        // 세션 에러 시 토큰 갱신 시도
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+        if (refreshError || !refreshData.session) {
+          console.error('Session refresh failed:', refreshError)
+          setError('세션이 만료되었습니다. 다시 로그인해주세요.')
+          setLoading(false)
+          return
+        }
+      }
 
-      // Fetch all dashboard data in parallel
+      // 최신 세션 다시 가져오기
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      if (!currentSession) return
+
+      const token = currentSession.access_token
+
+      // Fetch all dashboard data in parallel with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15초 타임아웃
+
+      const fetchOptions = {
+        headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal
+      }
+
       const [metricsRes, apiRes, dbRes, servicesRes] = await Promise.all([
-        fetch(`${API_URL}/api/admin/system/metrics`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/admin/system/api-usage`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/admin/system/database`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/admin/system/services`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        fetch(`${API_URL}/api/admin/system/metrics`, fetchOptions),
+        fetch(`${API_URL}/api/admin/system/api-usage`, fetchOptions),
+        fetch(`${API_URL}/api/admin/system/database`, fetchOptions),
+        fetch(`${API_URL}/api/admin/system/services`, fetchOptions)
       ])
+
+      clearTimeout(timeoutId)
+
+      // 401 에러면 토큰 갱신 후 재시도
+      if (metricsRes.status === 401 || apiRes.status === 401 || dbRes.status === 401 || servicesRes.status === 401) {
+        if (!isRetry) {
+          console.log('Token expired, refreshing...')
+          await supabase.auth.refreshSession()
+          return fetchDashboardData(true) // 한 번만 재시도
+        }
+        throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.')
+      }
 
       if (!metricsRes.ok || !apiRes.ok || !dbRes.ok || !servicesRes.ok) {
         throw new Error('Failed to fetch dashboard data')
@@ -75,6 +102,16 @@ export default function DashboardPage() {
       setError(null)
     } catch (err) {
       console.error('Dashboard fetch error:', err)
+
+      // 네트워크 에러나 타임아웃은 자동 재시도
+      if (err.name === 'AbortError' || err.message === 'Failed to fetch') {
+        if (!isRetry) {
+          console.log('Network error, retrying in 3 seconds...')
+          setTimeout(() => fetchDashboardData(true), 3000)
+          return
+        }
+      }
+
       setError(err.message)
       setLoading(false)
     }
@@ -107,9 +144,15 @@ export default function DashboardPage() {
   if (error) {
     return (
       <AdminLayout>
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 text-red-400">
-          <h3 className="font-semibold mb-2">Error loading dashboard</h3>
-          <p>{error}</p>
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 text-center">
+          <h3 className="font-semibold mb-2 text-yellow-400">대시보드 연결 오류</h3>
+          <p className="text-surface-400 text-sm mb-4">{error}</p>
+          <button
+            onClick={() => { setError(null); setLoading(true); fetchDashboardData(); }}
+            className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded transition-colors"
+          >
+            다시 시도
+          </button>
         </div>
       </AdminLayout>
     )
