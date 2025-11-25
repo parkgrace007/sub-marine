@@ -18,7 +18,9 @@ export const bbWidthLevels = [
     nameEn: 'Extreme Expansion',
     color: '#FF0000',
     description: '극단적 변동성. 급격한 가격 움직임.',
-    strategy: '과도한 변동성 - 진입 자제. 기존 포지션 익절 고려. 급격한 추세 반전 가능성.'
+    descriptionEn: 'Extreme volatility. Sharp price movement.',
+    strategy: '과도한 변동성 - 진입 자제. 기존 포지션 익절 고려. 급격한 추세 반전 가능성.',
+    strategyEn: 'Excessive volatility - avoid entry. Consider profit taking. Possible sharp reversal.'
   },
   {
     level: 6,
@@ -27,7 +29,9 @@ export const bbWidthLevels = [
     nameEn: 'Strong Expansion',
     color: '#FF6666',
     description: '높은 변동성. 트렌드 가속화.',
-    strategy: '트렌드 추종 전략 유효. 손절가 넓게 설정. 변동성 감소 시그널 감지.'
+    descriptionEn: 'High volatility. Trend accelerating.',
+    strategy: '트렌드 추종 전략 유효. 손절가 넓게 설정. 변동성 감소 시그널 감지.',
+    strategyEn: 'Trend-following valid. Set wide stop loss. Watch for volatility decrease.'
   },
   {
     level: 5,
@@ -36,7 +40,9 @@ export const bbWidthLevels = [
     nameEn: 'Expansion',
     color: '#FFA500',
     description: '변동성 증가. 트렌드 형성 중.',
-    strategy: '트렌드 진입 타이밍. 방향성 확인 후 진입. 분할 매수/매도.'
+    descriptionEn: 'Volatility increasing. Trend forming.',
+    strategy: '트렌드 진입 타이밍. 방향성 확인 후 진입. 분할 매수/매도.',
+    strategyEn: 'Trend entry timing. Enter after direction confirmed. DCA buy/sell.'
   },
   {
     level: 4,
@@ -45,7 +51,9 @@ export const bbWidthLevels = [
     nameEn: 'Normal',
     color: '#808080',
     description: '정상 변동성. 안정적 추세.',
-    strategy: '일반적 트레이딩 환경. 모든 전략 적용 가능. 리스크 관리 표준 적용.'
+    descriptionEn: 'Normal volatility. Stable trend.',
+    strategy: '일반적 트레이딩 환경. 모든 전략 적용 가능. 리스크 관리 표준 적용.',
+    strategyEn: 'Normal trading environment. All strategies applicable. Standard risk management.'
   },
   {
     level: 3,
@@ -54,7 +62,9 @@ export const bbWidthLevels = [
     nameEn: 'Contraction',
     color: '#66B2FF',
     description: '변동성 감소. 횡보장.',
-    strategy: '신규 진입 보류. 브레이크아웃 준비. 타이트한 손절가 설정.'
+    descriptionEn: 'Volatility decreasing. Sideways market.',
+    strategy: '신규 진입 보류. 브레이크아웃 준비. 타이트한 손절가 설정.',
+    strategyEn: 'Hold new entries. Prepare for breakout. Set tight stop loss.'
   },
   {
     level: 2,
@@ -63,7 +73,9 @@ export const bbWidthLevels = [
     nameEn: 'Strong Squeeze',
     color: '#0080FF',
     description: '낮은 변동성. 브레이크아웃 임박.',
-    strategy: 'B-003 Alert 발동 구간. 포지션 진입 대기. 브레이크아웃 방향 예측 (RSI/MACD 보조). 손절/익절 미리 설정.'
+    descriptionEn: 'Low volatility. Breakout imminent.',
+    strategy: 'B-003 Alert 발동 구간. 포지션 진입 대기. 브레이크아웃 방향 예측 (RSI/MACD 보조). 손절/익절 미리 설정.',
+    strategyEn: 'B-003 Alert zone. Wait for entry. Predict breakout direction (RSI/MACD). Pre-set stop/take profit.'
   },
   {
     level: 1,
@@ -72,7 +84,9 @@ export const bbWidthLevels = [
     nameEn: 'Extreme Squeeze',
     color: '#0000FF',
     description: '극단적 횡보. 폭발적 움직임 임박.',
-    strategy: 'Critical Alert - 대형 움직임 직전. 양방향 진입 준비 (롱/숏 모두). 첫 브레이크아웃 방향 즉시 추종. 가짜 돌파(Fake Breakout) 경계.'
+    descriptionEn: 'Extreme sideways. Explosive move imminent.',
+    strategy: 'Critical Alert - 대형 움직임 직전. 양방향 진입 준비 (롱/숏 모두). 첫 브레이크아웃 방향 즉시 추종. 가짜 돌파(Fake Breakout) 경계.',
+    strategyEn: 'Critical Alert - Major move ahead. Prepare both directions. Follow first breakout. Watch for fake breakouts.'
   }
 ];
 
@@ -87,7 +101,9 @@ export const bbPositions = [
     nameEn: 'Above Upper',
     color: '#00FF00',
     description: '과매수 구간. 상승 과열.',
-    strategy: '기존 롱 포지션 익절 고려. 신규 매수 자제 (고점 추격 위험). BB 상단 따라 걷기 패턴 확인 (강세장).'
+    descriptionEn: 'Overbought zone. Overheated uptrend.',
+    strategy: '기존 롱 포지션 익절 고려. 신규 매수 자제 (고점 추격 위험). BB 상단 따라 걷기 패턴 확인 (강세장).',
+    strategyEn: 'Consider profit taking on longs. Avoid new buys (chasing high risk). Check upper band walking (bull market).'
   },
   {
     level: 4,
@@ -95,7 +111,9 @@ export const bbPositions = [
     nameEn: 'Upper Zone',
     color: '#66FF66',
     description: '강세 구간. 매수세 우세.',
-    strategy: '상승 추세 진입 타이밍. RSI/MACD 보조 확인. 손절가 BB_Middle 하단.'
+    descriptionEn: 'Bullish zone. Buyers dominant.',
+    strategy: '상승 추세 진입 타이밍. RSI/MACD 보조 확인. 손절가 BB_Middle 하단.',
+    strategyEn: 'Uptrend entry timing. Check RSI/MACD. Stop loss below BB middle.'
   },
   {
     level: 3,
@@ -103,7 +121,9 @@ export const bbPositions = [
     nameEn: 'Middle Zone',
     color: '#808080',
     description: '중립 구간. 방향성 불명.',
-    strategy: '관망 (신규 진입 보류). 브레이크아웃 방향 대기. 다른 지표 우선 확인.'
+    descriptionEn: 'Neutral zone. Direction unclear.',
+    strategy: '관망 (신규 진입 보류). 브레이크아웃 방향 대기. 다른 지표 우선 확인.',
+    strategyEn: 'Wait (hold new entries). Wait for breakout direction. Check other indicators first.'
   },
   {
     level: 2,
@@ -111,7 +131,9 @@ export const bbPositions = [
     nameEn: 'Lower Zone',
     color: '#FF6666',
     description: '약세 구간. 매도세 우세.',
-    strategy: '하락 추세 진입 타이밍. RSI/MACD 보조 확인. 손절가 BB_Middle 상단.'
+    descriptionEn: 'Bearish zone. Sellers dominant.',
+    strategy: '하락 추세 진입 타이밍. RSI/MACD 보조 확인. 손절가 BB_Middle 상단.',
+    strategyEn: 'Downtrend entry timing. Check RSI/MACD. Stop loss above BB middle.'
   },
   {
     level: 1,
@@ -119,7 +141,9 @@ export const bbPositions = [
     nameEn: 'Below Lower',
     color: '#FF0000',
     description: '과매도 구간. 하락 과열.',
-    strategy: '기존 숏 포지션 익절 고려. 신규 매도 자제 (저점 추격 위험). BB 하단 따라 걷기 패턴 확인 (약세장).'
+    descriptionEn: 'Oversold zone. Overheated downtrend.',
+    strategy: '기존 숏 포지션 익절 고려. 신규 매도 자제 (저점 추격 위험). BB 하단 따라 걷기 패턴 확인 (약세장).',
+    strategyEn: 'Consider profit taking on shorts. Avoid new sells (chasing low risk). Check lower band walking (bear market).'
   }
 ];
 

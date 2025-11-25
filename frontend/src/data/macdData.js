@@ -14,7 +14,9 @@ export const macdLevels = [
     nameEn: 'Extreme Bullish',
     color: '#00FF00',
     description: '극단적 상승 모멘텀. 과열 경계.',
-    strategy: '단기 익절 고려. 추세 과열 경계. RSI 70+ 동반 시 조정 임박.'
+    descriptionEn: 'Extreme bullish momentum. Overheating warning.',
+    strategy: '단기 익절 고려. 추세 과열 경계. RSI 70+ 동반 시 조정 임박.',
+    strategyEn: 'Consider short-term profit taking. Watch for overheating. Correction imminent if RSI 70+.'
   },
   {
     level: 6,
@@ -23,7 +25,9 @@ export const macdLevels = [
     nameEn: 'Very Bullish',
     color: '#00CC00',
     description: '강력한 상승 추세. 매수세 우위.',
-    strategy: '추세 추종 매수. 손절가 상향 조정. 분할 익절 전략.'
+    descriptionEn: 'Strong uptrend. Buyers dominant.',
+    strategy: '추세 추종 매수. 손절가 상향 조정. 분할 익절 전략.',
+    strategyEn: 'Trend-following long. Raise stop loss. DCA profit taking.'
   },
   {
     level: 5,
@@ -32,7 +36,9 @@ export const macdLevels = [
     nameEn: 'Bullish',
     color: '#66FF66',
     description: '상승 추세 지속. 매수 신호.',
-    strategy: '신규 매수 진입. 골든크로스 후 추가 확인. 추세 지속 관찰.'
+    descriptionEn: 'Uptrend continues. Buy signal.',
+    strategy: '신규 매수 진입. 골든크로스 후 추가 확인. 추세 지속 관찰.',
+    strategyEn: 'New long entry. Confirm after golden cross. Monitor trend.'
   },
   {
     level: 4,
@@ -41,7 +47,9 @@ export const macdLevels = [
     nameEn: 'Neutral',
     color: '#808080',
     description: '모멘텀 없음. 방향성 불명.',
-    strategy: '관망 (신규 진입 보류). 브레이크아웃 대기. 다른 지표 보조 필요.'
+    descriptionEn: 'No momentum. Direction unclear.',
+    strategy: '관망 (신규 진입 보류). 브레이크아웃 대기. 다른 지표 보조 필요.',
+    strategyEn: 'Wait (hold new entries). Wait for breakout. Need other indicators.'
   },
   {
     level: 3,
@@ -50,7 +58,9 @@ export const macdLevels = [
     nameEn: 'Bearish',
     color: '#FF6666',
     description: '하락 추세 지속. 매도 신호.',
-    strategy: '신규 매도 진입. 데드크로스 후 추가 확인. 추세 지속 관찰.'
+    descriptionEn: 'Downtrend continues. Sell signal.',
+    strategy: '신규 매도 진입. 데드크로스 후 추가 확인. 추세 지속 관찰.',
+    strategyEn: 'New short entry. Confirm after death cross. Monitor trend.'
   },
   {
     level: 2,
@@ -59,7 +69,9 @@ export const macdLevels = [
     nameEn: 'Very Bearish',
     color: '#CC0000',
     description: '강력한 하락 추세. 매도세 우위.',
-    strategy: '추세 추종 매도. 손절가 하향 조정. 분할 손절 전략.'
+    descriptionEn: 'Strong downtrend. Sellers dominant.',
+    strategy: '추세 추종 매도. 손절가 하향 조정. 분할 손절 전략.',
+    strategyEn: 'Trend-following short. Lower stop loss. DCA stop loss.'
   },
   {
     level: 1,
@@ -68,7 +80,9 @@ export const macdLevels = [
     nameEn: 'Extreme Bearish',
     color: '#FF0000',
     description: '극단적 하락 모멘텀. 과매도 경계.',
-    strategy: '전량 손절 고려. 추세 과매도 경계. RSI 30- 동반 시 반등 임박.'
+    descriptionEn: 'Extreme bearish momentum. Oversold warning.',
+    strategy: '전량 손절 고려. 추세 과매도 경계. RSI 30- 동반 시 반등 임박.',
+    strategyEn: 'Consider full stop loss. Watch for oversold. Bounce imminent if RSI 30-.'
   }
 ];
 

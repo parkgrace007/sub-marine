@@ -224,9 +224,13 @@ function DeepDiveReport({ className = '' }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Briefing Sections */}
+            {/* Briefing Sections - Use English content if available and language is English */}
             <div className="space-y-3">
-              {parseBriefingContent(briefing.content).map((section, index) => (
+              {parseBriefingContent(
+                (i18n.language === 'en' || i18n.language.startsWith('en-')) && briefing.content_en
+                  ? briefing.content_en
+                  : briefing.content
+              ).map((section, index) => (
                 <div key={index} className="space-y-1">
                   <div className="text-sm font-bold text-surface-700 flex items-center gap-2">
                     {section.title}

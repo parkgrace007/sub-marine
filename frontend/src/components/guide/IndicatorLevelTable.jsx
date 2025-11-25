@@ -1,6 +1,10 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 function IndicatorLevelTable({ levels, title, type = 'default' }) {
+  const { t, i18n } = useTranslation()
+  const isEnglish = i18n.language === 'en' || i18n.language.startsWith('en-')
+
   return (
     <div className="card p-6">
       <h3 className="text-xl font-bold text-surface-600 mb-4">{title}</h3>
@@ -9,10 +13,10 @@ function IndicatorLevelTable({ levels, title, type = 'default' }) {
           <thead>
             <tr className="border-b-2 border-surface-300 bg-surface-200">
               <th className="text-left p-3 font-semibold text-surface-600">Level</th>
-              <th className="text-left p-3 font-semibold text-surface-600">범위</th>
-              <th className="text-left p-3 font-semibold text-surface-600">이름</th>
-              <th className="text-left p-3 font-semibold text-surface-600">설명</th>
-              <th className="text-left p-3 font-semibold text-surface-600">전략</th>
+              <th className="text-left p-3 font-semibold text-surface-600">{isEnglish ? 'Range' : '범위'}</th>
+              <th className="text-left p-3 font-semibold text-surface-600">{isEnglish ? 'Name' : '이름'}</th>
+              <th className="text-left p-3 font-semibold text-surface-600">{isEnglish ? 'Description' : '설명'}</th>
+              <th className="text-left p-3 font-semibold text-surface-600">{isEnglish ? 'Strategy' : '전략'}</th>
             </tr>
           </thead>
           <tbody>
@@ -37,9 +41,15 @@ function IndicatorLevelTable({ levels, title, type = 'default' }) {
                     {level.range}
                   </code>
                 </td>
-                <td className="p-3 font-semibold text-surface-600">{level.name}</td>
-                <td className="p-3 text-sm text-surface-500">{level.description}</td>
-                <td className="p-3 text-sm text-surface-600">{level.strategy}</td>
+                <td className="p-3 font-semibold text-surface-600">
+                  {isEnglish && level.nameEn ? level.nameEn : level.name}
+                </td>
+                <td className="p-3 text-sm text-surface-500">
+                  {isEnglish && level.descriptionEn ? level.descriptionEn : level.description}
+                </td>
+                <td className="p-3 text-sm text-surface-600">
+                  {isEnglish && level.strategyEn ? level.strategyEn : level.strategy}
+                </td>
               </tr>
             ))}
           </tbody>

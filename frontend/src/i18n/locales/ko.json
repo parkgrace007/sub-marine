@@ -136,6 +136,52 @@
     "extremeGreed": "극단적 탐욕"
   },
 
+  "indicators": {
+    "rsi": {
+      "extremeOversold": "극 과매도",
+      "oversold": "과매도",
+      "strongSell": "강한 매도세",
+      "sell": "매도세",
+      "neutralLow": "중립 하단",
+      "neutralHigh": "중립 상단",
+      "buy": "매수세",
+      "strongBuy": "강한 매수세",
+      "overbought": "과매수",
+      "extremeOverbought": "극 과매수"
+    },
+    "macd": {
+      "extremeBuy": "극 매수세",
+      "strongBuy": "강한 매수세",
+      "buy": "매수세",
+      "neutral": "중립",
+      "sell": "매도세",
+      "strongSell": "강한 매도세",
+      "extremeSell": "극 매도세"
+    },
+    "bb": {
+      "maxExpansion": "최대 확장",
+      "strongExpansion": "강한 확장",
+      "weakExpansion": "약한 확장",
+      "normal": "정상",
+      "weakContraction": "약한 수축",
+      "strongContraction": "강한 수축",
+      "maxContraction": "최대 수축"
+    },
+    "volume": {
+      "explosive": "폭발",
+      "active": "활성",
+      "normal": "정상",
+      "silent": "침묵"
+    },
+    "fearGreed": {
+      "extremeGreed": "극도의 탐욕",
+      "greed": "탐욕",
+      "neutral": "중립",
+      "fear": "공포",
+      "extremeFear": "극도의 공포"
+    }
+  },
+
   "errors": {
     "connectionFailed": "연결 실패",
     "dataLoadFailed": "데이터 로드 실패",

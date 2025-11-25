@@ -160,12 +160,41 @@ class BriefingService {
 
   /**
    * 2️⃣ Analyze market data with Claude AI
+   * @param {Object} marketData - Market data from external sources
+   * @param {string} language - 'ko' for Korean, 'en' for English
    */
-  async analyzeWithClaude(marketData) {
+  async analyzeWithClaude(marketData, language = 'ko') {
     try {
-      console.log('🤖 [Briefing] Requesting AI analysis from Claude...')
+      console.log(`🤖 [Briefing] Requesting AI analysis from Claude (${language})...`)
 
-      const userPrompt = `
+      const userPrompt = language === 'en' ? this.getEnglishPrompt(marketData) : this.getKoreanPrompt(marketData)
+
+      const message = await anthropic.messages.create({
+        model: 'claude-3-5-haiku-20241022', // Haiku 3.5 - Most cost-effective model
+        max_tokens: 1536, // Increased for longer, more detailed analysis
+        temperature: 0.7,
+        messages: [{
+          role: 'user',
+          content: userPrompt
+        }]
+      })
+
+      const analysis = message.content[0].text
+      console.log(`✅ [Briefing] AI analysis completed (${language})`)
+      console.log(`   Tokens used: ${message.usage.input_tokens} input, ${message.usage.output_tokens} output`)
+
+      return analysis
+    } catch (error) {
+      console.error('❌ [Briefing] Claude API error:', error.message)
+      throw error
+    }
+  }
+
+  /**
+   * Get Korean prompt for Claude
+   */
+  getKoreanPrompt(marketData) {
+    return `
 You are a senior cryptocurrency market analyst at a leading institutional research firm. Provide an in-depth market briefing in Korean that synthesizes technical data with broader market context.
 
 [Market Data - ${new Date().toISOString()}]
@@ -242,37 +271,104 @@ Requirements:
 - Focus exclusively on top-tier assets (BTC, ETH, major Layer 1s) - completely avoid meme coins
 - Output ONLY the Korean briefing sections - no English introductions or headers
 `
+  }
 
-      const message = await anthropic.messages.create({
-        model: 'claude-3-5-haiku-20241022', // Haiku 3.5 - Most cost-effective model
-        max_tokens: 1536, // Increased for longer, more detailed analysis
-        temperature: 0.7,
-        messages: [{
-          role: 'user',
-          content: userPrompt
-        }]
-      })
+  /**
+   * Get English prompt for Claude
+   */
+  getEnglishPrompt(marketData) {
+    return `
+You are a senior cryptocurrency market analyst at a leading institutional research firm. Provide an in-depth market briefing in English that synthesizes technical data with broader market context.
 
-      const analysis = message.content[0].text
-      console.log('✅ [Briefing] AI analysis completed')
-      console.log(`   Tokens used: ${message.usage.input_tokens} input, ${message.usage.output_tokens} output`)
+[Market Data - ${new Date().toISOString()}]
 
-      return analysis
-    } catch (error) {
-      console.error('❌ [Briefing] Claude API error:', error.message)
-      throw error
-    }
+1. Bitcoin (BTC):
+   - Price: $${marketData.btc.price}
+   - 24h Change: ${marketData.btc.change24h}%
+   - 24h Volume: $${marketData.btc.volume24h}B
+
+2. Market Sentiment:
+   - Fear & Greed Index: ${marketData.sentiment.value}/100 (${marketData.sentiment.classification})
+
+3. Top 10 Cryptocurrencies Performance (24h):
+${marketData.topCoins.map((coin, i) => `   ${i + 1}. ${coin.name} (${coin.symbol}): $${coin.price} (${coin.change_24h >= 0 ? '+' : ''}${coin.change_24h}%)`).join('\n')}
+
+---
+
+Analysis Framework:
+
+1. **Market Structure Analysis**:
+   - Evaluate BTC dominance and altcoin correlation patterns
+   - Identify volume characteristics and liquidity conditions
+   - Assess sentiment divergence from price action and its implications
+
+2. **External Factors & Catalysts**:
+   - Infer likely macro catalysts based on market behavior (e.g., if fear index is extreme while prices stable → possible rate decision anticipation, regulatory news, or institutional flows)
+   - Consider typical market drivers: Fed policy expectations, global risk sentiment, regulatory developments, institutional adoption news
+   - Connect price movements to probable external narratives (be specific but acknowledge inference)
+
+3. **Sector Dynamics**:
+   - Analyze top 10 coins for sector rotation signals
+   - Identify capital concentration patterns (BTC vs ETH vs Layer 1s vs stablecoins)
+   - Evaluate strength/weakness of major protocols and what it reveals about investor positioning
+
+4. **Technical & Risk Context**:
+   - Reference key support/resistance levels where relevant
+   - Assess volatility and risk-reward dynamics
+   - Identify potential inflection points
+
+Output Format (English):
+
+📉 Market Overview:
+(4-5 sentences providing comprehensive market overview)
+- Open with BTC price level and 24h movement context
+- Discuss volume characteristics and what it signals about market participation
+- Analyze sentiment index positioning and any divergence from price action
+- Connect market behavior to probable macro catalysts or external factors (e.g., "Fed policy shift expectations" or "regulatory uncertainty" or "institutional inflow signals")
+- Conclude with overall market phase assessment
+
+🔥 Sector Analysis:
+(5-6 sentences analyzing sector dynamics and capital flows)
+- Begin with ETH performance relative to BTC and its significance
+- Analyze Layer 1 ecosystem (SOL, BNB, ADA, etc.) relative strength
+- Discuss stablecoin behavior as risk appetite indicator
+- Identify which sectors are attracting capital and why
+- Explain sector rotation implications for market cycle position
+- Connect patterns to institutional vs retail positioning
+
+🔭 Key Watch Points:
+(4-5 sentences outlining key monitoring priorities)
+- Specify critical price levels for BTC and ETH with reasoning
+- Identify key external events or data releases to monitor (even if inferred from current market setup)
+- Highlight sentiment extremes or technical setups that could trigger moves
+- Provide specific actionable guidance on what signals to track over next 4 hours
+- End with balanced risk assessment
+
+Requirements:
+- Write ~400-450 characters per section
+- Use sophisticated, institutional-grade English language
+- Naturally incorporate probable external catalysts without stating them as fact (use phrases like "likely driven by", "appears to suggest", "possibly indicating")
+- Provide nuanced analysis connecting multiple data points
+- Be specific with price levels, percentages, and technical references
+- Maintain analytical objectivity while being insightful
+- Focus exclusively on top-tier assets (BTC, ETH, major Layer 1s) - completely avoid meme coins
+- Output ONLY the English briefing sections - no introductions or meta commentary
+`
   }
 
   /**
    * 3️⃣ Save briefing to Supabase
+   * @param {string} analysisKo - Korean analysis
+   * @param {string} analysisEn - English analysis
+   * @param {Object} marketData - Market data
    */
-  async saveBriefing(analysis, marketData) {
+  async saveBriefing(analysisKo, analysisEn, marketData) {
     try {
       const { data, error } = await supabase
         .from('market_briefings')
         .insert({
-          content: analysis,
+          content: analysisKo,
+          content_en: analysisEn,
           metadata: {
             btc_price: marketData.btc.price,
             price_change_24h: marketData.btc.change24h,
@@ -288,7 +384,7 @@ Requirements:
 
       if (error) throw error
 
-      console.log('✅ [Briefing] Saved to database')
+      console.log('✅ [Briefing] Saved to database (KO + EN)')
       return data[0]
     } catch (error) {
       console.error('❌ [Briefing] Failed to save:', error.message)
@@ -298,6 +394,7 @@ Requirements:
 
   /**
    * 🚀 Main execution flow
+   * Generates briefings in both Korean and English
    */
   async generateBriefing() {
     console.log('\n🌊 [Submarine Market Briefing] Starting...')
@@ -307,15 +404,21 @@ Requirements:
       // Step 1: Fetch external data
       const marketData = await this.fetchExternalData()
 
-      // Step 2: Analyze with AI
-      const analysis = await this.analyzeWithClaude(marketData)
+      // Step 2: Analyze with AI (both languages in parallel for efficiency)
+      console.log('🤖 [Briefing] Generating bilingual analysis...')
+      const [analysisKo, analysisEn] = await Promise.all([
+        this.analyzeWithClaude(marketData, 'ko'),
+        this.analyzeWithClaude(marketData, 'en')
+      ])
 
       // Step 3: Save to DB
-      const savedBriefing = await this.saveBriefing(analysis, marketData)
+      const savedBriefing = await this.saveBriefing(analysisKo, analysisEn, marketData)
 
       console.log('✅ [Submarine Market Briefing] Completed successfully\n')
-      console.log('📄 Preview:')
-      console.log(analysis)
+      console.log('📄 Preview (Korean):')
+      console.log(analysisKo.substring(0, 200) + '...')
+      console.log('📄 Preview (English):')
+      console.log(analysisEn.substring(0, 200) + '...')
       console.log('')
 
       return savedBriefing

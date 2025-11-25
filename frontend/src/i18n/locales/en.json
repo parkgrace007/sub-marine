@@ -136,6 +136,52 @@
     "extremeGreed": "Extreme Greed"
   },
 
+  "indicators": {
+    "rsi": {
+      "extremeOversold": "Extreme Oversold",
+      "oversold": "Oversold",
+      "strongSell": "Strong Bearish",
+      "sell": "Bearish",
+      "neutralLow": "Neutral Low",
+      "neutralHigh": "Neutral High",
+      "buy": "Bullish",
+      "strongBuy": "Strong Bullish",
+      "overbought": "Overbought",
+      "extremeOverbought": "Extreme Overbought"
+    },
+    "macd": {
+      "extremeBuy": "Extreme Bullish",
+      "strongBuy": "Strong Bullish",
+      "buy": "Bullish",
+      "neutral": "Neutral",
+      "sell": "Bearish",
+      "strongSell": "Strong Bearish",
+      "extremeSell": "Extreme Bearish"
+    },
+    "bb": {
+      "maxExpansion": "Max Expansion",
+      "strongExpansion": "Strong Expansion",
+      "weakExpansion": "Weak Expansion",
+      "normal": "Normal",
+      "weakContraction": "Weak Squeeze",
+      "strongContraction": "Strong Squeeze",
+      "maxContraction": "Max Squeeze"
+    },
+    "volume": {
+      "explosive": "Explosive",
+      "active": "Active",
+      "normal": "Normal",
+      "silent": "Silent"
+    },
+    "fearGreed": {
+      "extremeGreed": "Extreme Greed",
+      "greed": "Greed",
+      "neutral": "Neutral",
+      "fear": "Fear",
+      "extremeFear": "Extreme Fear"
+    }
+  },
+
   "errors": {
     "connectionFailed": "Connection failed",
     "dataLoadFailed": "Failed to load data",

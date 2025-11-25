@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import ImportantAlertCard from './ImportantAlertCard'
 import IndicatorCardsGrid from './IndicatorCardsGrid'
 import AlertLogTerminal from './AlertLogTerminal'
@@ -33,6 +34,8 @@ function AlertDualPanel({
   symbol = '통합',
   className = ''
 }) {
+  const { t } = useTranslation()
+
   return (
     <div className={`grid grid-cols-1 lg:grid-cols-2 gap-2 ${className}`}>
       {/* 1. IndicatorCardsGrid - 모바일: 1순위, 데스크톱: 오른쪽 상단 */}
@@ -49,9 +52,9 @@ function AlertDualPanel({
       <div className="order-3 lg:col-start-1 lg:row-start-2">
         <AlertLogTerminal
           alerts={alerts}
-          title="중요알림 LOG"
+          title={t('alerts.title')}
           className="h-[400px]"
-          emptyState="No active alerts"
+          emptyState={t('alerts.noAlerts')}
         />
       </div>
 
