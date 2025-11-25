@@ -18,25 +18,39 @@ export default function VisitorWidget() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lastUpdate, setLastUpdate] = useState(null)
+  const [retryCount, setRetryCount] = useState(0)
 
-  const fetchVisitorData = useCallback(async () => {
+  // Fetch with timeout (Render cold start can take 30+ seconds)
+  const fetchWithTimeout = async (url, options, timeout = 30000) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      return response
+    } catch (err) {
+      clearTimeout(timeoutId)
+      throw err
+    }
+  }
+
+  const fetchVisitorData = useCallback(async (isRetry = false) => {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
       const token = session.access_token
+      const headers = { Authorization: `Bearer ${token}` }
 
-      // Fetch all visitor data in parallel
+      // Fetch all visitor data in parallel with timeout
       const [realtimeRes, statsRes, recentRes] = await Promise.all([
-        fetch(`${API_URL}/api/visitors/admin/realtime`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/visitors/admin/stats?days=7`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/api/visitors/admin/recent?limit=10`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        fetchWithTimeout(`${API_URL}/api/visitors/admin/realtime`, { headers }),
+        fetchWithTimeout(`${API_URL}/api/visitors/admin/stats?days=7`, { headers }),
+        fetchWithTimeout(`${API_URL}/api/visitors/admin/recent?limit=10`, { headers })
       ])
 
       if (!realtimeRes.ok || !statsRes.ok || !recentRes.ok) {
@@ -55,12 +69,21 @@ export default function VisitorWidget() {
       setLastUpdate(new Date())
       setLoading(false)
       setError(null)
+      setRetryCount(0)
     } catch (err) {
       console.error('Visitor data fetch error:', err)
+
+      // Auto retry up to 3 times with increasing delay
+      if (!isRetry && retryCount < 3) {
+        setRetryCount(prev => prev + 1)
+        setTimeout(() => fetchVisitorData(true), 3000 * (retryCount + 1))
+        return
+      }
+
       setError(err.message)
       setLoading(false)
     }
-  }, [])
+  }, [retryCount])
 
   useEffect(() => {
     fetchVisitorData()
@@ -107,7 +130,12 @@ export default function VisitorWidget() {
       <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
         <div className="text-surface-400 text-center py-8">
           <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
-          방문자 데이터 로딩 중...
+          <p>방문자 데이터 로딩 중...</p>
+          {retryCount > 0 && (
+            <p className="text-xs text-yellow-500 mt-2">
+              서버 응답 대기 중... (재시도 {retryCount}/3)
+            </p>
+          )}
         </div>
       </div>
     )
@@ -116,12 +144,14 @@ export default function VisitorWidget() {
   if (error) {
     return (
       <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
-        <div className="text-red-400 text-center py-8">
-          <p className="mb-2">방문자 데이터 로드 실패</p>
-          <p className="text-xs text-surface-400">{error}</p>
+        <div className="text-center py-8">
+          <p className="text-yellow-400 mb-2">방문자 데이터 일시적 연결 실패</p>
+          <p className="text-xs text-surface-400 mb-4">
+            서버가 절전 모드에서 깨어나는 중일 수 있습니다 (최대 30초)
+          </p>
           <button
-            onClick={fetchVisitorData}
-            className="mt-4 text-primary hover:underline text-sm"
+            onClick={() => { setRetryCount(0); setLoading(true); fetchVisitorData(); }}
+            className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded text-sm transition-colors"
           >
             다시 시도
           </button>
