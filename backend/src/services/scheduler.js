@@ -78,6 +78,12 @@ class SchedulerService {
       console.log('📰 Checking news freshness on startup...\n')
       await this.checkAndRefreshNews()
     }, 10000) // Wait 10 seconds for services to initialize
+
+    // Check and refresh briefing if stale (Render Free tier fix - 2025-11-25)
+    setTimeout(async () => {
+      console.log('📊 Checking briefing freshness on startup...\n')
+      await this.checkAndRefreshBriefing()
+    }, 15000) // Wait 15 seconds for services to initialize
   }
 
   /**
@@ -208,6 +214,45 @@ class SchedulerService {
       }
     } catch (err) {
       console.error('   ❌ Error checking news freshness:', err.message)
+    }
+  }
+
+  /**
+   * Check Briefing Freshness and Refresh if Stale
+   * Render Free tier fix: Check on server startup to handle cold starts
+   * If briefing is older than 4 hours, immediately refresh
+   */
+  async checkAndRefreshBriefing() {
+    try {
+      // Check last update time from Supabase
+      const { data, error } = await supabase
+        .from('market_briefings')
+        .select('created_at')
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (error) {
+        console.error('   ❌ Error checking briefing freshness:', error.message)
+        return
+      }
+
+      if (!data || data.length === 0) {
+        console.log('   📊 No briefing found in database, generating initial briefing...')
+        await this.runMarketBriefing()
+        return
+      }
+
+      const lastUpdate = new Date(data[0].created_at)
+      const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60)
+
+      if (hoursSinceUpdate >= 4) {
+        console.log(`   📊 Briefing is ${hoursSinceUpdate.toFixed(1)} hours old (>4h), refreshing now...`)
+        await this.runMarketBriefing()
+      } else {
+        console.log(`   ✅ Briefing is fresh (${hoursSinceUpdate.toFixed(1)} hours old), skipping refresh`)
+      }
+    } catch (err) {
+      console.error('   ❌ Error checking briefing freshness:', err.message)
     }
   }
 
