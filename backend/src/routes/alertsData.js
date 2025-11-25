@@ -315,7 +315,10 @@ router.get('/indicators/stream', (req, res) => {
   req.on('close', () => {
     console.log(`🔴 [SSE/Indicators] Client disconnected`)
     clearInterval(heartbeat)
-    supabase.removeChannel(channel)
+    if (channel) {
+      channel.unsubscribe()
+      supabase.removeChannel(channel)
+    }
   })
 })
 
@@ -376,7 +379,10 @@ router.get('/stream', (req, res) => {
   req.on('close', () => {
     console.log(`🔴 [SSE/Alerts] Client disconnected`)
     clearInterval(heartbeat)
-    supabase.removeChannel(channel)
+    if (channel) {
+      channel.unsubscribe()
+      supabase.removeChannel(channel)
+    }
   })
 })
 

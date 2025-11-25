@@ -157,9 +157,9 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
       })
     }, 5 * 60 * 1000)
 
-    // Cleanup
+    // Cleanup - only close connections, keep data to prevent flickering
     return () => {
-      console.log('🧹 [useWhaleData] Cleaning up...')
+      console.log('🧹 [useWhaleData] Cleaning up SSE connection...')
 
       if (eventSource) {
         eventSource.close()
@@ -174,7 +174,8 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         clearTimeout(reconnectTimeout)
       }
 
-      setAllWhales([])
+      // Don't clear allWhales here - causes data to disappear on filter change
+      // Data will be replaced by fresh fetch when new effect runs
     }
   }, [timeframe, symbol, refetchTrigger])
 

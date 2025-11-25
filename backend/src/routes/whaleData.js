@@ -219,7 +219,10 @@ router.get('/stream', (req, res) => {
   req.on('close', () => {
     console.log(`🔴 [SSE] Client disconnected`)
     clearInterval(heartbeat)
-    supabase.removeChannel(channel)
+    if (channel) {
+      channel.unsubscribe()
+      supabase.removeChannel(channel)
+    }
   })
 })
 

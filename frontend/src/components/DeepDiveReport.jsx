@@ -17,6 +17,8 @@ function DeepDiveReport({ className = '' }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const eventSourceRef = useRef(null)
+  const isMountedRef = useRef(true)
+  const reconnectTimeoutRef = useRef(null)
 
   // Fetch latest briefing from Backend API
   const fetchLatestBriefing = async () => {
@@ -36,20 +38,30 @@ function DeepDiveReport({ className = '' }) {
         throw new Error(json.error || 'Failed to fetch briefing')
       }
 
-      // json.data can be null if no briefings exist yet
-      setBriefing(json.data)
-      setError(null)
-      console.log(`✅ [DeepDiveReport] Loaded briefing in ${json.queryTime}ms`)
+      // Only update state if still mounted
+      if (isMountedRef.current) {
+        // json.data can be null if no briefings exist yet
+        setBriefing(json.data)
+        setError(null)
+        console.log(`✅ [DeepDiveReport] Loaded briefing in ${json.queryTime}ms`)
+      }
     } catch (err) {
       console.error('❌ [DeepDiveReport] Error fetching briefing:', err)
-      setError(err.message)
+      if (isMountedRef.current) {
+        setError(err.message)
+      }
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
     }
   }
 
   // Connect to SSE for real-time updates
   const connectSSE = () => {
+    // Don't connect if unmounted
+    if (!isMountedRef.current) return
+
     console.log('🔴 [SSE/DeepDiveReport] Connecting to briefing stream...')
 
     const eventSource = new EventSource(`${API_URL}/api/briefings/stream`)
@@ -63,7 +75,9 @@ function DeepDiveReport({ className = '' }) {
       try {
         const newBriefing = JSON.parse(event.data)
         console.log('📰 [SSE/DeepDiveReport] New briefing received')
-        setBriefing(newBriefing)
+        if (isMountedRef.current) {
+          setBriefing(newBriefing)
+        }
       } catch (e) {
         console.error('❌ [SSE/DeepDiveReport] Parse error:', e)
       }
@@ -82,22 +96,38 @@ function DeepDiveReport({ className = '' }) {
         eventSourceRef.current = null
       }
 
-      // Reconnect after 5 seconds
-      console.log('🔄 [SSE/DeepDiveReport] Reconnecting in 5s...')
-      setTimeout(connectSSE, 5000)
+      // Only reconnect if still mounted
+      if (isMountedRef.current) {
+        console.log('🔄 [SSE/DeepDiveReport] Reconnecting in 5s...')
+        reconnectTimeoutRef.current = setTimeout(connectSSE, 5000)
+      }
     }
   }
 
   // Set up on mount
   useEffect(() => {
-    // Initial fetch
-    fetchLatestBriefing()
+    isMountedRef.current = true
 
-    // Set up SSE connection for real-time updates
-    connectSSE()
+    // Initial fetch, then connect SSE after fetch completes
+    const initializeData = async () => {
+      await fetchLatestBriefing()
+      // Only connect SSE after initial fetch completes to avoid race condition
+      if (isMountedRef.current) {
+        connectSSE()
+      }
+    }
+
+    initializeData()
 
     // Cleanup on unmount
     return () => {
+      isMountedRef.current = false
+
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+        reconnectTimeoutRef.current = null
+      }
+
       if (eventSourceRef.current) {
         eventSourceRef.current.close()
         eventSourceRef.current = null
