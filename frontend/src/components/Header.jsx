@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import NicknameModal from './NicknameModal'
+import LanguageToggle from './LanguageToggle'
 
 function Header() {
+  const { t } = useTranslation()
   const location = useLocation()
   const { user, profile, signInWithGoogle, signOut } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -11,12 +14,12 @@ function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   const navLinks = [
-    { path: '/', label: '대시보드' },
-    { path: '/whale-alerts', label: '고래알림' },
-    { path: '/trading', label: '트레이딩' },
-    { path: '/news', label: '뉴스/리포트' },
-    { path: '/events', label: '이벤트/혜택' },
-    { path: '/guide', label: '가이드' }
+    { path: '/', label: t('nav.home') },
+    { path: '/whale-alerts', label: t('nav.whaleAlerts') },
+    { path: '/trading', label: t('nav.trading') },
+    { path: '/news', label: t('nav.news') },
+    { path: '/events', label: t('nav.events') },
+    { path: '/guide', label: t('nav.guide') }
   ]
 
 
@@ -62,7 +65,10 @@ function Header() {
           </div>
 
           {/* Right: User & Actions - Desktop only */}
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-end gap-2">
+            {/* Language Toggle */}
+            <LanguageToggle className="hidden md:flex" />
+
             {user ? (
               /* Logged In - User Menu */
               <div className="hidden md:block relative">
@@ -91,7 +97,7 @@ function Header() {
                       }}
                       className="w-full px-4 py-2 text-left text-sm text-surface-600 hover:bg-surface-200 transition-colors"
                     >
-                      닉네임 변경
+                      {t('header.profile')}
                     </button>
                     <button
                       onClick={async () => {
@@ -100,7 +106,7 @@ function Header() {
                       }}
                       className="w-full px-4 py-2 text-left text-sm text-surface-600 hover:bg-surface-200 transition-colors border-t border-surface-300"
                     >
-                      로그아웃
+                      {t('header.logout')}
                     </button>
                   </div>
                 )}
@@ -134,7 +140,7 @@ function Header() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                <span>로그인</span>
+                <span>{t('header.login')}</span>
               </button>
             )}
 
@@ -142,7 +148,7 @@ function Header() {
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="md:hidden flex flex-col gap-1.5 p-2 hover:bg-surface-200 rounded transition-colors"
-              aria-label="메뉴 열기"
+              aria-label={t('common.close')}
             >
               <span className="w-6 h-0.5 bg-surface-600 rounded-full"></span>
               <span className="w-6 h-0.5 bg-surface-600 rounded-full"></span>
@@ -167,11 +173,14 @@ function Header() {
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-surface-300">
-                <h2 className="text-lg font-bold text-surface-600">메뉴</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-bold text-surface-600">{t('nav.home')}</h2>
+                  <LanguageToggle />
+                </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-surface-500 hover:text-surface-600 text-2xl leading-none p-1"
-                  aria-label="메뉴 닫기"
+                  aria-label={t('common.close')}
                 >
                   ×
                 </button>
@@ -221,7 +230,7 @@ function Header() {
                       }}
                       className="w-full px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 hover:bg-surface-300 rounded-md transition-colors"
                     >
-                      닉네임 변경
+                      {t('header.profile')}
                     </button>
                     <button
                       onClick={async () => {
@@ -230,7 +239,7 @@ function Header() {
                       }}
                       className="w-full px-4 py-2 text-sm font-medium text-surface-600 bg-surface-200 hover:bg-surface-300 rounded-md transition-colors"
                     >
-                      로그아웃
+                      {t('header.logout')}
                     </button>
                   </div>
                 ) : (
@@ -265,7 +274,7 @@ function Header() {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                       />
                     </svg>
-                    <span>로그인</span>
+                    <span>{t('header.login')}</span>
                   </button>
                 )}
               </div>

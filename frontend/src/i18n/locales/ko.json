@@ -1,0 +1,152 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "close": "닫기",
+    "save": "저장",
+    "cancel": "취소",
+    "confirm": "확인",
+    "search": "검색",
+    "filter": "필터",
+    "all": "전체",
+    "none": "없음",
+    "yes": "예",
+    "no": "아니오"
+  },
+
+  "nav": {
+    "home": "홈",
+    "whaleAlerts": "고래 알림",
+    "trading": "트레이딩",
+    "events": "이벤트",
+    "news": "뉴스",
+    "guide": "가이드"
+  },
+
+  "header": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "profile": "프로필",
+    "settings": "설정"
+  },
+
+  "main": {
+    "title": "SubMarine",
+    "subtitle": "실시간 고래 추적 시스템",
+    "timeframe": {
+      "5m": "5분",
+      "15m": "15분",
+      "1h": "1시간"
+    },
+    "stats": {
+      "whalesActive": "활성 고래",
+      "totalVolume": "총 거래량",
+      "buyPressure": "매수 압력",
+      "sellPressure": "매도 압력"
+    }
+  },
+
+  "whale": {
+    "buy": "매수",
+    "sell": "매도",
+    "exchange": "거래소간",
+    "internal": "내부",
+    "defi": "DeFi",
+    "amount": "금액",
+    "from": "출발",
+    "to": "도착",
+    "time": "시간",
+    "tier": "등급"
+  },
+
+  "alerts": {
+    "title": "중요 알림 LOG",
+    "noAlerts": "알림이 없습니다",
+    "tierS": "S등급",
+    "tierA": "A등급",
+    "tierB": "B등급",
+    "tierC": "C등급",
+    "newAlert": "새로운 알림",
+    "summary": {
+      "title": "알림 요약",
+      "total": "총 알림",
+      "last24h": "최근 24시간"
+    }
+  },
+
+  "briefing": {
+    "title": "DEEP DIVE REPORT",
+    "loading": "브리핑 로딩 중...",
+    "noData": "브리핑이 없습니다",
+    "nextUpdate": "다음 업데이트",
+    "schedule": "00:00, 04:00, 08:00, 12:00, 16:00, 20:00",
+    "sections": {
+      "marketTrend": "시장 동향",
+      "sectorAnalysis": "섹터 분석",
+      "watchPoints": "관전 포인트"
+    }
+  },
+
+  "trading": {
+    "title": "모의 트레이딩",
+    "balance": "잔고",
+    "position": "포지션",
+    "pnl": "손익",
+    "winRate": "승률",
+    "totalTrades": "총 거래",
+    "openPosition": "포지션 열기",
+    "closePosition": "포지션 청산",
+    "long": "롱",
+    "short": "숏",
+    "leverage": "레버리지",
+    "amount": "금액",
+    "price": "가격",
+    "liquidation": "청산가",
+    "noPosition": "열린 포지션이 없습니다",
+    "history": "거래 내역",
+    "reset": "리셋",
+    "resetConfirm": "잔고를 $10,000로 리셋하시겠습니까?"
+  },
+
+  "market": {
+    "price": "가격",
+    "change24h": "24시간 변화",
+    "volume24h": "24시간 거래량",
+    "high24h": "24시간 최고",
+    "low24h": "24시간 최저",
+    "marketCap": "시가총액",
+    "sentiment": "시장 심리",
+    "fearGreed": "공포/탐욕 지수",
+    "fear": "공포",
+    "greed": "탐욕",
+    "neutral": "중립",
+    "extremeFear": "극단적 공포",
+    "extremeGreed": "극단적 탐욕"
+  },
+
+  "errors": {
+    "connectionFailed": "연결 실패",
+    "dataLoadFailed": "데이터 로드 실패",
+    "unauthorized": "인증이 필요합니다",
+    "notFound": "페이지를 찾을 수 없습니다",
+    "serverError": "서버 오류",
+    "tryAgain": "다시 시도해주세요"
+  },
+
+  "time": {
+    "justNow": "방금 전",
+    "minutesAgo": "{{count}}분 전",
+    "hoursAgo": "{{count}}시간 전",
+    "daysAgo": "{{count}}일 전",
+    "seconds": "초",
+    "minutes": "분",
+    "hours": "시간",
+    "days": "일"
+  },
+
+  "footer": {
+    "copyright": "© 2024 SubMarine. All rights reserved.",
+    "disclaimer": "이 서비스는 투자 조언이 아닙니다."
+  }
+}

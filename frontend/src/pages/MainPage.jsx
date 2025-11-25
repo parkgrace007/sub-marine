@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import MainVisualizationSet from '../components/MainVisualizationSet'
 import AlertDualPanel from '../components/AlertDualPanel'
@@ -24,6 +25,7 @@ const FILTER_DEBOUNCE_MS = 300
  * Now uses Backend API instead of direct Supabase calls
  */
 function MainPage() {
+  const { t } = useTranslation()
   const [timeframe, setTimeframe] = useState('8h')
   const [symbol, setSymbol] = useState('통합') // Default to '통합' (ALL) to show all recent whales
   const [isMuted, setIsMuted] = useState(soundManager.getMuted())
@@ -277,7 +279,7 @@ function MainPage() {
       {/* Whale Loading Overlay */}
       {whalesLoading && (
         <div className="fixed top-20 right-6 z-50 bg-surface-200 border border-surface-300 px-4 py-2 rounded shadow-lg">
-          고래 데이터 로딩 중...
+          {t('common.loading')}
         </div>
       )}
     </div>

@@ -1,0 +1,152 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No"
+  },
+
+  "nav": {
+    "home": "Home",
+    "whaleAlerts": "Whale Alerts",
+    "trading": "Trading",
+    "events": "Events",
+    "news": "News",
+    "guide": "Guide"
+  },
+
+  "header": {
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+
+  "main": {
+    "title": "SubMarine",
+    "subtitle": "Real-time Whale Tracking System",
+    "timeframe": {
+      "5m": "5m",
+      "15m": "15m",
+      "1h": "1h"
+    },
+    "stats": {
+      "whalesActive": "Active Whales",
+      "totalVolume": "Total Volume",
+      "buyPressure": "Buy Pressure",
+      "sellPressure": "Sell Pressure"
+    }
+  },
+
+  "whale": {
+    "buy": "Buy",
+    "sell": "Sell",
+    "exchange": "Exchange",
+    "internal": "Internal",
+    "defi": "DeFi",
+    "amount": "Amount",
+    "from": "From",
+    "to": "To",
+    "time": "Time",
+    "tier": "Tier"
+  },
+
+  "alerts": {
+    "title": "ALERT LOG",
+    "noAlerts": "No alerts",
+    "tierS": "S-Tier",
+    "tierA": "A-Tier",
+    "tierB": "B-Tier",
+    "tierC": "C-Tier",
+    "newAlert": "New Alert",
+    "summary": {
+      "title": "Alert Summary",
+      "total": "Total Alerts",
+      "last24h": "Last 24 Hours"
+    }
+  },
+
+  "briefing": {
+    "title": "DEEP DIVE REPORT",
+    "loading": "Loading briefing...",
+    "noData": "No briefings yet",
+    "nextUpdate": "Next update",
+    "schedule": "00:00, 04:00, 08:00, 12:00, 16:00, 20:00",
+    "sections": {
+      "marketTrend": "Market Trend",
+      "sectorAnalysis": "Sector Analysis",
+      "watchPoints": "Watch Points"
+    }
+  },
+
+  "trading": {
+    "title": "Paper Trading",
+    "balance": "Balance",
+    "position": "Position",
+    "pnl": "PnL",
+    "winRate": "Win Rate",
+    "totalTrades": "Total Trades",
+    "openPosition": "Open Position",
+    "closePosition": "Close Position",
+    "long": "Long",
+    "short": "Short",
+    "leverage": "Leverage",
+    "amount": "Amount",
+    "price": "Price",
+    "liquidation": "Liquidation",
+    "noPosition": "No open positions",
+    "history": "Trade History",
+    "reset": "Reset",
+    "resetConfirm": "Reset balance to $10,000?"
+  },
+
+  "market": {
+    "price": "Price",
+    "change24h": "24h Change",
+    "volume24h": "24h Volume",
+    "high24h": "24h High",
+    "low24h": "24h Low",
+    "marketCap": "Market Cap",
+    "sentiment": "Market Sentiment",
+    "fearGreed": "Fear & Greed Index",
+    "fear": "Fear",
+    "greed": "Greed",
+    "neutral": "Neutral",
+    "extremeFear": "Extreme Fear",
+    "extremeGreed": "Extreme Greed"
+  },
+
+  "errors": {
+    "connectionFailed": "Connection failed",
+    "dataLoadFailed": "Failed to load data",
+    "unauthorized": "Authentication required",
+    "notFound": "Page not found",
+    "serverError": "Server error",
+    "tryAgain": "Please try again"
+  },
+
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "seconds": "sec",
+    "minutes": "min",
+    "hours": "hrs",
+    "days": "days"
+  },
+
+  "footer": {
+    "copyright": "© 2024 SubMarine. All rights reserved.",
+    "disclaimer": "This service is not investment advice."
+  }
+}

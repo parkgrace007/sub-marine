@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FileText } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 // Backend API URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -13,6 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
  * Now uses Backend API instead of direct Supabase calls
  */
 function DeepDiveReport({ className = '' }) {
+  const { t, i18n } = useTranslation()
   const [briefing, setBriefing] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -135,11 +137,12 @@ function DeepDiveReport({ className = '' }) {
     }
   }, [])
 
-  // Format timestamp
+  // Format timestamp based on current language
   const formatTime = (timestamp) => {
     if (!timestamp) return ''
     const date = new Date(timestamp)
-    return date.toLocaleString('ko-KR', {
+    const locale = i18n.language === 'ko' ? 'ko-KR' : 'en-US'
+    return date.toLocaleString(locale, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -183,7 +186,7 @@ function DeepDiveReport({ className = '' }) {
       <div className="flex items-center justify-between px-4 py-2 bg-surface-200 border-b border-surface-300">
         <div className="flex items-center gap-2">
           <FileText size={14} className="text-surface-500" />
-          <span className="text-xs font-bold text-surface-600 tracking-wider">DEEP DIVE REPORT</span>
+          <span className="text-xs font-bold text-surface-600 tracking-wider">{t('briefing.title')}</span>
         </div>
         <div className="flex items-center gap-2">
           {briefing && (
@@ -203,7 +206,7 @@ function DeepDiveReport({ className = '' }) {
           <div className="h-full flex items-center justify-center text-surface-500">
             <div className="flex flex-col items-center gap-2">
               <div className="animate-spin">⚡</div>
-              <span className="text-xs">Loading briefing...</span>
+              <span className="text-xs">{t('briefing.loading')}</span>
             </div>
           </div>
         ) : error ? (
@@ -216,8 +219,8 @@ function DeepDiveReport({ className = '' }) {
         ) : !briefing ? (
           <div className="h-full flex flex-col items-center justify-center text-surface-500 opacity-50 gap-2">
             <span className="text-xl">📊</span>
-            <span className="text-xs">No briefings yet</span>
-            <span className="text-xs text-surface-400">Next: 00:00, 04:00, 08:00, 12:00, 16:00, or 20:00</span>
+            <span className="text-xs">{t('briefing.noData')}</span>
+            <span className="text-xs text-surface-400">{t('briefing.nextUpdate')}: {t('briefing.schedule')}</span>
           </div>
         ) : (
           <div className="space-y-4">

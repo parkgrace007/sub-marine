@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './contexts/AuthContext'
 import { WhaleDataProvider } from './contexts/WhaleDataContext'
 
@@ -22,6 +23,22 @@ const LoadingFallback = () => (
     </div>
   </div>
 )
+
+// 404 Page component with i18n
+const NotFoundPage = () => {
+  const { t } = useTranslation()
+  return (
+    <div className="min-h-screen bg-surface-100 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-surface-400 mb-4">404</h1>
+        <p className="text-surface-500 text-xl mb-8">{t('errors.notFound')}</p>
+        <Link to="/" className="text-primary hover:underline text-lg font-medium">
+          {t('nav.home')}
+        </Link>
+      </div>
+    </div>
+  )
+}
 
 /**
  * App - Root component with routing
@@ -52,17 +69,7 @@ function App() {
             <Route path="/guide" element={<GuidePage />} />
 
             {/* 404 Not Found */}
-            <Route path="*" element={
-              <div className="min-h-screen bg-surface-100 flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-6xl font-bold text-surface-400 mb-4">404</h1>
-                  <p className="text-surface-500 text-xl mb-8">페이지를 찾을 수 없습니다</p>
-                  <Link to="/" className="text-primary hover:underline text-lg font-medium">
-                    홈으로 돌아가기
-                  </Link>
-                </div>
-              </div>
-            } />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </Suspense>
         </BrowserRouter>
