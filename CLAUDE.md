@@ -453,12 +453,17 @@ node backend/scripts/calculateSWSI.js
 - 폴링 방식 절대 금지
 - 구독 방식 유지
 
-### 8. Backend Proxy 필수 (Render Free Tier) - 2025-11-25 추가
+### 8. Backend Proxy 필수 - 2025-11-25 추가
 
 **절대 금지**: Frontend에서 Supabase 직접 호출
 **필수**: 모든 DB 요청은 Backend API를 통해 처리
 
-**이유**: Render Free Tier에서 Frontend ↔ Supabase 직접 연결 시 connection timeout 발생
+**호스팅 플랜 (변경 금지)**:
+- **Supabase**: Pro 플랜
+- **Render Backend**: Starter 플랜 (항상 켜짐, cold start 없음)
+- **Render Frontend**: Static Site
+
+**이유**: Frontend ↔ Supabase 직접 연결 시 connection timeout 발생
 - ANON_KEY로는 connection pooler 우회 불가
 - SERVICE_ROLE key는 Backend에서만 사용 가능
 

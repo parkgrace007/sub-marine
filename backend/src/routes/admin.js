@@ -8,6 +8,7 @@ import { supabase } from '../utils/supabase.js'
 import { verifyToken, requireRole, logAdminAction, auditLog } from '../middleware/adminAuth.js'
 import metricsCollector from '../services/metricsCollector.js'
 import whaleAlertService from '../services/whaleAlert.js'
+import { activeSessions } from './visitors.js'
 
 const router = express.Router()
 
@@ -126,6 +127,7 @@ router.get('/system/api-usage', async (req, res) => {
     const stats = {
       apiCalls: metricsCollector.getApiCallStats(minutes),
       aggregated: metricsCollector.getAggregatedStats(),
+      activeVisitors: activeSessions.size,
       timestamp: Date.now()
     }
 

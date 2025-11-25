@@ -10,7 +10,8 @@ import { verifyToken, requireRole } from '../middleware/adminAuth.js'
 const router = express.Router()
 
 // 메모리 기반 실시간 접속자 (빠른 응답용)
-const activeSessions = new Map()
+// export해서 다른 라우터에서도 접근 가능
+export const activeSessions = new Map()
 
 // 2분 타임아웃 (밀리초)
 const SESSION_TIMEOUT = 2 * 60 * 1000

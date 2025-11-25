@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import AdminLayout from '../../components/admin/AdminLayout'
-import VisitorWidget from '../../components/admin/VisitorWidget'
 
 // API URL from environment variable or fallback to localhost for development
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -163,6 +162,15 @@ export default function DashboardPage() {
               {apiStats?.apiCalls?.avgResponseTime?.toFixed(0)}ms avg
             </div>
           </div>
+
+          {/* Active Visitors - 헤더에도 표시되지만 대시보드에서도 확인 가능 */}
+          <div className="bg-surface-200 border border-surface-300 rounded-lg p-6">
+            <div className="text-surface-400 text-sm mb-1">Active Visitors</div>
+            <div className="text-2xl font-bold text-green-400">
+              {apiStats?.activeVisitors ?? '-'}
+            </div>
+            <div className="text-xs text-green-400 mt-1">● 실시간</div>
+          </div>
         </div>
 
         {/* System Metrics Chart */}
@@ -257,9 +265,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* Visitor Tracking Widget */}
-        <VisitorWidget />
 
         {/* Refresh Button */}
         <div className="text-center">
