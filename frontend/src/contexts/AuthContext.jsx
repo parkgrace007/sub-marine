@@ -194,49 +194,38 @@ export const AuthProvider = ({ children }) => {
     if (error) console.error('Error signing in:', error)
   }
 
-  const signOut = async () => {
-    try {
-      console.log('🚪 Logging out...')
+  const signOut = () => {
+    console.log('🚪 Logging out...')
 
-      // 1. Supabase signOut (scope: global로 모든 탭에서 로그아웃)
-      await supabase.auth.signOut({ scope: 'global' })
+    // 1. TradingStore localStorage 완전 삭제 (동기)
+    console.log('🧹 Clearing trading store...')
+    localStorage.removeItem('trading-storage-v2')
 
-      // 2. TradingStore localStorage 완전 삭제
-      console.log('🧹 Clearing trading store...')
-      localStorage.removeItem('trading-storage-v2')
+    // TradingStore 초기 상태로 리셋
+    useTradingStore.setState({
+      balance: 0,
+      positions: [],
+      orders: [],
+      tradeHistory: []
+    })
 
-      // TradingStore 초기 상태로 리셋
-      useTradingStore.setState({
-        balance: 0, // Reset to 0 for logged-out state
-        positions: [],
-        orders: [],
-        tradeHistory: []
-      })
+    // 2. 수동으로 모든 Supabase 관련 저장소 삭제 (동기)
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('sb-') || key.includes('supabase')) {
+        console.log('🧹 Removing storage key:', key)
+        localStorage.removeItem(key)
+      }
+    })
+    sessionStorage.clear()
 
-      // 3. 수동으로 모든 Supabase 관련 저장소 삭제 (PKCE 세션 정리)
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('sb-') || key.includes('supabase')) {
-          console.log('🧹 Removing storage key:', key)
-          localStorage.removeItem(key)
-        }
-      })
-      sessionStorage.clear()
+    // 3. Supabase signOut - 기다리지 않음 (fire and forget)
+    // Render Free Tier에서 타임아웃 발생하므로 await 하지 않음
+    supabase.auth.signOut({ scope: 'global' }).catch(() => {})
 
-      // 4. React 상태 초기화
-      setUser(null)
-      setProfile(null)
+    console.log('✅ Logout complete, reloading page...')
 
-      console.log('✅ Logout complete, reloading page...')
-
-      // 5. 페이지 완전 리로드 (모든 상태 초기화)
-      window.location.href = '/'
-    } catch (err) {
-      console.error('❌ Logout error:', err)
-      // 에러가 나도 강제로 정리하고 리로드
-      localStorage.clear()
-      sessionStorage.clear()
-      window.location.href = '/'
-    }
+    // 4. 즉시 리다이렉트 (모든 상태 초기화)
+    window.location.href = '/'
   }
 
   // Update nickname via Backend API
