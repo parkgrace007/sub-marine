@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useMarketData } from '../hooks/useMarketData'
 import { useWhaleData } from '../hooks/useWhaleData'
 import { transformToComboData } from '../utils/alertComboTransformer'
@@ -20,6 +21,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
  * Now uses Backend API instead of direct Supabase calls
  */
 function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
+  const { t } = useTranslation()
   // Fetch market data
   const sentiment = useMarketData(timeframe, symbol)
   const { whales, loading: whalesLoading } = useWhaleData(timeframe, ['inflow', 'outflow'])
@@ -215,7 +217,7 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-danger uppercase tracking-wide font-bold">
-              긴급 알림
+              {t('alerts.important.urgentAlert')}
             </span>
             <span className="px-2 py-0.5 text-[10px] bg-tier-s text-primary-text rounded font-bold animate-pulse">
               S-TIER
@@ -223,19 +225,19 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
           </div>
           <div className="flex-1">
             <h3 className="text-base font-bold text-danger mb-1">
-              🚨 대량 고래 급증 감지
+              {t('alerts.important.whaleSurge')}
             </h3>
             <p className="text-xs text-danger/90 mb-2 leading-relaxed">
-              {conditions.time_window} 동안 {conditions.whale_count}건의 대형 거래 ($100M+) 발생
+              {t('alerts.important.whaleSurgeDesc', { count: conditions.whale_count, time: conditions.time_window })}
             </p>
             <div className="text-xs space-y-1">
               <div className="flex justify-between">
-                <span className="text-surface-500">총 거래량:</span>
+                <span className="text-surface-500">{t('alerts.important.totalVolume')}:</span>
                 <span className="font-bold text-danger">{conditions.total_volume_formatted}</span>
               </div>
               {topWhales.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-danger/20">
-                  <div className="text-[10px] text-surface-500 mb-1">상위 거래:</div>
+                  <div className="text-[10px] text-surface-500 mb-1">{t('alerts.important.topTrades')}:</div>
                   {topWhales.slice(0, 2).map((whale, i) => (
                     <div key={i} className="text-[10px] flex items-center justify-between text-danger/80 gap-2">
                       <div className="flex items-center gap-1.5">
@@ -257,7 +259,7 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
       return (
         <div className="flex items-center justify-center h-full">
           <p className="text-sm text-surface-500">
-            현재 중요한 시장 신호가 없습니다.
+            {t('alerts.important.noSignal')}
           </p>
         </div>
       )
@@ -268,7 +270,7 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
       return (
         <div className="flex items-center justify-center h-full">
           <p className="text-sm text-surface-500">
-            현재 중요한 시장 신호가 없습니다.
+            {t('alerts.important.noSignal')}
           </p>
         </div>
       )

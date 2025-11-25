@@ -72,6 +72,14 @@
       "title": "알림 요약",
       "total": "총 알림",
       "last24h": "최근 24시간"
+    },
+    "important": {
+      "urgentAlert": "긴급 알림",
+      "whaleSurge": "🚨 대량 고래 급증 감지",
+      "whaleSurgeDesc": "{{time}} 동안 {{count}}건의 대형 거래 ($100M+) 발생",
+      "totalVolume": "총 거래량",
+      "topTrades": "상위 거래",
+      "noSignal": "현재 중요한 시장 신호가 없습니다."
     }
   },
 

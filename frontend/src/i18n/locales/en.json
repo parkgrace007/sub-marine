@@ -72,6 +72,14 @@
       "title": "Alert Summary",
       "total": "Total Alerts",
       "last24h": "Last 24 Hours"
+    },
+    "important": {
+      "urgentAlert": "URGENT ALERT",
+      "whaleSurge": "🚨 Massive Whale Surge Detected",
+      "whaleSurgeDesc": "{{count}} large trades ($100M+) in {{time}}",
+      "totalVolume": "Total Volume",
+      "topTrades": "Top Trades",
+      "noSignal": "No significant market signals at this time."
     }
   },
 
