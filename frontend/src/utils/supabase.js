@@ -7,9 +7,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Check frontend/.env')
 }
 
-// Create Supabase client with ANON key (for AUTH ONLY)
-// NOTE: Do NOT use supabase client for data queries - use Backend API instead
-// Reason: Render Free Tier has connection issues with direct Supabase calls
+// Create Supabase client with ANON key
+// Used for:
+// - Authentication (supabase.auth.*)
+// - Realtime subscriptions (whale_events, indicator_alerts)
+// Data queries still use Backend API for caching + SERVICE_ROLE access
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -17,7 +19,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionUrl: true,
     flowType: 'implicit' // Use implicit flow for OAuth
   },
-  // Disable realtime since we use Backend SSE instead
+  // Enable Realtime with optimized settings (2025-11-25)
+  // Supabase Pro now active - direct Realtime connection is stable
   realtime: {
     params: {
       eventsPerSecond: 10

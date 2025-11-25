@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { WhaleDataProvider } from './contexts/WhaleDataContext'
 
 // Critical pages - loaded immediately
 import MainPage from './pages/MainPage'
@@ -43,8 +44,9 @@ const LoadingFallback = () => (
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<LoadingFallback />}>
+      <WhaleDataProvider>
+        <BrowserRouter>
+          <Suspense fallback={<LoadingFallback />}>
           {/* Page Routes */}
           <Routes>
             {/* Main App Routes - critical pages loaded immediately */}
@@ -77,8 +79,9 @@ function App() {
               </div>
             } />
           </Routes>
-        </Suspense>
-      </BrowserRouter>
+          </Suspense>
+        </BrowserRouter>
+      </WhaleDataProvider>
     </AuthProvider>
   )
 }
