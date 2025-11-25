@@ -19,7 +19,7 @@ function StatItem({ label, value, prefix = '', color = 'text-surface-600' }) {
 /**
  * TransactionFeed - Live transaction feed at bottom of screen
  */
-function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange }) {
+function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, maxItems = 200 }) {
   const [isPaused, setIsPaused] = useState(false)
   const [filter, setFilter] = useState('all')
   const { whales: transactions, loading, error } = useWhaleData(timeframe, flowTypes)
@@ -159,7 +159,7 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange }) 
           </div>
         )}
 
-        {filteredTransactions.map((tx, index) => (
+        {filteredTransactions.slice(0, maxItems).map((tx, index) => (
           <TransactionRow
             key={tx.id}
             transaction={tx}
