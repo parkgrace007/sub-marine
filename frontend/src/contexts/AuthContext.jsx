@@ -18,31 +18,67 @@ export const AuthProvider = ({ children }) => {
     console.log('🔐 [AuthContext] Initializing...')
     console.log('   URL hash present:', urlHash.length > 0)
     console.log('   API_URL:', API_URL)
-    if (urlHash.includes('access_token')) {
-      console.log('   ✅ OAuth tokens detected in URL hash')
+
+    // Manual OAuth token handling (detectSessionUrl sometimes fails)
+    const handleOAuthCallback = async () => {
+      if (urlHash.includes('access_token')) {
+        console.log('   ✅ OAuth tokens detected in URL hash, processing...')
+
+        try {
+          // Parse tokens from URL hash
+          const params = new URLSearchParams(urlHash.substring(1))
+          const accessToken = params.get('access_token')
+          const refreshToken = params.get('refresh_token')
+
+          if (accessToken && refreshToken) {
+            console.log('   🔄 Setting session from URL tokens...')
+
+            // Set the session manually
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            })
+
+            if (error) {
+              console.error('❌ [AuthContext] setSession error:', error)
+            } else if (data.session) {
+              console.log('✅ [AuthContext] Session set successfully:', {
+                userId: data.session.user?.id?.substring(0, 8)
+              })
+
+              // Clear the URL hash
+              window.history.replaceState(null, '', window.location.pathname)
+
+              setUser(data.session.user)
+              await fetchProfile(data.session.user.id)
+              return // Session handled, don't proceed to getSession
+            }
+          }
+        } catch (err) {
+          console.error('❌ [AuthContext] OAuth callback error:', err)
+        }
+      }
+
+      // Fall back to getSession for existing sessions
+      console.log('🔐 [AuthContext] Checking existing session...')
+      const { data: { session }, error } = await supabase.auth.getSession()
+
+      console.log('🔐 [AuthContext] getSession result:', {
+        hasSession: !!session,
+        userId: session?.user?.id?.substring(0, 8) || 'none',
+        error: error?.message || 'none'
+      })
+
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        await fetchProfile(session.user.id)
+      } else {
+        console.log('🔐 [AuthContext] No session found, user is logged out')
+        setLoading(false)
+      }
     }
 
-    // 현재 세션 확인
-    supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
-        console.log('🔐 [AuthContext] getSession result:', {
-          hasSession: !!session,
-          userId: session?.user?.id?.substring(0, 8) || 'none',
-          error: error?.message || 'none'
-        })
-
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          fetchProfile(session.user.id)
-        } else {
-          console.log('🔐 [AuthContext] No session found, user is logged out')
-          setLoading(false)
-        }
-      })
-      .catch((error) => {
-        console.error('❌ [AuthContext] getSession error:', error)
-        setLoading(false)
-      })
+    handleOAuthCallback()
 
     // Auth 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -63,11 +99,11 @@ export const AuthProvider = ({ children }) => {
       }
     )
 
-    // 안전장치: 5초 후에도 loading이 true면 강제로 false 설정
+    // 안전장치: 10초 후에도 loading이 true면 강제로 false 설정
     const timeout = setTimeout(() => {
       console.warn('⚠️ [AuthContext] Auth loading timeout - forcing loading to false')
       setLoading(false)
-    }, 5000)
+    }, 10000)
 
     return () => {
       subscription.unsubscribe()
