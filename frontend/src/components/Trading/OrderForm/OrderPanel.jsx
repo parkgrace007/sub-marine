@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMarketStore } from '../../../store/marketStore';
 import { useTradingStore } from '../../../store/tradingStore';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -6,6 +7,7 @@ import { clsx } from 'clsx';
 import { DollarSign, TrendingUp, TrendingDown, Lock } from 'lucide-react';
 
 export const OrderPanel = () => {
+    const { t } = useTranslation();
     const price = useMarketStore((state) => state.price);
     const submitOrder = useTradingStore((state) => state.submitOrder);
     const balance = useTradingStore((state) => state.balance);
@@ -21,7 +23,7 @@ export const OrderPanel = () => {
     const handleOrder = (orderSide) => {
         // Check if user is logged in
         if (!user) {
-            alert('로그인 후 이용 가능합니다.\n\n트레이딩 게임은 로그인한 사용자만 이용할 수 있습니다.');
+            alert(t('trading.orderPanel.loginRequiredAlert'));
             return;
         }
 
@@ -77,7 +79,7 @@ export const OrderPanel = () => {
         <div className="h-full flex flex-col bg-surface-200">
             {/* Header */}
             <div className="px-5 py-4 border-b border-surface-300 bg-surface-200">
-                <h3 className="text-sm font-bold text-surface-600 uppercase tracking-wider">Place Order</h3>
+                <h3 className="text-sm font-bold text-surface-600 uppercase tracking-wider">{t('trading.orderPanel.placeOrder')}</h3>
             </div>
 
             {/* Order Type Tabs */}
@@ -102,7 +104,7 @@ export const OrderPanel = () => {
                 {/* Price Input */}
                 <div>
                     <label className="text-xs text-surface-500 font-medium uppercase tracking-wide block mb-2">
-                        Price (USDT)
+                        {t('trading.orderPanel.priceUsdt')}
                     </label>
                     <div className={clsx(
                         "bg-surface-400 border rounded px-4 py-3 flex justify-between transition-all",
@@ -126,8 +128,8 @@ export const OrderPanel = () => {
                 {/* Size Input */}
                 <div>
                     <label className="text-xs text-surface-500 font-medium uppercase tracking-wide block mb-2 flex justify-between">
-                        <span>Size (BTC)</span>
-                        <span className="text-[10px] font-mono text-primary">Max: {maxBuy}</span>
+                        <span>{t('trading.orderPanel.sizeBtc')}</span>
+                        <span className="text-[10px] font-mono text-primary">{t('trading.orderPanel.max')}: {maxBuy}</span>
                     </label>
                     <div className="bg-surface-400 border border-surface-300 rounded px-4 py-3 flex justify-between hover:border-surface-500 focus-within:border-primary transition-all">
                         <input
@@ -165,7 +167,7 @@ export const OrderPanel = () => {
                 {/* Leverage Slider */}
                 <div className="pt-2">
                     <div className="flex justify-between text-xs text-surface-500 mb-3 font-medium">
-                        <span className="uppercase tracking-wide">Leverage</span>
+                        <span className="uppercase tracking-wide">{t('trading.leverage')}</span>
                         <div className="flex items-center space-x-1">
                             <input
                                 type="number"
@@ -205,13 +207,13 @@ export const OrderPanel = () => {
                 {/* Order Info */}
                 <div className="pt-2 space-y-2 text-xs">
                     <div className="flex justify-between py-2 border-t border-surface-300">
-                        <span className="text-surface-500 font-medium">Required Margin</span>
+                        <span className="text-surface-500 font-medium">{t('trading.orderPanel.requiredMargin')}</span>
                         <span className="font-mono text-surface-600 font-semibold">
-                            {cost} USDT <span className="text-surface-500">(가상)</span>
+                            {cost} USDT <span className="text-surface-500">({t('trading.virtual')})</span>
                         </span>
                     </div>
                     <div className="flex justify-between pb-2">
-                        <span className="text-surface-500 font-medium">Max Position</span>
+                        <span className="text-surface-500 font-medium">{t('trading.orderPanel.maxPosition')}</span>
                         <span className="font-mono text-surface-500">{maxBuy} BTC</span>
                     </div>
                 </div>
@@ -222,10 +224,10 @@ export const OrderPanel = () => {
                 {!user && (
                     <div className="bg-surface-300 border border-surface-400 rounded px-3 py-2 mb-3 flex items-center gap-2">
                         <Lock size={14} className="text-surface-500" />
-                        <p className="text-[11px] text-surface-500">로그인 후 거래 가능합니다</p>
+                        <p className="text-[11px] text-surface-500">{t('trading.orderPanel.loginRequired')}</p>
                     </div>
                 )}
-                <p className="text-[10px] text-surface-500 text-center mb-3">※ 실제 거래가 아닙니다</p>
+                <p className="text-[10px] text-surface-500 text-center mb-3">{t('trading.orderPanel.notRealTrading')}</p>
                 <div className="grid grid-cols-2 gap-3">
                     <button
                         onClick={() => handleOrder('LONG')}
@@ -237,7 +239,7 @@ export const OrderPanel = () => {
                                 : "bg-surface-300 text-surface-500 cursor-not-allowed opacity-60"
                         )}
                     >
-                        <span className="text-sm">Buy / Long</span>
+                        <span className="text-sm">{t('trading.orderPanel.buyLong')}</span>
                     </button>
                     <button
                         onClick={() => handleOrder('SHORT')}
@@ -249,7 +251,7 @@ export const OrderPanel = () => {
                                 : "bg-surface-300 text-surface-500 cursor-not-allowed opacity-60"
                         )}
                     >
-                        <span className="text-sm">Sell / Short</span>
+                        <span className="text-sm">{t('trading.orderPanel.sellShort')}</span>
                     </button>
                 </div>
             </div>

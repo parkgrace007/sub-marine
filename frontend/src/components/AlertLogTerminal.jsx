@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Terminal } from 'lucide-react'
 
 /**
@@ -12,10 +13,27 @@ function AlertLogTerminal({
   className = '',
   emptyState = 'No active alerts'
 }) {
+  const { t, i18n } = useTranslation()
   const [typingMessage, setTypingMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const previousAlertsRef = useRef([])
   const typingTimeoutRef = useRef(null)
+
+  // Get translated message based on signal_type
+  const getTranslatedMessage = (alert) => {
+    if (alert.signal_type) {
+      const titleKey = `alerts.types.${alert.signal_type}.title`
+      const descKey = `alerts.types.${alert.signal_type}.desc`
+      const translatedTitle = t(titleKey, { defaultValue: '' })
+      const translatedDesc = t(descKey, { defaultValue: '' })
+
+      // If translation exists, use it; otherwise fallback to original message
+      if (translatedTitle && translatedDesc) {
+        return `[${alert.signal_type}] ${translatedTitle}: ${translatedDesc}`
+      }
+    }
+    return alert.message
+  }
 
   // Format timestamp as HH:MM:SS
   const formatTime = (timestamp) => {
@@ -47,7 +65,9 @@ function AlertLogTerminal({
     const isNewAlert = previousAlerts.length === 0 ||
                        !previousAlerts.find(prev => prev.id === latestAlert.id)
 
-    if (isNewAlert && latestAlert.message && !isTyping) {
+    const translatedMessage = getTranslatedMessage(latestAlert)
+
+    if (isNewAlert && translatedMessage && !isTyping) {
       // Clear any existing typing animation
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current)
@@ -56,7 +76,7 @@ function AlertLogTerminal({
       setIsTyping(true)
       setTypingMessage('')
 
-      const message = latestAlert.message
+      const message = translatedMessage
       let currentIndex = 0
 
       const typeNextChar = () => {
@@ -78,7 +98,7 @@ function AlertLogTerminal({
     if (!isTyping) {
       previousAlertsRef.current = alerts
     }
-  }, [alerts, isTyping])
+  }, [alerts, isTyping, i18n.language])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -115,7 +135,8 @@ function AlertLogTerminal({
           alerts.map((alert, index) => {
             const isLatest = index === 0
             const showTyping = isLatest && isTyping
-            const displayMessage = showTyping ? typingMessage : alert.message
+            const translatedMsg = getTranslatedMessage(alert)
+            const displayMessage = showTyping ? typingMessage : translatedMsg
 
             return (
               <div

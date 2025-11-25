@@ -62,7 +62,9 @@
 
   "alerts": {
     "title": "ALERT LOG",
+    "importantLog": "IMPORTANT ALERTS LOG",
     "noAlerts": "No alerts",
+    "noActiveAlerts": "No active alerts",
     "tierS": "S-Tier",
     "tierA": "A-Tier",
     "tierB": "B-Tier",
@@ -73,14 +75,56 @@
       "total": "Total Alerts",
       "last24h": "Last 24 Hours"
     },
-    "important": {
-      "urgentAlert": "URGENT ALERT",
-      "whaleSurge": "🚨 Massive Whale Surge Detected",
-      "whaleSurgeDesc": "{{count}} large trades ($100M+) in {{time}}",
+    "types": {
+      "S-01": {
+        "title": "ABYSSAL SCOOP",
+        "desc": "Extreme fear (RSI L1) + Large whale accumulation + Volume explosion. Perfect bottom."
+      },
+      "S-02": {
+        "title": "LEVIATHAN DUMP",
+        "desc": "Peak of euphoria (RSI L10) - whales are dumping their holdings."
+      },
+      "S-03": {
+        "title": "WHALE TORPEDO",
+        "desc": "Compressed energy (Squeeze) released upward by whales."
+      },
+      "S-04": {
+        "title": "HULL CRACK",
+        "desc": "Major support breach + Whale dump + Volume-backed decline."
+      },
+      "A-01": {
+        "title": "SMART DIVERGENCE",
+        "desc": "Price falling but whales quietly accumulating. (Time-weighted analysis)"
+      },
+      "A-02": {
+        "title": "EXIT DIVERGENCE",
+        "desc": "Price rising but whales quietly exiting. (Time-weighted analysis)"
+      },
+      "A-03": {
+        "title": "FULL THROTTLE",
+        "desc": "All engines go. Strong uptrend riding the upper band."
+      },
+      "B-01": {
+        "title": "BB Squeeze Zone",
+        "desc": "Bollinger Bands strong contraction (L1-L2) + Volume drop. Volatility compression zone."
+      },
+      "B-02": {
+        "title": "RSI Overbought Zone",
+        "desc": "RSI 90+ (L9-10). Entered technical overbought zone."
+      },
+      "B-03": {
+        "title": "MACD Golden Cross",
+        "desc": "MACD Golden Cross + Volume increase. Technical pattern confirmed."
+      }
+    },
+    "whaleSurge": {
+      "urgent": "URGENT ALERT",
+      "title": "🚨 Massive Whale Surge Detected",
+      "desc": "{{count}} large trades ($100M+) detected in {{window}}",
       "totalVolume": "Total Volume",
-      "topTrades": "Top Trades",
-      "noSignal": "No significant market signals at this time."
-    }
+      "topTrades": "Top Trades"
+    },
+    "noSignal": "No significant market signals detected."
   },
 
   "briefing": {
@@ -88,7 +132,7 @@
     "loading": "Loading briefing...",
     "noData": "No briefings yet",
     "nextUpdate": "Next update",
-    "schedule": "00:00, 04:00, 08:00, 12:00, 16:00, 20:00",
+    "schedule": "00:00, 06:00, 12:00, 18:00",
     "sections": {
       "marketTrend": "Market Trend",
       "sectorAnalysis": "Sector Analysis",
@@ -125,6 +169,79 @@
       "point2": "Not connected to real exchanges",
       "point3": "For practice purposes only",
       "dontShowAgain": "Don't show again"
+    },
+    "orderPanel": {
+      "placeOrder": "Place Order",
+      "priceUsdt": "Price (USDT)",
+      "sizeBtc": "Size (BTC)",
+      "max": "Max",
+      "requiredMargin": "Required Margin",
+      "maxPosition": "Max Position",
+      "buyLong": "Buy / Long",
+      "sellShort": "Sell / Short",
+      "loginRequired": "Login required to trade",
+      "loginRequiredAlert": "Please log in first.\n\nTrading game is only available for logged-in users.",
+      "notRealTrading": "※ This is not real trading"
+    },
+    "positionsTable": {
+      "symbol": "Symbol",
+      "size": "Size",
+      "entryPrice": "Entry Price",
+      "markPrice": "Mark Price",
+      "liqPrice": "Liq. Price",
+      "margin": "Margin",
+      "pnlRoe": "PnL (ROE%)",
+      "actions": "Actions",
+      "close": "Close",
+      "setTpsl": "Set TP/SL",
+      "partialClose": "Partial Close",
+      "reversePosition": "Reverse Position",
+      "reverseConfirm": "Reverse {{side}} position to {{newSide}}? This will close the current position and open a new one in the opposite direction.",
+      "loginToView": "Login to view positions"
+    },
+    "ordersTable": {
+      "time": "Time",
+      "symbol": "Symbol",
+      "type": "Type",
+      "side": "Side",
+      "price": "Price",
+      "size": "Size",
+      "filled": "Filled",
+      "action": "Action",
+      "cancel": "Cancel",
+      "noOrders": "No open orders",
+      "loginToView": "Login to view orders"
+    },
+    "historyTable": {
+      "time": "Time",
+      "symbol": "Symbol",
+      "entry": "Entry",
+      "exit": "Exit",
+      "size": "Size",
+      "leverage": "Leverage",
+      "pnlRoe": "PnL (ROE%)",
+      "loginToView": "Login to view trade history",
+      "loading": "Loading trade history...",
+      "noHistory": "No trade history yet",
+      "noHistoryDesc": "History will be saved when you close a position"
+    },
+    "rankingTable": {
+      "rank": "Rank",
+      "trader": "Trader",
+      "roi": "ROI%",
+      "myRank": "My Rank",
+      "you": "You",
+      "loginToView": "Login to view rankings",
+      "loading": "Loading rankings...",
+      "noData": "No ranking data yet",
+      "noDataDesc": "Start trading to appear on the leaderboard",
+      "footer": "Rankings are based on ROI% • Real-time updates"
+    },
+    "chart": {
+      "perpetual": "Perpetual",
+      "high24h": "24h High",
+      "low24h": "24h Low",
+      "vol24h": "24h Vol(BTC)"
     }
   },
 

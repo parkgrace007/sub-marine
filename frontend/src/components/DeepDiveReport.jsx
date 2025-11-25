@@ -9,7 +9,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
  * DeepDiveReport - Market Briefing Display Component
  *
  * Displays AI-generated market analysis from Claude
- * Updates every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00)
+ * Supports bilingual content (Korean/English)
+ * Updates every 6 hours (00:00, 06:00, 12:00, 18:00)
  *
  * Now uses Backend API instead of direct Supabase calls
  */
@@ -150,6 +151,17 @@ function DeepDiveReport({ className = '' }) {
     })
   }
 
+  // Get content based on current language
+  const getBriefingContent = () => {
+    if (!briefing) return null
+
+    // Use content_en for English, content for Korean (default)
+    if (i18n.language === 'en' && briefing.content_en) {
+      return briefing.content_en
+    }
+    return briefing.content
+  }
+
   // Parse briefing content (split by emoji sections)
   const parseBriefingContent = (content) => {
     if (!content) return []
@@ -224,13 +236,9 @@ function DeepDiveReport({ className = '' }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Briefing Sections - Use English content if available and language is English */}
+            {/* Briefing Sections */}
             <div className="space-y-3">
-              {parseBriefingContent(
-                (i18n.language === 'en' || i18n.language.startsWith('en-')) && briefing.content_en
-                  ? briefing.content_en
-                  : briefing.content
-              ).map((section, index) => (
+              {parseBriefingContent(getBriefingContent()).map((section, index) => (
                 <div key={index} className="space-y-1">
                   <div className="text-sm font-bold text-surface-700 flex items-center gap-2">
                     {section.title}

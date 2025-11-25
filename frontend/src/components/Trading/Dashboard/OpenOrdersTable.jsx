@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTradingStore } from '../../../store/tradingStore';
 import { useAuth } from '../../../contexts/AuthContext';
 import { clsx } from 'clsx';
 import { X, Lock } from 'lucide-react';
 
 export const OpenOrdersTable = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const orders = useTradingStore((state) => state.orders);
     const cancelOrder = useTradingStore((state) => state.cancelOrder);
@@ -14,7 +16,7 @@ export const OpenOrdersTable = () => {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
                 <Lock size={32} className="mb-2 opacity-50" />
-                <p className="text-sm">로그인 후 주문을 확인할 수 있습니다</p>
+                <p className="text-sm">{t('trading.ordersTable.loginToView')}</p>
             </div>
         );
     }
@@ -24,7 +26,7 @@ export const OpenOrdersTable = () => {
     if (pendingOrders.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
-                <p className="text-sm">No open orders</p>
+                <p className="text-sm">{t('trading.ordersTable.noOrders')}</p>
             </div>
         );
     }
@@ -34,14 +36,14 @@ export const OpenOrdersTable = () => {
             <table className="w-full text-left text-sm">
                 <thead className="text-xs text-surface-500 border-b border-surface-300 uppercase tracking-wider font-semibold">
                     <tr>
-                        <th className="pb-3 pl-5">Time</th>
-                        <th className="pb-3">Symbol</th>
-                        <th className="pb-3">Type</th>
-                        <th className="pb-3">Side</th>
-                        <th className="pb-3">Price</th>
-                        <th className="pb-3">Size</th>
-                        <th className="pb-3">Filled</th>
-                        <th className="pb-3 pr-5 text-right">Action</th>
+                        <th className="pb-3 pl-5">{t('trading.ordersTable.time')}</th>
+                        <th className="pb-3">{t('trading.ordersTable.symbol')}</th>
+                        <th className="pb-3">{t('trading.ordersTable.type')}</th>
+                        <th className="pb-3">{t('trading.ordersTable.side')}</th>
+                        <th className="pb-3">{t('trading.ordersTable.price')}</th>
+                        <th className="pb-3">{t('trading.ordersTable.size')}</th>
+                        <th className="pb-3">{t('trading.ordersTable.filled')}</th>
+                        <th className="pb-3 pr-5 text-right">{t('trading.ordersTable.action')}</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-300">
@@ -77,7 +79,7 @@ export const OpenOrdersTable = () => {
                                     className="text-xs bg-surface-100 hover:bg-danger hover:text-white border border-surface-300 hover:border-danger text-surface-500 px-3 py-1.5 rounded transition-all font-medium inline-flex items-center gap-1.5 shadow-sm"
                                 >
                                     <X size={12} />
-                                    Cancel
+                                    {t('trading.ordersTable.cancel')}
                                 </button>
                             </td>
                         </tr>

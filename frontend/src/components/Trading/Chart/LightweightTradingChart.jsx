@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import { binanceService } from '../../../services/binance';
 import { useMarketStore } from '../../../store/marketStore';
 import { Loader2 } from 'lucide-react';
 
 export const LightweightTradingChart = () => {
+    const { t } = useTranslation();
     const chartContainerRef = useRef(null);
     const chartRef = useRef(null);
     const candlestickSeriesRef = useRef(null);
@@ -113,21 +115,21 @@ export const LightweightTradingChart = () => {
                     <div className="flex items-center gap-2">
                         <h2 className="text-lg font-bold text-surface-600">BTC/USDT</h2>
                         <span className="text-[10px] bg-surface-300 px-1.5 py-0.5 rounded text-surface-500 font-semibold">
-                            Perpetual
+                            {t('trading.chart.perpetual')}
                         </span>
                     </div>
                     <div className="h-4 w-[1px] bg-surface-300" />
                     <div className="flex gap-4 text-xs">
                         <div className="flex flex-col">
-                            <span className="text-surface-500">24h High</span>
+                            <span className="text-surface-500">{t('trading.chart.high24h')}</span>
                             <span className="text-surface-600 font-medium">--</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-surface-500">24h Low</span>
+                            <span className="text-surface-500">{t('trading.chart.low24h')}</span>
                             <span className="text-surface-600 font-medium">--</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-surface-500">24h Vol(BTC)</span>
+                            <span className="text-surface-500">{t('trading.chart.vol24h')}</span>
                             <span className="text-surface-600 font-medium">--</span>
                         </div>
                     </div>

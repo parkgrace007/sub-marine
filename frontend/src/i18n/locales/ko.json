@@ -62,7 +62,9 @@
 
   "alerts": {
     "title": "중요 알림 LOG",
+    "importantLog": "중요알림 LOG",
     "noAlerts": "알림이 없습니다",
+    "noActiveAlerts": "활성 알림이 없습니다",
     "tierS": "S등급",
     "tierA": "A등급",
     "tierB": "B등급",
@@ -73,14 +75,56 @@
       "total": "총 알림",
       "last24h": "최근 24시간"
     },
-    "important": {
-      "urgentAlert": "긴급 알림",
-      "whaleSurge": "🚨 대량 고래 급증 감지",
-      "whaleSurgeDesc": "{{time}} 동안 {{count}}건의 대형 거래 ($100M+) 발생",
+    "types": {
+      "S-01": {
+        "title": "ABYSSAL SCOOP (심해 줍기)",
+        "desc": "극단적 공포(RSI L1) + 고래의 대량 매집 + 거래량 폭발. 완벽한 바닥."
+      },
+      "S-02": {
+        "title": "LEVIATHAN DUMP (리바이어던 투하)",
+        "desc": "광기(RSI L10)의 정점에서 고래가 물량을 떠넘기고 있습니다."
+      },
+      "S-03": {
+        "title": "WHALE TORPEDO (고래 어뢰 발사)",
+        "desc": "응축된 에너지(Squeeze)를 고래가 상방으로 터뜨렸습니다."
+      },
+      "S-04": {
+        "title": "HULL CRACK (선체 붕괴)",
+        "desc": "주요 지지선 붕괴 + 고래 투매 + 거래량 실린 하락."
+      },
+      "A-01": {
+        "title": "SMART DIVERGENCE (스마트 다이버전스)",
+        "desc": "가격은 떨어지지만 고래는 조용히 매집 중입니다. (시간 가중 분석)"
+      },
+      "A-02": {
+        "title": "EXIT DIVERGENCE (탈출 다이버전스)",
+        "desc": "가격은 오르지만 고래는 조용히 탈출 중입니다. (시간 가중 분석)"
+      },
+      "A-03": {
+        "title": "FULL THROTTLE (전속 전진)",
+        "desc": "모든 엔진 가동. 밴드 상단을 타고 오르는 강력한 상승장."
+      },
+      "B-01": {
+        "title": "BB Squeeze 구간",
+        "desc": "볼린저밴드 강수축 (L1-L2) + 거래량 저하. 변동성 수축 구간."
+      },
+      "B-02": {
+        "title": "RSI 과매수 영역",
+        "desc": "RSI 90+ (L9-10). 기술적 과매수 구간 진입."
+      },
+      "B-03": {
+        "title": "MACD 골든크로스",
+        "desc": "MACD 골든크로스 발생 + 거래량 증가. 기술적 패턴 확인."
+      }
+    },
+    "whaleSurge": {
+      "urgent": "긴급 알림",
+      "title": "🚨 대량 고래 급증 감지",
+      "desc": "{{window}} 동안 {{count}}건의 대형 거래 ($100M+) 발생",
       "totalVolume": "총 거래량",
-      "topTrades": "상위 거래",
-      "noSignal": "현재 중요한 시장 신호가 없습니다."
-    }
+      "topTrades": "상위 거래"
+    },
+    "noSignal": "현재 중요한 시장 신호가 없습니다."
   },
 
   "briefing": {
@@ -88,7 +132,7 @@
     "loading": "브리핑 로딩 중...",
     "noData": "브리핑이 없습니다",
     "nextUpdate": "다음 업데이트",
-    "schedule": "00:00, 04:00, 08:00, 12:00, 16:00, 20:00",
+    "schedule": "00:00, 06:00, 12:00, 18:00",
     "sections": {
       "marketTrend": "시장 동향",
       "sectorAnalysis": "섹터 분석",
@@ -125,6 +169,79 @@
       "point2": "실제 거래소와 연결되지 않습니다",
       "point3": "연습 목적으로만 사용하세요",
       "dontShowAgain": "다시 보지 않기"
+    },
+    "orderPanel": {
+      "placeOrder": "주문하기",
+      "priceUsdt": "가격 (USDT)",
+      "sizeBtc": "수량 (BTC)",
+      "max": "최대",
+      "requiredMargin": "필요 증거금",
+      "maxPosition": "최대 포지션",
+      "buyLong": "매수 / 롱",
+      "sellShort": "매도 / 숏",
+      "loginRequired": "로그인 후 거래 가능합니다",
+      "loginRequiredAlert": "로그인 후 이용 가능합니다.\n\n트레이딩 게임은 로그인한 사용자만 이용할 수 있습니다.",
+      "notRealTrading": "※ 실제 거래가 아닙니다"
+    },
+    "positionsTable": {
+      "symbol": "심볼",
+      "size": "수량",
+      "entryPrice": "진입가",
+      "markPrice": "현재가",
+      "liqPrice": "청산가",
+      "margin": "증거금",
+      "pnlRoe": "손익 (ROE%)",
+      "actions": "관리",
+      "close": "청산",
+      "setTpsl": "TP/SL 설정",
+      "partialClose": "부분 청산",
+      "reversePosition": "포지션 전환",
+      "reverseConfirm": "{{side}} 포지션을 {{newSide}}(으)로 전환하시겠습니까? 현재 포지션이 청산되고 반대 방향으로 새 포지션이 열립니다.",
+      "loginToView": "로그인 후 포지션을 확인할 수 있습니다"
+    },
+    "ordersTable": {
+      "time": "시간",
+      "symbol": "심볼",
+      "type": "유형",
+      "side": "방향",
+      "price": "가격",
+      "size": "수량",
+      "filled": "체결",
+      "action": "관리",
+      "cancel": "취소",
+      "noOrders": "대기 중인 주문이 없습니다",
+      "loginToView": "로그인 후 주문을 확인할 수 있습니다"
+    },
+    "historyTable": {
+      "time": "시간",
+      "symbol": "심볼",
+      "entry": "진입가",
+      "exit": "청산가",
+      "size": "수량",
+      "leverage": "레버리지",
+      "pnlRoe": "손익 (ROE%)",
+      "loginToView": "로그인 후 거래 기록을 확인할 수 있습니다",
+      "loading": "거래 기록 불러오는 중...",
+      "noHistory": "아직 거래 기록이 없습니다",
+      "noHistoryDesc": "포지션을 청산하면 기록이 저장됩니다"
+    },
+    "rankingTable": {
+      "rank": "순위",
+      "trader": "트레이더",
+      "roi": "ROI%",
+      "myRank": "내 순위",
+      "you": "나",
+      "loginToView": "로그인 후 랭킹을 확인할 수 있습니다",
+      "loading": "랭킹 불러오는 중...",
+      "noData": "아직 랭킹 데이터가 없습니다",
+      "noDataDesc": "거래를 시작하면 랭킹에 표시됩니다",
+      "footer": "랭킹은 수익률(ROI%) 기준으로 매겨집니다 • 실시간 업데이트"
+    },
+    "chart": {
+      "perpetual": "무기한",
+      "high24h": "24시간 최고",
+      "low24h": "24시간 최저",
+      "vol24h": "24시간 거래량(BTC)"
     }
   },
 

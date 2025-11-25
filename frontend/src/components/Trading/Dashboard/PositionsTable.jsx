@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTradingStore } from '../../../store/tradingStore';
 import { useMarketStore } from '../../../store/marketStore';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -11,6 +12,7 @@ import { Portal } from '../UI/Portal';
 import CoinIcon from '../../CoinIcon';
 
 export const PositionsTable = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const positions = useTradingStore((state) => state.positions);
     const closePosition = useTradingStore((state) => state.closePosition);
@@ -28,7 +30,7 @@ export const PositionsTable = () => {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
                 <Lock size={32} className="mb-2 opacity-50" />
-                <p className="text-sm">로그인 후 포지션을 확인할 수 있습니다</p>
+                <p className="text-sm">{t('trading.positionsTable.loginToView')}</p>
             </div>
         );
     }
@@ -36,13 +38,14 @@ export const PositionsTable = () => {
     if (positions.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
-                <p className="text-sm">No open positions</p>
+                <p className="text-sm">{t('trading.noPosition')}</p>
             </div>
         );
     }
 
     const handleReversePosition = (pos) => {
-        if (confirm(`Reverse ${pos.side} position to ${pos.side === 'LONG' ? 'SHORT' : 'LONG'}? This will close the current position and open a new one in the opposite direction.`)) {
+        const newSide = pos.side === 'LONG' ? 'SHORT' : 'LONG';
+        if (confirm(t('trading.positionsTable.reverseConfirm', { side: pos.side, newSide }))) {
             reversePosition(pos.id, currentPrice);
             setActiveMenu(null);
         }
@@ -54,14 +57,14 @@ export const PositionsTable = () => {
                 <table className="w-full text-left text-sm">
                     <thead className="text-xs text-surface-500 border-b border-surface-300 uppercase tracking-wider font-semibold">
                         <tr>
-                            <th className="pb-3 pl-5">Symbol</th>
-                            <th className="pb-3">Size</th>
-                            <th className="pb-3">Entry Price</th>
-                            <th className="pb-3">Mark Price</th>
-                            <th className="pb-3">Liq. Price</th>
-                            <th className="pb-3">Margin</th>
-                            <th className="pb-3">PnL (ROE%)</th>
-                            <th className="pb-3 pr-5 text-right">Actions</th>
+                            <th className="pb-3 pl-5">{t('trading.positionsTable.symbol')}</th>
+                            <th className="pb-3">{t('trading.positionsTable.size')}</th>
+                            <th className="pb-3">{t('trading.positionsTable.entryPrice')}</th>
+                            <th className="pb-3">{t('trading.positionsTable.markPrice')}</th>
+                            <th className="pb-3">{t('trading.positionsTable.liqPrice')}</th>
+                            <th className="pb-3">{t('trading.positionsTable.margin')}</th>
+                            <th className="pb-3">{t('trading.positionsTable.pnlRoe')}</th>
+                            <th className="pb-3 pr-5 text-right">{t('trading.positionsTable.actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-surface-300">
@@ -161,7 +164,7 @@ export const PositionsTable = () => {
                                                     className="text-xs bg-surface-100 hover:bg-danger hover:text-white border border-surface-300 hover:border-danger text-surface-500 px-3 py-1.5 rounded transition-all font-medium inline-flex items-center gap-1.5 shadow-sm"
                                                 >
                                                     <X size={12} />
-                                                    Close
+                                                    {t('trading.positionsTable.close')}
                                                 </button>
                                                 <div className="relative">
                                                     <button
@@ -245,7 +248,7 @@ export const PositionsTable = () => {
                             className="w-full px-4 py-2.5 text-left text-sm hover:bg-surface-300 transition-colors flex items-center gap-2 text-surface-600"
                         >
                             <Target size={14} />
-                            Set TP/SL
+                            {t('trading.positionsTable.setTpsl')}
                         </button>
                         <button
                             onClick={() => {
@@ -256,7 +259,7 @@ export const PositionsTable = () => {
                             className="w-full px-4 py-2.5 text-left text-sm hover:bg-surface-300 transition-colors flex items-center gap-2 text-surface-600"
                         >
                             <ScissorsLineDashed size={14} />
-                            Partial Close
+                            {t('trading.positionsTable.partialClose')}
                         </button>
                         <button
                             onClick={() => {
@@ -266,7 +269,7 @@ export const PositionsTable = () => {
                             className="w-full px-4 py-2.5 text-left text-sm hover:bg-surface-300 transition-colors flex items-center gap-2 text-primary"
                         >
                             <Repeat size={14} />
-                            Reverse Position
+                            {t('trading.positionsTable.reversePosition')}
                         </button>
                     </div>
                 </Portal>

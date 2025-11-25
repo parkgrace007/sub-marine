@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRanking } from '../../../hooks/useRanking';
 import {
@@ -16,6 +17,7 @@ import { clsx } from 'clsx';
 import { Trophy, Loader2, Lock, User } from 'lucide-react';
 
 export const RankingTable = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { rankings, userRank, loading, error } = useRanking();
 
@@ -24,7 +26,7 @@ export const RankingTable = () => {
     return (
       <div className="flex flex-col items-center justify-center h-40 text-surface-500">
         <Lock size={32} className="mb-2 opacity-50" />
-        <p className="text-sm">로그인 후 랭킹을 확인할 수 있습니다</p>
+        <p className="text-sm">{t('trading.rankingTable.loginToView')}</p>
       </div>
     );
   }
@@ -34,7 +36,7 @@ export const RankingTable = () => {
     return (
       <div className="flex flex-col items-center justify-center h-40 text-surface-500">
         <Loader2 className="w-6 h-6 animate-spin mb-2" />
-        <p className="text-sm">랭킹 불러오는 중...</p>
+        <p className="text-sm">{t('trading.rankingTable.loading')}</p>
       </div>
     );
   }
@@ -43,7 +45,7 @@ export const RankingTable = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-40 text-danger">
-        <p className="text-sm">오류: {error}</p>
+        <p className="text-sm">{t('common.error')}: {error}</p>
       </div>
     );
   }
@@ -53,8 +55,8 @@ export const RankingTable = () => {
     return (
       <div className="flex flex-col items-center justify-center h-40 text-surface-500">
         <Trophy size={32} className="mb-2 opacity-50" />
-        <p className="text-sm">아직 랭킹 데이터가 없습니다</p>
-        <p className="text-xs text-surface-400 mt-1">거래를 시작하면 랭킹에 표시됩니다</p>
+        <p className="text-sm">{t('trading.rankingTable.noData')}</p>
+        <p className="text-xs text-surface-400 mt-1">{t('trading.rankingTable.noDataDesc')}</p>
       </div>
     );
   }
@@ -67,11 +69,11 @@ export const RankingTable = () => {
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <User size={14} className="text-primary" />
-              <span className="text-surface-500">내 순위:</span>
+              <span className="text-surface-500">{t('trading.rankingTable.myRank')}:</span>
               <span className="font-bold text-primary">#{userRank.rank}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-surface-500">ROI:</span>
+              <span className="text-surface-500">{t('trading.rankingTable.roi')}:</span>
               <span className={clsx('font-mono font-semibold', getROIColorClass(userRank.roi_percentage))}>
                 {formatPercentage(userRank.roi_percentage)}
               </span>
@@ -83,9 +85,9 @@ export const RankingTable = () => {
       <table className="w-full text-left text-sm">
         <thead className="text-xs text-surface-500 border-b border-surface-300 uppercase tracking-wider font-semibold">
           <tr>
-            <th className="pb-3 pl-3 lg:pl-5">Rank</th>
-            <th className="pb-3">Trader</th>
-            <th className="pb-3 pr-3 lg:pr-5 text-right">ROI%</th>
+            <th className="pb-3 pl-3 lg:pl-5">{t('trading.rankingTable.rank')}</th>
+            <th className="pb-3">{t('trading.rankingTable.trader')}</th>
+            <th className="pb-3 pr-3 lg:pr-5 text-right">{t('trading.rankingTable.roi')}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-surface-300">
@@ -125,7 +127,7 @@ export const RankingTable = () => {
                   <div className="flex items-center gap-2">
                     {isCurrentUser && (
                       <span className="text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wide bg-primary/20 text-primary border border-primary/30">
-                        You
+                        {t('trading.rankingTable.you')}
                       </span>
                     )}
                     <span className="font-semibold text-surface-600">
@@ -149,7 +151,7 @@ export const RankingTable = () => {
       {/* 하단 안내 */}
       <div className="px-3 lg:px-5 py-4 border-t border-surface-300 bg-surface-100">
         <p className="text-xs text-surface-500 text-center">
-          랭킹은 수익률(ROI%) 기준으로 매겨집니다 • 실시간 업데이트
+          {t('trading.rankingTable.footer')}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../contexts/AuthContext';
 import { supabase } from '../../../utils/supabase';
 import { clsx } from 'clsx';
@@ -6,6 +7,7 @@ import { Calendar, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
 import CoinIcon from '../../CoinIcon';
 
 export const TradingHistoryTable = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export const TradingHistoryTable = () => {
     if (!user) {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
-                <p className="text-sm">로그인 후 거래 기록을 확인할 수 있습니다</p>
+                <p className="text-sm">{t('trading.historyTable.loginToView')}</p>
             </div>
         );
     }
@@ -67,7 +69,7 @@ export const TradingHistoryTable = () => {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
                 <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                <p className="text-sm">거래 기록 불러오는 중...</p>
+                <p className="text-sm">{t('trading.historyTable.loading')}</p>
             </div>
         );
     }
@@ -75,7 +77,7 @@ export const TradingHistoryTable = () => {
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-danger">
-                <p className="text-sm">오류: {error}</p>
+                <p className="text-sm">{t('common.error')}: {error}</p>
             </div>
         );
     }
@@ -84,8 +86,8 @@ export const TradingHistoryTable = () => {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-surface-500">
                 <Calendar size={32} className="mb-2 opacity-50" />
-                <p className="text-sm">아직 거래 기록이 없습니다</p>
-                <p className="text-xs text-surface-400 mt-1">포지션을 청산하면 기록이 저장됩니다</p>
+                <p className="text-sm">{t('trading.historyTable.noHistory')}</p>
+                <p className="text-xs text-surface-400 mt-1">{t('trading.historyTable.noHistoryDesc')}</p>
             </div>
         );
     }
@@ -95,13 +97,13 @@ export const TradingHistoryTable = () => {
             <table className="w-full text-left text-sm">
                 <thead className="text-xs text-surface-500 border-b border-surface-300 uppercase tracking-wider font-semibold">
                     <tr>
-                        <th className="pb-3 pl-5">Time</th>
-                        <th className="pb-3">Symbol</th>
-                        <th className="pb-3">Entry</th>
-                        <th className="pb-3">Exit</th>
-                        <th className="pb-3">Size</th>
-                        <th className="pb-3">Leverage</th>
-                        <th className="pb-3 pr-5 text-right">PnL (ROE%)</th>
+                        <th className="pb-3 pl-5">{t('trading.historyTable.time')}</th>
+                        <th className="pb-3">{t('trading.historyTable.symbol')}</th>
+                        <th className="pb-3">{t('trading.historyTable.entry')}</th>
+                        <th className="pb-3">{t('trading.historyTable.exit')}</th>
+                        <th className="pb-3">{t('trading.historyTable.size')}</th>
+                        <th className="pb-3">{t('trading.historyTable.leverage')}</th>
+                        <th className="pb-3 pr-5 text-right">{t('trading.historyTable.pnlRoe')}</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-300">

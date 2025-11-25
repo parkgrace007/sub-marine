@@ -52,9 +52,9 @@ function AlertDualPanel({
       <div className="order-3 lg:col-start-1 lg:row-start-2">
         <AlertLogTerminal
           alerts={alerts}
-          title={t('alerts.title')}
+          title={t('alerts.importantLog')}
           className="h-[400px]"
-          emptyState={t('alerts.noAlerts')}
+          emptyState={t('alerts.noActiveAlerts')}
         />
       </div>
 

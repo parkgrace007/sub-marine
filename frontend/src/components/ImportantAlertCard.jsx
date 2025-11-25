@@ -22,6 +22,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
  */
 function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
   const { t } = useTranslation()
+
   // Fetch market data
   const sentiment = useMarketData(timeframe, symbol)
   const { whales, loading: whalesLoading } = useWhaleData(timeframe, ['inflow', 'outflow'])
@@ -217,7 +218,7 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-danger uppercase tracking-wide font-bold">
-              {t('alerts.important.urgentAlert')}
+              {t('alerts.whaleSurge.urgent')}
             </span>
             <span className="px-2 py-0.5 text-[10px] bg-tier-s text-primary-text rounded font-bold animate-pulse">
               S-TIER
@@ -225,19 +226,19 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
           </div>
           <div className="flex-1">
             <h3 className="text-base font-bold text-danger mb-1">
-              {t('alerts.important.whaleSurge')}
+              {t('alerts.whaleSurge.title')}
             </h3>
             <p className="text-xs text-danger/90 mb-2 leading-relaxed">
-              {t('alerts.important.whaleSurgeDesc', { count: conditions.whale_count, time: conditions.time_window })}
+              {t('alerts.whaleSurge.desc', { window: conditions.time_window, count: conditions.whale_count })}
             </p>
             <div className="text-xs space-y-1">
               <div className="flex justify-between">
-                <span className="text-surface-500">{t('alerts.important.totalVolume')}:</span>
+                <span className="text-surface-500">{t('alerts.whaleSurge.totalVolume')}:</span>
                 <span className="font-bold text-danger">{conditions.total_volume_formatted}</span>
               </div>
               {topWhales.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-danger/20">
-                  <div className="text-[10px] text-surface-500 mb-1">{t('alerts.important.topTrades')}:</div>
+                  <div className="text-[10px] text-surface-500 mb-1">{t('alerts.whaleSurge.topTrades')}:</div>
                   {topWhales.slice(0, 2).map((whale, i) => (
                     <div key={i} className="text-[10px] flex items-center justify-between text-danger/80 gap-2">
                       <div className="flex items-center gap-1.5">
@@ -259,7 +260,7 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
       return (
         <div className="flex items-center justify-center h-full">
           <p className="text-sm text-surface-500">
-            {t('alerts.important.noSignal')}
+            {t('alerts.noSignal')}
           </p>
         </div>
       )
@@ -270,11 +271,17 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
       return (
         <div className="flex items-center justify-center h-full">
           <p className="text-sm text-surface-500">
-            {t('alerts.important.noSignal')}
+            {t('alerts.noSignal')}
           </p>
         </div>
       )
     }
+
+    // Get translated title and description for activeCombo
+    const comboTitleKey = `alerts.types.${activeCombo.id}.title`
+    const comboDescKey = `alerts.types.${activeCombo.id}.desc`
+    const translatedTitle = t(comboTitleKey, { defaultValue: activeCombo.title })
+    const translatedDesc = t(comboDescKey, { defaultValue: activeCombo.desc })
 
     return (
       <div className="flex flex-col h-full">
@@ -290,13 +297,13 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
 
         {/* Title */}
         <div className={`text-base mb-2 leading-tight ${theme.titleClass}`}>
-          {activeCombo.title}
+          {translatedTitle}
         </div>
 
         {/* Description */}
         <div className="flex-1 flex items-center">
           <p className={`text-xs leading-relaxed ${theme.descClass}`}>
-            {activeCombo.desc}
+            {translatedDesc}
           </p>
         </div>
       </div>

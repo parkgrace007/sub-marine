@@ -13,7 +13,7 @@ dotenv.config()
  *
  * Jobs:
  * 1. ALERT_System Monitoring (every 1 minute)
- * 2. Market Briefing (every 4 hours at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00)
+ * 2. Market Briefing (every 6 hours at 00:00, 06:00, 12:00, 18:00)
  * 3. News Refresh (every 3 hours at 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00)
  * 4. Database Cleanup (daily at 3:00 AM)
  */
@@ -35,13 +35,13 @@ class SchedulerService {
 
     console.log('⏰ Starting scheduler...')
 
-    // Job 1: Market Briefing (every 4 hours at 00:00, 04:00, 08:00, 12:00, 16:00, 20:00)
-    const briefingJob = cron.schedule('0 0,4,8,12,16,20 * * *', async () => {
+    // Job 1: Market Briefing (every 6 hours at 00:00, 06:00, 12:00, 18:00)
+    const briefingJob = cron.schedule('0 0,6,12,18 * * *', async () => {
       await this.runMarketBriefing()
     })
 
     this.jobs.push({ name: 'Market Briefing', job: briefingJob })
-    console.log(`   Market Briefing: Every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00)`)
+    console.log(`   Market Briefing: Every 6 hours (00:00, 06:00, 12:00, 18:00)`)
 
     // Job 2: News Refresh (every 3 hours)
     const newsRefreshJob = cron.schedule('0 */3 * * *', async () => {
@@ -156,7 +156,7 @@ class SchedulerService {
 
   /**
    * Market Briefing Job
-   * Generates AI-powered market analysis every 4 hours
+   * Generates AI-powered market analysis every 6 hours (bilingual: Korean + English)
    */
   async runMarketBriefing() {
     const startTime = Date.now()
@@ -220,7 +220,7 @@ class SchedulerService {
   /**
    * Check Briefing Freshness and Refresh if Stale
    * Render Free tier fix: Check on server startup to handle cold starts
-   * If briefing is older than 4 hours, immediately refresh
+   * If briefing is older than 6 hours, immediately refresh
    */
   async checkAndRefreshBriefing() {
     try {
@@ -245,8 +245,8 @@ class SchedulerService {
       const lastUpdate = new Date(data[0].created_at)
       const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60)
 
-      if (hoursSinceUpdate >= 4) {
-        console.log(`   📊 Briefing is ${hoursSinceUpdate.toFixed(1)} hours old (>4h), refreshing now...`)
+      if (hoursSinceUpdate >= 6) {
+        console.log(`   📊 Briefing is ${hoursSinceUpdate.toFixed(1)} hours old (>6h), refreshing now...`)
         await this.runMarketBriefing()
       } else {
         console.log(`   ✅ Briefing is fresh (${hoursSinceUpdate.toFixed(1)} hours old), skipping refresh`)
