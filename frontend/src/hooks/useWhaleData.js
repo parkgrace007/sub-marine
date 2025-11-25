@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { TIMEFRAME_DURATIONS_MS } from '../config/timeframes'
 
 // Backend API URL
@@ -12,6 +12,7 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [refetchTrigger, setRefetchTrigger] = useState(0)
+  const isMountedRef = useRef(true)
 
   // Client-side filtering: ONLY timeframe trimming
   const whales = useMemo(() => {
@@ -30,14 +31,17 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
     let eventSource = null
     let cleanupInterval = null
     let reconnectTimeout = null
+    isMountedRef.current = true
 
     async function fetchWhales() {
       try {
         console.log('🔍 [useWhaleData] Fetching via Backend API...')
         console.log(`   Timeframe: ${timeframe}, Symbol: ${symbol}, FlowTypes: ${flowTypes?.join('/')}`)
 
-        setLoading(true)
-        setError(null)
+        if (isMountedRef.current) {
+          setLoading(true)
+          setError(null)
+        }
 
         // Build query params
         const params = new URLSearchParams({
@@ -63,16 +67,26 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
         console.log(`✅ [useWhaleData] Fetched ${json.data?.length || 0} whales in ${duration}ms`)
         console.log(`   Cached: ${json.cached}, Cache age: ${json.cacheAge || 0}s`)
 
-        setAllWhales(json.data || [])
+        if (isMountedRef.current) {
+          setAllWhales(json.data || [])
+          setError(null)
+        }
       } catch (err) {
         console.error('❌ [useWhaleData] Error:', err)
-        setError(err.message)
+        if (isMountedRef.current) {
+          setError(err.message)
+        }
       } finally {
-        setLoading(false)
+        if (isMountedRef.current) {
+          setLoading(false)
+        }
       }
     }
 
     function connectSSE() {
+      // Don't connect if unmounted
+      if (!isMountedRef.current) return
+
       // Build query params
       const params = new URLSearchParams({
         timeframe,
@@ -93,18 +107,20 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
           const whale = JSON.parse(event.data)
           console.log(`🐋 [SSE] New whale: $${(whale.amount_usd / 1e6).toFixed(1)}M ${whale.flow_type}`)
 
-          setAllWhales((prev) => {
-            // Check for duplicate
-            if (prev.some(w => w.id === whale.id)) {
-              return prev
-            }
+          if (isMountedRef.current) {
+            setAllWhales((prev) => {
+              // Check for duplicate
+              if (prev.some(w => w.id === whale.id)) {
+                return prev
+              }
 
-            const updated = [whale, ...prev]
-            if (updated.length > MAX_WHALES_IN_MEMORY) {
-              return updated.slice(0, MAX_WHALES_IN_MEMORY)
-            }
-            return updated
-          })
+              const updated = [whale, ...prev]
+              if (updated.length > MAX_WHALES_IN_MEMORY) {
+                return updated.slice(0, MAX_WHALES_IN_MEMORY)
+              }
+              return updated
+            })
+          }
         } catch (e) {
           console.error('❌ [SSE] Parse error:', e)
         }
@@ -123,17 +139,24 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
           eventSource = null
         }
 
-        // Reconnect after 5 seconds
-        console.log('🔄 [SSE] Reconnecting in 5s...')
-        reconnectTimeout = setTimeout(connectSSE, 5000)
+        // Only reconnect if still mounted
+        if (isMountedRef.current) {
+          console.log('🔄 [SSE] Reconnecting in 5s...')
+          reconnectTimeout = setTimeout(connectSSE, 5000)
+        }
       }
     }
 
-    // Initial fetch
-    fetchWhales()
+    // Initial fetch, then connect SSE after fetch completes
+    const initializeData = async () => {
+      await fetchWhales()
+      // Only connect SSE after initial fetch completes to avoid race condition
+      if (isMountedRef.current) {
+        connectSSE()
+      }
+    }
 
-    // Connect to SSE stream
-    connectSSE()
+    initializeData()
 
     // Cleanup old whales every 5 minutes
     cleanupInterval = setInterval(() => {
@@ -160,6 +183,12 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
     // Cleanup - only close connections, keep data to prevent flickering
     return () => {
       console.log('🧹 [useWhaleData] Cleaning up SSE connection...')
+      isMountedRef.current = false
+
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+        reconnectTimeout = null
+      }
 
       if (eventSource) {
         eventSource.close()
@@ -168,10 +197,6 @@ export function useWhaleData(timeframe = '1h', flowTypes = null, symbol = '통�
 
       if (cleanupInterval) {
         clearInterval(cleanupInterval)
-      }
-
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout)
       }
 
       // Don't clear allWhales here - causes data to disappear on filter change
