@@ -33,26 +33,51 @@ export const AuthProvider = ({ children }) => {
           if (accessToken && refreshToken) {
             console.log('   🔄 Setting session from URL tokens...')
 
-            // Set the session manually
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
+            // Decode JWT to get user info (no network call needed)
+            const payloadBase64 = accessToken.split('.')[1]
+            const payload = JSON.parse(atob(payloadBase64))
+            console.log('   📋 JWT payload decoded:', {
+              userId: payload.sub?.substring(0, 8),
+              email: payload.email
             })
 
-            if (error) {
-              console.error('❌ [AuthContext] setSession error:', error)
-            } else if (data.session) {
-              console.log('✅ [AuthContext] Session set successfully:', {
-                userId: data.session.user?.id?.substring(0, 8)
-              })
-
-              // Clear the URL hash
-              window.history.replaceState(null, '', window.location.pathname)
-
-              setUser(data.session.user)
-              await fetchProfile(data.session.user.id)
-              return // Session handled, don't proceed to getSession
+            // Create user object from JWT
+            const user = {
+              id: payload.sub,
+              email: payload.email,
+              user_metadata: payload.user_metadata || {},
+              app_metadata: payload.app_metadata || {},
+              aud: payload.aud,
+              role: payload.role
             }
+
+            // Store tokens in localStorage (Supabase format)
+            const storageKey = `sb-${new URL(import.meta.env.VITE_SUPABASE_URL).hostname.split('.')[0]}-auth-token`
+            const sessionData = {
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              expires_at: payload.exp,
+              expires_in: payload.exp - Math.floor(Date.now() / 1000),
+              token_type: 'bearer',
+              user: user
+            }
+            localStorage.setItem(storageKey, JSON.stringify(sessionData))
+            console.log('   💾 Session stored in localStorage')
+
+            // Clear the URL hash
+            window.history.replaceState(null, '', window.location.pathname)
+            console.log('   🧹 URL hash cleared')
+
+            // Set user state
+            setUser(user)
+            console.log('✅ [AuthContext] User set from JWT:', {
+              userId: user.id?.substring(0, 8),
+              email: user.email
+            })
+
+            // Fetch profile
+            await fetchProfile(user.id)
+            return // Session handled, don't proceed to getSession
           }
         } catch (err) {
           console.error('❌ [AuthContext] OAuth callback error:', err)
