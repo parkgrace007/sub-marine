@@ -10,6 +10,9 @@ import soundManager from '../utils/SoundManager'
 // Backend API URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
+// Debounce delay for filter changes (prevents rapid API calls)
+const FILTER_DEBOUNCE_MS = 300
+
 /**
  * MainPage - Market Sentiment Dashboard
  * Contains the primary market analysis interface with:
@@ -31,6 +34,27 @@ function MainPage() {
   // Refs
   const whaleCanvasRef = useRef(null)
   const eventSourceRef = useRef(null)
+  const timeframeDebounceRef = useRef(null)
+  const symbolDebounceRef = useRef(null)
+
+  // Debounced filter handlers (prevents rapid API calls + SSE reconnections)
+  const handleTimeframeChange = useCallback((newTimeframe) => {
+    if (timeframeDebounceRef.current) {
+      clearTimeout(timeframeDebounceRef.current)
+    }
+    timeframeDebounceRef.current = setTimeout(() => {
+      setTimeframe(newTimeframe)
+    }, FILTER_DEBOUNCE_MS)
+  }, [])
+
+  const handleSymbolChange = useCallback((newSymbol) => {
+    if (symbolDebounceRef.current) {
+      clearTimeout(symbolDebounceRef.current)
+    }
+    symbolDebounceRef.current = setTimeout(() => {
+      setSymbol(newSymbol)
+    }, FILTER_DEBOUNCE_MS)
+  }, [])
 
   // Fetch alerts from Backend API on mount or when filters change
   useEffect(() => {
@@ -227,8 +251,8 @@ function MainPage() {
           <MainVisualizationSet
             timeframe={timeframe}
             symbol={symbol}
-            onSymbolChange={setSymbol}
-            onTimeframeChange={setTimeframe}
+            onSymbolChange={handleSymbolChange}
+            onTimeframeChange={handleTimeframeChange}
             isMuted={isMuted}
             onMuteToggle={handleMuteToggle}
             bullRatio={bullRatio}

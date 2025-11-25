@@ -17,7 +17,10 @@ function WhaleAlertsPage() {
       {/* Main Content */}
       <main className="relative z-10 max-w-[1600px] mx-auto px-6 py-6">
         <div className="h-[calc(100vh-120px)]">
-          <TransactionFeed timeframe={timeframe} />
+          <TransactionFeed
+            timeframe={timeframe}
+            flowTypes={['inflow', 'outflow', 'exchange', 'defi']}
+          />
         </div>
       </main>
     </div>

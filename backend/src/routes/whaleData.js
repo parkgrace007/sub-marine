@@ -98,7 +98,7 @@ router.get('/', whaleApiLimiter, async (req, res) => {
     // Build query - SERVICE_ROLE key bypasses RLS
     let query = supabase
       .from('whale_events')
-      .select('id, timestamp, symbol, amount_usd, flow_type, blockchain, from_owner_type, to_owner_type, from_address, to_address')
+      .select('id, timestamp, symbol, amount_usd, flow_type, blockchain, from_owner, to_owner, from_owner_type, to_owner_type, from_address, to_address')
       .gte('timestamp', cutoffTimestamp)
       .gte('amount_usd', MIN_WHALE_USD)
 

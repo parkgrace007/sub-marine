@@ -110,10 +110,37 @@ function TransactionRow({ transaction, isNew = false }) {
     }
   }
 
+  // Get owner label based on flow_type (when owner name is unknown)
+  const getOwnerLabel = (owner, ownerType, position) => {
+    // If we have the actual owner name, use it
+    if (owner) return owner
+
+    const flow = transaction.flow_type
+
+    // Use flow_type to determine the correct label
+    if (flow === 'inflow') {
+      // inflow: exchange → wallet
+      return position === 'from' ? '🏦 거래소' : '👛 개인지갑'
+    }
+    if (flow === 'outflow') {
+      // outflow: wallet → exchange
+      return position === 'from' ? '👛 개인지갑' : '🏦 거래소'
+    }
+    if (flow === 'exchange') {
+      // exchange: exchange ↔ exchange
+      return '🏦 거래소'
+    }
+    if (flow === 'defi') {
+      // defi: use owner_type if available
+      return ownerType === 'contract' ? '📜 컨트랙트' : '👛 개인지갑'
+    }
+    // internal: wallet ↔ wallet
+    return '👛 개인지갑'
+  }
+
   // Get transaction label
   const getTransactionLabel = () => {
     const type = transaction.transaction_type
-    const flow = transaction.flow_type
     const symbol = transaction.symbol?.toUpperCase() || ''
     const amount = formatAmount(transaction.amount)
 
@@ -126,8 +153,8 @@ function TransactionRow({ transaction, isNew = false }) {
     }
 
     // Default: show amount + symbol + from → to
-    const from = transaction.from_owner || 'Unknown wallet'
-    const to = transaction.to_owner || 'Unknown wallet'
+    const from = getOwnerLabel(transaction.from_owner, transaction.from_owner_type, 'from')
+    const to = getOwnerLabel(transaction.to_owner, transaction.to_owner_type, 'to')
     return `${amount} ${symbol} • ${from} → ${to}`
   }
 

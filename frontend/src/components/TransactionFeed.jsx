@@ -19,10 +19,10 @@ function StatItem({ label, value, prefix = '', color = 'text-surface-600' }) {
 /**
  * TransactionFeed - Live transaction feed at bottom of screen
  */
-function TransactionFeed({ timeframe, onTransactionsChange }) {
+function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange }) {
   const [isPaused, setIsPaused] = useState(false)
   const [filter, setFilter] = useState('all')
-  const { whales: transactions, loading, error } = useWhaleData(timeframe)
+  const { whales: transactions, loading, error } = useWhaleData(timeframe, flowTypes)
   const scrollRef = useRef(null)
   const prevTransactionCountRef = useRef(0)
 
