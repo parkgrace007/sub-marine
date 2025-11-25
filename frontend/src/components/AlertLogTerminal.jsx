@@ -120,25 +120,27 @@ function AlertLogTerminal({
             return (
               <div
                 key={alert.id || index}
-                className={`flex gap-3 p-2 rounded hover:bg-surface-200 transition-colors border-l-2 ${
+                className={`flex gap-2 sm:gap-3 p-2 rounded hover:bg-surface-200 transition-colors border-l-2 ${
                   showTyping ? 'border-primary bg-surface-200/50' : 'border-transparent hover:border-primary'
                 }`}
               >
-                <span className="text-surface-500 shrink-0 font-mono">
-                  {formatTime(alert.timestamp)}
-                </span>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-bold ${getAlertColor(alert.type || 'info')}`}>
-                      [{String(alert.type || 'INFO').toUpperCase()}]
-                    </span>
-                    <span className="text-surface-600">
-                      {displayMessage}
-                      {showTyping && <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-primary animate-pulse" />}
-                    </span>
-                  </div>
+                {/* 시간 + 타입 (모바일: 세로, 데스크톱: 가로) */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 shrink-0">
+                  <span className="text-surface-500 font-mono text-[10px] sm:text-xs">
+                    {formatTime(alert.timestamp)}
+                  </span>
+                  <span className={`font-bold text-[10px] sm:text-xs ${getAlertColor(alert.type || 'info')}`}>
+                    [{String(alert.type || 'INFO').toUpperCase()}]
+                  </span>
+                </div>
+                {/* 메시지 */}
+                <div className="flex flex-col gap-1 min-w-0 flex-1">
+                  <span className="text-surface-600 text-[11px] sm:text-xs break-words">
+                    {displayMessage}
+                    {showTyping && <span className="inline-block w-1.5 h-3 sm:h-3.5 ml-0.5 bg-primary animate-pulse" />}
+                  </span>
                   {alert.value && !showTyping && (
-                    <span className="text-surface-500">
+                    <span className="text-surface-500 text-[10px] sm:text-xs">
                       Value: <span className="text-surface-600 font-bold">{alert.value}</span>
                     </span>
                   )}
