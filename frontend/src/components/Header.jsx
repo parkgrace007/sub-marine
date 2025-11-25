@@ -30,7 +30,16 @@ function Header() {
 
           {/* Left: Logo */}
           <div className="flex items-center justify-start">
-            <Link to="/" className="group hover:opacity-80 transition-all duration-300">
+            <Link
+              to="/"
+              onClick={(e) => {
+                if (location.pathname === '/') {
+                  e.preventDefault()
+                  window.location.reload()
+                }
+              }}
+              className="group hover:opacity-80 transition-all duration-300"
+            >
               <img src="/logo.png" alt="SubMarine Logo" className="h-6 w-auto object-contain" />
             </Link>
           </div>
