@@ -67,8 +67,38 @@ class BriefingService {
       const sentiment = fngData.data?.[0] || { value: 'N/A', value_classification: 'Unknown' }
 
       // C. Binance - BTC 24h stats
-      const priceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
-      const priceData = await priceResponse.json()
+      let btcData = { price: 'N/A', change24h: 'N/A', volume24h: 'N/A' }
+      try {
+        const priceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
+        const priceData = await priceResponse.json()
+
+        // Validate response has required fields
+        if (priceData && priceData.lastPrice && priceData.priceChangePercent && priceData.volume) {
+          const price = parseFloat(priceData.lastPrice)
+          const change = parseFloat(priceData.priceChangePercent)
+          const volume = parseFloat(priceData.volume)
+
+          // Check for valid numbers
+          if (!isNaN(price) && !isNaN(change) && !isNaN(volume)) {
+            btcData = {
+              price: price.toFixed(0),
+              change24h: change.toFixed(2),
+              volume24h: (volume * price / 1e9).toFixed(2)
+            }
+          } else {
+            console.warn('⚠️  [Briefing] Binance returned invalid numbers')
+          }
+        } else {
+          console.warn('⚠️  [Briefing] Binance response missing required fields:', priceData)
+        }
+      } catch (binanceError) {
+        console.warn(`⚠️  [Briefing] Failed to fetch Binance data: ${binanceError.message}`)
+      }
+
+      // Validate we have at least BTC price before proceeding
+      if (btcData.price === 'N/A') {
+        throw new Error('Failed to fetch BTC price from Binance API - cannot generate briefing without price data')
+      }
 
       const marketData = {
         topCoins: topCoins,
@@ -76,11 +106,7 @@ class BriefingService {
           value: sentiment.value,
           classification: sentiment.value_classification
         },
-        btc: {
-          price: parseFloat(priceData.lastPrice).toFixed(0),
-          change24h: parseFloat(priceData.priceChangePercent).toFixed(2),
-          volume24h: (parseFloat(priceData.volume) * parseFloat(priceData.lastPrice) / 1e9).toFixed(2) // in Billion USD
-        }
+        btc: btcData
       }
 
       console.log('✅ [Briefing] External data fetched successfully')

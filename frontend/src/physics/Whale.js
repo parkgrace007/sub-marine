@@ -204,7 +204,7 @@ class Whale {
     this.frameTimer = 0  // Accumulated time for frame updates
     const spriteMetadata = whaleSprites.getMetadata(tier)
     this.frameCount = spriteMetadata.frames  // Total frames for this tier
-    this.animationSpeed = 0.15  // Frames to advance per update (0.15 = ~10 FPS at 60 FPS)
+    this.animationSpeed = 0.25  // Frames to advance per update (0.25 = ~7.5 FPS at 30 FPS)
 
     // ===== SPRITE DIMENSION CACHING (2025-11-23: Performance optimization) =====
     // Pre-calculate sprite dimensions to avoid repeated division in draw()
