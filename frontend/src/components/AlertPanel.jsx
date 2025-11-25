@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { supabase } from '../utils/supabase'
 import soundManager from '../utils/SoundManager'
+
+// Backend API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 /**
  * AlertPanel - Real-time trading alerts from ALERT_System
  * Shows Tier S, A, B, C signals with appropriate urgency
+ *
+ * Now uses Backend API instead of direct Supabase calls
  */
 function AlertPanel({ className = '', style = {} }) {
   const [alerts, setAlerts] = useState([])
@@ -12,32 +16,20 @@ function AlertPanel({ className = '', style = {} }) {
   const [filter, setFilter] = useState('all') // 'all', 'S', 'A', 'B', 'C'
   const [autoScroll, setAutoScroll] = useState(true)
   const alertsRef = useRef(null)
-  const channelRef = useRef(null)
+  const eventSourceRef = useRef(null)
 
-  // Subscribe to real-time alerts
+  // Fetch initial alerts and set up SSE
   useEffect(() => {
     // Fetch initial alerts (last 20)
     fetchRecentAlerts()
 
-    // Subscribe to new alerts
-    channelRef.current = supabase
-      .channel('alerts-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'alerts'
-        },
-        (payload) => {
-          handleNewAlert(payload.new)
-        }
-      )
-      .subscribe()
+    // Set up SSE connection for real-time updates
+    connectSSE()
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
       }
     }
   }, [])
@@ -50,18 +42,64 @@ function AlertPanel({ className = '', style = {} }) {
   }, [alerts, autoScroll])
 
   const fetchRecentAlerts = async () => {
-    const { data, error } = await supabase
-      .from('alerts')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20)
+    try {
+      console.log('🔔 [AlertPanel] Fetching alerts via Backend API...')
+      const response = await fetch(`${API_URL}/api/alerts?limit=20`)
 
-    if (error) {
-      console.error('Error fetching alerts:', error)
-      return
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
+      }
+
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch alerts')
+      }
+
+      setAlerts(json.data || [])
+      console.log(`✅ [AlertPanel] Loaded ${json.data?.length || 0} alerts in ${json.queryTime}ms`)
+    } catch (err) {
+      console.error('❌ [AlertPanel] Error fetching alerts:', err)
     }
+  }
 
-    setAlerts(data || [])
+  const connectSSE = () => {
+    console.log('🔴 [SSE/AlertPanel] Connecting to alert stream...')
+
+    const eventSource = new EventSource(`${API_URL}/api/alerts/stream`)
+    eventSourceRef.current = eventSource
+
+    eventSource.addEventListener('connected', () => {
+      console.log('✅ [SSE/AlertPanel] Connected to alert stream')
+    })
+
+    eventSource.addEventListener('alert', (event) => {
+      try {
+        const alert = JSON.parse(event.data)
+        console.log(`🚨 [SSE/AlertPanel] New alert: [${alert.tier}] ${alert.signal_type}`)
+        handleNewAlert(alert)
+      } catch (e) {
+        console.error('❌ [SSE/AlertPanel] Parse error:', e)
+      }
+    })
+
+    eventSource.addEventListener('ping', () => {
+      // Heartbeat received
+    })
+
+    eventSource.onerror = (err) => {
+      console.error('❌ [SSE/AlertPanel] Error:', err)
+
+      // Close current connection
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
+
+      // Reconnect after 5 seconds
+      console.log('🔄 [SSE/AlertPanel] Reconnecting in 5s...')
+      setTimeout(connectSSE, 5000)
+    }
   }
 
   const handleNewAlert = (alert) => {

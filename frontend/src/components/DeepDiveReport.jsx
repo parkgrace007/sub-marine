@@ -1,75 +1,107 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { FileText } from 'lucide-react'
-import { supabase } from '../utils/supabase'
+
+// Backend API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 /**
  * DeepDiveReport - Market Briefing Display Component
  *
  * Displays AI-generated market analysis from Claude
  * Updates every 4 hours (00:00, 04:00, 08:00, 12:00, 16:00, 20:00)
- * Data source: market_briefings table
+ *
+ * Now uses Backend API instead of direct Supabase calls
  */
 function DeepDiveReport({ className = '' }) {
   const [briefing, setBriefing] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const eventSourceRef = useRef(null)
 
-  // Fetch latest briefing
+  // Fetch latest briefing from Backend API
   const fetchLatestBriefing = async () => {
     try {
       setLoading(true)
-      const { data, error: fetchError } = await supabase
-        .from('market_briefings')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+      console.log('📰 [DeepDiveReport] Fetching briefing via Backend API...')
 
-      if (fetchError) {
-        if (fetchError.code === 'PGRST116') {
-          // No rows found - this is okay, just no briefings yet
-          setBriefing(null)
-          setError(null)
-        } else {
-          throw fetchError
-        }
-      } else {
-        setBriefing(data)
-        setError(null)
+      const response = await fetch(`${API_URL}/api/briefings/latest`)
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
       }
+
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch briefing')
+      }
+
+      // json.data can be null if no briefings exist yet
+      setBriefing(json.data)
+      setError(null)
+      console.log(`✅ [DeepDiveReport] Loaded briefing in ${json.queryTime}ms`)
     } catch (err) {
-      console.error('Error fetching briefing:', err)
+      console.error('❌ [DeepDiveReport] Error fetching briefing:', err)
       setError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
-  // Subscribe to real-time updates
+  // Connect to SSE for real-time updates
+  const connectSSE = () => {
+    console.log('🔴 [SSE/DeepDiveReport] Connecting to briefing stream...')
+
+    const eventSource = new EventSource(`${API_URL}/api/briefings/stream`)
+    eventSourceRef.current = eventSource
+
+    eventSource.addEventListener('connected', () => {
+      console.log('✅ [SSE/DeepDiveReport] Connected to briefing stream')
+    })
+
+    eventSource.addEventListener('briefing', (event) => {
+      try {
+        const newBriefing = JSON.parse(event.data)
+        console.log('📰 [SSE/DeepDiveReport] New briefing received')
+        setBriefing(newBriefing)
+      } catch (e) {
+        console.error('❌ [SSE/DeepDiveReport] Parse error:', e)
+      }
+    })
+
+    eventSource.addEventListener('ping', () => {
+      // Heartbeat received
+    })
+
+    eventSource.onerror = (err) => {
+      console.error('❌ [SSE/DeepDiveReport] Error:', err)
+
+      // Close current connection
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
+
+      // Reconnect after 5 seconds
+      console.log('🔄 [SSE/DeepDiveReport] Reconnecting in 5s...')
+      setTimeout(connectSSE, 5000)
+    }
+  }
+
+  // Set up on mount
   useEffect(() => {
     // Initial fetch
     fetchLatestBriefing()
 
-    // Subscribe to INSERT events
-    const channel = supabase
-      .channel('market_briefings_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'market_briefings'
-        },
-        (payload) => {
-          console.log('📰 New briefing received:', payload.new)
-          setBriefing(payload.new)
-        }
-      )
-      .subscribe()
+    // Set up SSE connection for real-time updates
+    connectSSE()
 
-    // Cleanup subscription on unmount
+    // Cleanup on unmount
     return () => {
-      supabase.removeChannel(channel)
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
     }
   }, [])
 

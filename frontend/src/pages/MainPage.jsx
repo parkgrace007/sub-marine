@@ -6,7 +6,9 @@ import CryptoTrendsFeed from '../components/CryptoTrendsFeed'
 import { useIndicatorLogger } from '../hooks/useIndicatorLogger' // Indicator change detection + logs
 import { useWhaleData } from '../hooks/useWhaleData'
 import soundManager from '../utils/SoundManager'
-import { supabase } from '../utils/supabase'
+
+// Backend API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 /**
  * MainPage - Market Sentiment Dashboard
@@ -15,6 +17,8 @@ import { supabase } from '../utils/supabase'
  * - Whale visualization (live transactions)
  * - Technical indicator status
  * - Alert terminal
+ *
+ * Now uses Backend API instead of direct Supabase calls
  */
 function MainPage() {
   const [timeframe, setTimeframe] = useState('8h')
@@ -26,33 +30,37 @@ function MainPage() {
 
   // Refs
   const whaleCanvasRef = useRef(null)
+  const eventSourceRef = useRef(null)
 
-  // Fetch alerts from Supabase on mount or when filters change
+  // Fetch alerts from Backend API on mount or when filters change
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        // Build query with optional symbol filter
-        let query = supabase
-          .from('indicator_alerts')
-          .select('*')
-          .eq('timeframe', timeframe)
+        console.log(`📥 [MainPage] Fetching alerts via Backend API...`)
 
-        // Only add symbol filter if not '통합' (ALL)
+        // Build query params
+        const params = new URLSearchParams({
+          timeframe,
+          limit: '100'
+        })
         if (symbol !== '통합') {
-          query = query.eq('symbol', symbol)
+          params.append('symbol', symbol)
         }
 
-        const { data, error } = await query
-          .order('created_at', { ascending: false })
-          .limit(100)
+        const response = await fetch(`${API_URL}/api/alerts/indicators?${params}`)
 
-        if (error) {
-          console.error('❌ [MainPage] Error fetching alerts:', error)
-          return
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`)
         }
 
-        // Convert Supabase format to alert format
-        const formattedAlerts = data.map(alert => ({
+        const json = await response.json()
+
+        if (!json.success) {
+          throw new Error(json.error || 'Failed to fetch alerts')
+        }
+
+        // Convert to alert format
+        const formattedAlerts = (json.data || []).map(alert => ({
           id: alert.id,
           timestamp: alert.created_at,
           type: alert.type,
@@ -62,47 +70,51 @@ function MainPage() {
 
         setAlerts(formattedAlerts)
         const symbolLabel = symbol === '통합' ? 'ALL' : symbol
-        console.log(`📥 [MainPage] Loaded ${formattedAlerts.length} alerts for ${timeframe}/${symbolLabel}`)
+        console.log(`✅ [MainPage] Loaded ${formattedAlerts.length} alerts for ${timeframe}/${symbolLabel} in ${json.queryTime}ms`)
       } catch (err) {
-        console.error('❌ [MainPage] Error:', err)
+        console.error('❌ [MainPage] Error fetching alerts:', err)
       }
     }
 
     fetchAlerts()
   }, [timeframe, symbol])
 
-  // Subscribe to real-time alert updates
+  // Subscribe to real-time alert updates via SSE
   useEffect(() => {
-    // Build filter: only add symbol filter if not '통합'
-    const filter = symbol === '통합'
-      ? `timeframe=eq.${timeframe}`
-      : `timeframe=eq.${timeframe},symbol=eq.${symbol}`
+    function connectSSE() {
+      // Build query params for SSE
+      const params = new URLSearchParams({ timeframe })
+      if (symbol !== '통합') {
+        params.append('symbol', symbol)
+      }
 
-    const channel = supabase
-      .channel(`indicator_alerts_${timeframe}_${symbol}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'indicator_alerts',
-          filter: filter
-        },
-        (payload) => {
-          console.log('📨 [MainPage] New alert received:', payload.new)
+      console.log(`🔴 [SSE/MainPage] Connecting to indicator alerts stream...`)
+
+      const eventSource = new EventSource(`${API_URL}/api/alerts/indicators/stream?${params}`)
+      eventSourceRef.current = eventSource
+
+      eventSource.addEventListener('connected', () => {
+        console.log('✅ [SSE/MainPage] Connected to indicator alerts stream')
+      })
+
+      eventSource.addEventListener('indicator_alert', (event) => {
+        try {
+          const alert = JSON.parse(event.data)
 
           // If symbol is '통합', accept all. Otherwise check symbol match
-          if (symbol !== '통합' && payload.new.symbol !== symbol) {
+          if (symbol !== '통합' && alert.symbol !== symbol) {
             return
           }
 
+          console.log(`📨 [SSE/MainPage] New alert: ${alert.type} for ${alert.symbol}/${alert.timeframe}`)
+
           // Convert to alert format and add to state
           const newAlert = {
-            id: payload.new.id,
-            timestamp: payload.new.created_at,
-            type: payload.new.type,
-            message: payload.new.message,
-            value: payload.new.value
+            id: alert.id,
+            timestamp: alert.created_at,
+            type: alert.type,
+            message: alert.message,
+            value: alert.value
           }
 
           setAlerts((prev) => {
@@ -110,12 +122,36 @@ function MainPage() {
             const updated = [newAlert, ...prev]
             return updated.slice(0, 100)
           })
+        } catch (e) {
+          console.error('❌ [SSE/MainPage] Parse error:', e)
         }
-      )
-      .subscribe()
+      })
+
+      eventSource.addEventListener('ping', () => {
+        // Heartbeat received
+      })
+
+      eventSource.onerror = (err) => {
+        console.error('❌ [SSE/MainPage] Error:', err)
+
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close()
+          eventSourceRef.current = null
+        }
+
+        // Reconnect after 5 seconds
+        console.log('🔄 [SSE/MainPage] Reconnecting in 5s...')
+        setTimeout(connectSSE, 5000)
+      }
+    }
+
+    connectSSE()
 
     return () => {
-      supabase.removeChannel(channel)
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
     }
   }, [timeframe, symbol])
 
@@ -124,27 +160,34 @@ function MainPage() {
     console.log('📝 [MainPage] Indicator log generated:', log)
 
     try {
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('indicator_alerts')
-        .insert({
+      // Save via Backend API
+      const response = await fetch(`${API_URL}/api/alerts/indicators`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           timeframe,
           symbol,
           type: log.type,
           message: log.text,
           value: log.value || null
         })
-        .select()
-        .single()
+      })
 
-      if (error) {
-        console.error('❌ [MainPage] Error saving alert:', error)
-        return
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
       }
 
-      console.log('✅ [MainPage] Alert saved to database:', data.id)
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to save alert')
+      }
+
+      console.log('✅ [MainPage] Alert saved to database:', json.data?.id)
     } catch (err) {
-      console.error('❌ [MainPage] Error:', err)
+      console.error('❌ [MainPage] Error saving alert:', err)
     }
   }, [timeframe, symbol])
 

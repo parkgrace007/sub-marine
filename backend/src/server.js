@@ -12,6 +12,8 @@ import { getNewsAPIData, clearCache as clearNewsCache, getNextRefreshTime, clean
 import adminRouter from './routes/admin.js'
 import diagnosticRouter from './routes/diagnostic.js'
 import whaleDataRouter from './routes/whaleData.js'
+import alertsDataRouter from './routes/alertsData.js'
+import briefingsDataRouter from './routes/briefingsData.js'
 import metricsCollector from './services/metricsCollector.js'
 
 dotenv.config()
@@ -237,6 +239,16 @@ app.use('/api/diagnostic', diagnosticRouter)
 // Mount whale data router (proxy for frontend → supabase)
 // This bypasses frontend direct connection issues with SERVICE_ROLE key
 app.use('/api/whales', whaleDataRouter)
+
+// ===== ALERTS DATA ROUTES =====
+// Mount alerts data router (proxy for frontend → supabase)
+// Handles both combined alerts and indicator alerts
+app.use('/api/alerts', alertsDataRouter)
+
+// ===== BRIEFINGS DATA ROUTES =====
+// Mount briefings data router (proxy for frontend → supabase)
+// Handles market briefings / deep dive reports
+app.use('/api/briefings', briefingsDataRouter)
 
 // Health check endpoint
 app.get('/health', healthCheckLimiter, (req, res) => {

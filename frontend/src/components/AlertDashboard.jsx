@@ -1,55 +1,37 @@
-import React, { useState, useEffect } from 'react'
-import { supabase } from '../utils/supabase'
+import React, { useState, useEffect, useRef } from 'react'
 import TierSummaryPanel from './TierSummaryPanel'
 import AlertTerminal from './AlertTerminal'
+
+// Backend API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 /**
  * AlertDashboard - Main container for the dual-panel alert system
  * Left panel (30%): Tier-based summary
  * Right panel (70%): Terminal-style log
+ *
+ * Now uses Backend API instead of direct Supabase calls
  */
 function AlertDashboard({ className = '', style = {} }) {
   const [alerts, setAlerts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const eventSourceRef = useRef(null)
 
-  // Fetch initial alerts
+  // Fetch initial alerts from Backend API
   useEffect(() => {
     fetchRecentAlerts()
   }, [])
 
-  // Set up real-time subscription
+  // Set up SSE connection for real-time updates
   useEffect(() => {
-    // Subscribe to new alerts
-    const subscription = supabase
-      .channel('alerts_channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'alerts'
-        },
-        (payload) => {
-          console.log('🚨 New alert received:', payload.new)
-
-          // Add new alert to the beginning of the list
-          setAlerts(prev => [payload.new, ...prev].slice(0, 100)) // Keep last 100 alerts
-
-          // Play sound for high-tier alerts
-          if (payload.new.tier === 'S' || payload.new.tier === 'A') {
-            playAlertSound(payload.new.tier)
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Alert subscription active')
-        }
-      })
+    connectSSE()
 
     return () => {
-      supabase.removeChannel(subscription)
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
     }
   }, [])
 
@@ -58,30 +40,73 @@ function AlertDashboard({ className = '', style = {} }) {
       setLoading(true)
       setError(null)
 
-      const { data, error: fetchError } = await supabase
-        .from('alerts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50)
+      console.log('🔔 [AlertDashboard] Fetching alerts via Backend API...')
 
-      if (fetchError) {
-        console.error('Error fetching alerts:', fetchError)
-        setError(fetchError.message)
+      const response = await fetch(`${API_URL}/api/alerts?limit=50`)
 
-        // If table doesn't exist, show helpful message
-        if (fetchError.message.includes('relation') && fetchError.message.includes('does not exist')) {
-          setError('Alert tables not found. Please create database tables first.')
-        }
-        return
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
       }
 
-      setAlerts(data || [])
-      console.log(`📊 Loaded ${data?.length || 0} recent alerts`)
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch alerts')
+      }
+
+      setAlerts(json.data || [])
+      console.log(`✅ [AlertDashboard] Loaded ${json.data?.length || 0} alerts in ${json.queryTime}ms`)
     } catch (err) {
-      console.error('Failed to fetch alerts:', err)
+      console.error('❌ [AlertDashboard] Error:', err)
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const connectSSE = () => {
+    console.log('🔴 [SSE/Alerts] Connecting to alert stream...')
+
+    const eventSource = new EventSource(`${API_URL}/api/alerts/stream`)
+    eventSourceRef.current = eventSource
+
+    eventSource.addEventListener('connected', (event) => {
+      console.log('✅ [SSE/Alerts] Connected to alert stream')
+    })
+
+    eventSource.addEventListener('alert', (event) => {
+      try {
+        const alert = JSON.parse(event.data)
+        console.log(`🚨 [SSE/Alerts] New alert: [${alert.tier}] ${alert.signal_type}`)
+
+        // Add new alert to the beginning of the list
+        setAlerts(prev => [alert, ...prev].slice(0, 100)) // Keep last 100 alerts
+
+        // Play sound for high-tier alerts
+        if (alert.tier === 'S' || alert.tier === 'A') {
+          playAlertSound(alert.tier)
+        }
+      } catch (e) {
+        console.error('❌ [SSE/Alerts] Parse error:', e)
+      }
+    })
+
+    eventSource.addEventListener('ping', () => {
+      // Heartbeat received
+    })
+
+    eventSource.onerror = (err) => {
+      console.error('❌ [SSE/Alerts] Error:', err)
+
+      // Close current connection
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
+
+      // Reconnect after 5 seconds
+      console.log('🔄 [SSE/Alerts] Reconnecting in 5s...')
+      setTimeout(connectSSE, 5000)
     }
   }
 

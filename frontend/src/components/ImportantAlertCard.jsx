@@ -1,11 +1,13 @@
-import React, { useMemo, useEffect, useState } from 'react'
+import React, { useMemo, useEffect, useState, useRef } from 'react'
 import { useMarketData } from '../hooks/useMarketData'
 import { useWhaleData } from '../hooks/useWhaleData'
 import { transformToComboData } from '../utils/alertComboTransformer'
 import { ALERT_COMBOS } from '../constants/SubMarine_AlertCombos'
-import { supabase } from '../utils/supabase'
 import soundManager from '../utils/SoundManager'
 import CoinIcon from './CoinIcon'
+
+// Backend API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 /**
  * 🔱 메인얼럿 (God-Tier Alert System)
@@ -13,6 +15,8 @@ import CoinIcon from './CoinIcon'
  *
  * Priority 순서: S(1) > A(2) > B(3)
  * Type 별 색상: LONG(Green) / SHORT(Red) / HOLD(Yellow)
+ *
+ * Now uses Backend API instead of direct Supabase calls
  */
 function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
   // Fetch market data
@@ -22,63 +26,109 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
   // Track S-001 WHALE_SURGE alerts (2025-11-22)
   const [whaleSurgeAlert, setWhaleSurgeAlert] = useState(null)
   const [playedAlertIds, setPlayedAlertIds] = useState(new Set())
+  const eventSourceRef = useRef(null)
 
-  // Subscribe to S-001 alerts from alerts table
+  // Fetch S-001 alerts from Backend API
   useEffect(() => {
     // Fetch latest S-001 alert (within last 10 minutes)
     async function fetchLatestSurgeAlert() {
-      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+      try {
+        console.log('🚨 [ImportantAlertCard] Fetching S-001 alerts via Backend API...')
+        const response = await fetch(`${API_URL}/api/alerts?signal_type=S-001&limit=1`)
 
-      const { data, error } = await supabase
-        .from('alerts')
-        .select('*')
-        .eq('signal_type', 'S-001')
-        .gte('created_at', tenMinutesAgo)
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      if (!error && data && data.length > 0) {
-        const alert = data[0]
-        setWhaleSurgeAlert(alert)
-
-        // Play sound for new alerts (only once per alert)
-        if (!playedAlertIds.has(alert.id)) {
-          soundManager.play('alert-critical')
-          setPlayedAlertIds(prev => new Set([...prev, alert.id]))
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`)
         }
-      } else {
-        setWhaleSurgeAlert(null)
+
+        const json = await response.json()
+
+        if (!json.success) {
+          throw new Error(json.error || 'Failed to fetch alerts')
+        }
+
+        const data = json.data || []
+
+        // Filter for alerts within last 10 minutes
+        const tenMinutesAgo = Date.now() - 10 * 60 * 1000
+        const recentAlerts = data.filter(alert =>
+          new Date(alert.created_at).getTime() > tenMinutesAgo
+        )
+
+        if (recentAlerts.length > 0) {
+          const alert = recentAlerts[0]
+          setWhaleSurgeAlert(alert)
+
+          // Play sound for new alerts (only once per alert)
+          if (!playedAlertIds.has(alert.id)) {
+            soundManager.play('alert-critical')
+            setPlayedAlertIds(prev => new Set([...prev, alert.id]))
+          }
+        } else {
+          setWhaleSurgeAlert(null)
+        }
+
+        console.log(`✅ [ImportantAlertCard] Loaded ${recentAlerts.length} recent S-001 alerts`)
+      } catch (err) {
+        console.error('❌ [ImportantAlertCard] Error fetching alerts:', err)
+      }
+    }
+
+    // Connect SSE for real-time S-001 alerts
+    function connectSSE() {
+      console.log('🔴 [SSE/ImportantAlertCard] Connecting to alert stream...')
+
+      const eventSource = new EventSource(`${API_URL}/api/alerts/stream`)
+      eventSourceRef.current = eventSource
+
+      eventSource.addEventListener('connected', () => {
+        console.log('✅ [SSE/ImportantAlertCard] Connected')
+      })
+
+      eventSource.addEventListener('alert', (event) => {
+        try {
+          const alert = JSON.parse(event.data)
+
+          // Only handle S-001 WHALE_SURGE alerts
+          if (alert.signal_type === 'S-001') {
+            console.log('🚨 [SSE/ImportantAlertCard] S-001 WHALE SURGE detected:', alert)
+            setWhaleSurgeAlert(alert)
+
+            // Play critical alert sound
+            if (!playedAlertIds.has(alert.id)) {
+              soundManager.play('alert-critical')
+              setPlayedAlertIds(prev => new Set([...prev, alert.id]))
+            }
+          }
+        } catch (e) {
+          console.error('❌ [SSE/ImportantAlertCard] Parse error:', e)
+        }
+      })
+
+      eventSource.addEventListener('ping', () => {
+        // Heartbeat received
+      })
+
+      eventSource.onerror = (err) => {
+        console.error('❌ [SSE/ImportantAlertCard] Error:', err)
+
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close()
+          eventSourceRef.current = null
+        }
+
+        // Reconnect after 5 seconds
+        setTimeout(connectSSE, 5000)
       }
     }
 
     fetchLatestSurgeAlert()
-
-    // Subscribe to realtime updates
-    const channel = supabase
-      .channel('surge-alerts')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'alerts',
-          filter: 'signal_type=eq.S-001'
-        },
-        (payload) => {
-          console.log('🚨 S-001 WHALE SURGE detected:', payload.new)
-          setWhaleSurgeAlert(payload.new)
-
-          // Play critical alert sound
-          if (!playedAlertIds.has(payload.new.id)) {
-            soundManager.play('alert-critical')
-            setPlayedAlertIds(prev => new Set([...prev, payload.new.id]))
-          }
-        }
-      )
-      .subscribe()
+    connectSSE()
 
     return () => {
-      supabase.removeChannel(channel)
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
     }
   }, [])
 
