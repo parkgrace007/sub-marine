@@ -42,10 +42,10 @@ const corsOptions = {
       } else {
         // Fallback to default production origins
         allowedOrigins = [
-          'https://submarine-frontend-vb92.onrender.com',  // Frontend URL
+          'https://submarine-frontend-vb92.onrender.com',  // Frontend URL (Render)
           'https://submarine-ch8s.onrender.com',           // Backend URL (for admin)
-          'https://submarine.app',
-          'https://www.submarine.app'
+          'https://sub-marine.kr',                         // Custom domain
+          'https://www.sub-marine.kr'                      // Custom domain (www)
         ].filter(Boolean)
         console.log('🔒 [CORS] Using default allowed origins:', allowedOrigins)
       }
