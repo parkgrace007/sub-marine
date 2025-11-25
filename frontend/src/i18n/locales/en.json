@@ -91,7 +91,11 @@
   "trading": {
     "title": "Paper Trading",
     "balance": "Balance",
-    "position": "Position",
+    "virtual": "Virtual",
+    "positions": "Positions",
+    "orders": "Orders",
+    "history": "History",
+    "ranking": "Ranking",
     "pnl": "PnL",
     "winRate": "Win Rate",
     "totalTrades": "Total Trades",
@@ -104,9 +108,16 @@
     "price": "Price",
     "liquidation": "Liquidation",
     "noPosition": "No open positions",
-    "history": "Trade History",
     "reset": "Reset",
-    "resetConfirm": "Reset balance to $10,000?"
+    "resetConfirm": "Reset balance to $10,000?",
+    "demoNotice": {
+      "title": "Notice",
+      "description": "This page is a Bitcoin futures trading simulator using virtual USDT.",
+      "point1": "Not real trading",
+      "point2": "Not connected to real exchanges",
+      "point3": "For practice purposes only",
+      "dontShowAgain": "Don't show again"
+    }
   },
 
   "market": {

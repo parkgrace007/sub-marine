@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import { LightweightTradingChart } from '../components/Trading/Chart/LightweightTradingChart';
 import { OrderPanel } from '../components/Trading/OrderForm/OrderPanel';
@@ -15,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { TrendingUp, Wallet } from 'lucide-react';
 
 function TradingPage() {
+    const { t } = useTranslation();
     const price = useMarketStore((state) => state.price);
     const priceChange = useMarketStore((state) => state.priceChangePercent);
     const [activeTab, setActiveTab] = useState('positions');
@@ -81,11 +83,11 @@ function TradingPage() {
                     <div className="flex items-center gap-3 bg-surface-100 px-4 py-1.5 rounded border border-surface-300">
                         <Wallet size={16} className="text-primary" />
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-surface-500 font-medium uppercase tracking-wider">Balance:</span>
+                            <span className="text-xs text-surface-500 font-medium uppercase tracking-wider">{t('trading.balance')}:</span>
                             <span className="text-sm text-surface-600 font-mono font-semibold">
                                 {displayBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 <span className="text-surface-500 text-xs ml-1">USDT</span>
-                                <span className="text-surface-500 text-xs ml-1">(가상)</span>
+                                <span className="text-surface-500 text-xs ml-1">({t('trading.virtual')})</span>
                             </span>
                         </div>
                     </div>
@@ -120,7 +122,7 @@ function TradingPage() {
                                     activeTab === 'positions' ? "text-primary border-primary" : "text-surface-500 border-transparent hover:text-surface-600"
                                 )}
                             >
-                                Positions
+                                {t('trading.positions')}
                             </button>
                             <button
                                 onClick={() => setActiveTab('orders')}
@@ -129,7 +131,7 @@ function TradingPage() {
                                     activeTab === 'orders' ? "text-primary border-primary" : "text-surface-500 border-transparent hover:text-surface-600"
                                 )}
                             >
-                                Orders
+                                {t('trading.orders')}
                             </button>
                             <button
                                 onClick={() => setActiveTab('history')}
@@ -138,7 +140,7 @@ function TradingPage() {
                                     activeTab === 'history' ? "text-primary border-primary" : "text-surface-500 border-transparent hover:text-surface-600"
                                 )}
                             >
-                                History
+                                {t('trading.history')}
                             </button>
                         </div>
                         <div className="flex-1 overflow-auto">
@@ -152,7 +154,7 @@ function TradingPage() {
                     <div className="bg-surface-200 rounded border border-surface-300 overflow-hidden flex flex-col h-[500px]">
                         <div className="px-3 lg:px-5 py-3 border-b border-surface-300 bg-surface-200">
                             <h3 className="text-xs lg:text-sm font-bold uppercase tracking-wider text-primary">
-                                Ranking
+                                {t('trading.ranking')}
                             </h3>
                         </div>
                         <div className="flex-1 overflow-auto">
@@ -172,25 +174,24 @@ function TradingPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="bg-surface-200 border border-surface-300 rounded-lg shadow-2xl p-6 max-w-md w-full mx-4">
                         <div className="text-center mb-6">
-                            <h2 className="text-xl font-bold text-surface-600 mb-2">📌 안내</h2>
+                            <h2 className="text-xl font-bold text-surface-600 mb-2">📌 {t('trading.demoNotice.title')}</h2>
                             <p className="text-sm text-surface-500 leading-relaxed">
-                                본 페이지는 가상 USDT를 사용하는<br />
-                                비트코인 선물 거래 시뮬레이터입니다.
+                                {t('trading.demoNotice.description')}
                             </p>
                         </div>
                         <div className="bg-surface-100 border border-surface-300 rounded p-4 mb-6">
                             <ul className="space-y-2 text-sm text-surface-500">
                                 <li className="flex items-start gap-2">
                                     <span className="text-surface-400 mt-0.5">•</span>
-                                    <span>실제 거래가 아닙니다</span>
+                                    <span>{t('trading.demoNotice.point1')}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="text-surface-400 mt-0.5">•</span>
-                                    <span>실제 거래소와 연결되지 않습니다</span>
+                                    <span>{t('trading.demoNotice.point2')}</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="text-surface-400 mt-0.5">•</span>
-                                    <span>연습 목적으로만 사용하세요</span>
+                                    <span>{t('trading.demoNotice.point3')}</span>
                                 </li>
                             </ul>
                         </div>
@@ -202,13 +203,13 @@ function TradingPage() {
                                     onChange={(e) => setDontShowAgain(e.target.checked)}
                                     className="w-4 h-4 rounded border-surface-400 text-primary focus:ring-primary"
                                 />
-                                <span>다시 보지 않기</span>
+                                <span>{t('trading.demoNotice.dontShowAgain')}</span>
                             </label>
                             <button
                                 onClick={handleCloseDemoNotice}
                                 className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-text font-semibold rounded transition-colors"
                             >
-                                확인
+                                {t('common.confirm')}
                             </button>
                         </div>
                     </div>
