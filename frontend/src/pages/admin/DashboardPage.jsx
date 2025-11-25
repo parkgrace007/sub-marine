@@ -25,11 +25,25 @@ export default function DashboardPage() {
 
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      fetchDashboardData()
+      // 탭이 보이는 상태에서만 새로고침 (백그라운드 throttling 방지)
+      if (document.visibilityState === 'visible') {
+        fetchDashboardData()
+      }
     }, 30000)
+
+    // 탭이 다시 활성화되면 즉시 새로고침
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Tab activated, refreshing dashboard...')
+        fetchDashboardData()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 

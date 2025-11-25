@@ -146,12 +146,14 @@ export function useVisitorTracking() {
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        disconnect()
-      } else if (document.visibilityState === 'visible') {
-        // 다시 돌아오면 heartbeat
+      // 탭이 다시 활성화되면 즉시 heartbeat 전송
+      // (백그라운드에서 throttle되어 놓친 heartbeat 보상)
+      if (document.visibilityState === 'visible') {
         sendHeartbeat()
       }
+      // Note: hidden 상태에서 disconnect 호출 제거
+      // 이유: 백그라운드 탭이 잠시 숨겨져도 세션 유지 필요
+      // 실제 종료는 beforeunload에서만 처리
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)

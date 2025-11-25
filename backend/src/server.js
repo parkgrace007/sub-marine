@@ -666,6 +666,16 @@ const server = app.listen(PORT, () => {
   console.log('━'.repeat(60))
 })
 
+// Server timeout settings (prevent premature connection drops)
+// Render.com allows up to 100 minutes, but we set reasonable defaults
+server.keepAliveTimeout = 120000 // 120 seconds (default is 5s)
+server.headersTimeout = 125000   // Must be > keepAliveTimeout
+server.timeout = 0               // Disable request timeout (let rate limiter handle it)
+
+console.log('⚙️  Server timeouts configured:')
+console.log(`   Keep-Alive: ${server.keepAliveTimeout / 1000}s`)
+console.log(`   Headers: ${server.headersTimeout / 1000}s`)
+
 // Initialize REST API fallback
 const restFallback = new WhaleRestFallback()
 
