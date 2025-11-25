@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../utils/supabase'
 import { useTradingStore } from '../store/tradingStore'
 
+// Backend API URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
 const AuthContext = createContext({})
 
 export const AuthProvider = ({ children }) => {
@@ -28,6 +31,7 @@ export const AuthProvider = ({ children }) => {
     // Auth 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔐 [AuthContext] Auth state changed:', event)
         setUser(session?.user ?? null)
         if (session?.user) {
           await fetchProfile(session.user.id)
@@ -50,18 +54,45 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  // Fetch profile via Backend API (not direct Supabase)
   const fetchProfile = async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
+      console.log(`👤 [AuthContext] Fetching profile via Backend API...`)
 
-      if (error) throw error
-      setProfile(data)
+      const response = await fetch(`${API_URL}/api/profiles/${userId}`)
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status} ${response.statusText}`)
+      }
+
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to fetch profile')
+      }
+
+      // If profile doesn't exist, create one
+      if (!json.data) {
+        console.log(`👤 [AuthContext] No profile found, creating new profile...`)
+        const createResponse = await fetch(`${API_URL}/api/profiles/${userId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname: 'User' })
+        })
+
+        if (createResponse.ok) {
+          const createJson = await createResponse.json()
+          if (createJson.success && createJson.data) {
+            setProfile(createJson.data)
+            console.log(`✅ [AuthContext] Profile created in ${createJson.queryTime}ms`)
+          }
+        }
+      } else {
+        setProfile(json.data)
+        console.log(`✅ [AuthContext] Profile loaded in ${json.queryTime}ms`)
+      }
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('❌ [AuthContext] Error fetching profile:', error)
     } finally {
       setLoading(false)
     }
@@ -71,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,  // Explicit localhost URL
+        redirectTo: `${window.location.origin}/`,  // Explicit redirect URL
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -88,13 +119,13 @@ export const AuthProvider = ({ children }) => {
       // 1. Supabase signOut (scope: global로 모든 탭에서 로그아웃)
       await supabase.auth.signOut({ scope: 'global' })
 
-      // 2. 🆕 TradingStore localStorage 완전 삭제
+      // 2. TradingStore localStorage 완전 삭제
       console.log('🧹 Clearing trading store...')
       localStorage.removeItem('trading-storage-v2')
 
-      // 🆕 TradingStore 초기 상태로 리셋
+      // TradingStore 초기 상태로 리셋
       useTradingStore.setState({
-        balance: 0, // 🔧 FIX: Reset to 0 for logged-out state (not 10000)
+        balance: 0, // Reset to 0 for logged-out state
         positions: [],
         orders: [],
         tradeHistory: []
@@ -126,40 +157,75 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Update nickname via Backend API
   const updateNickname = async (newNickname) => {
     if (!user) return { error: 'Not authenticated' }
 
-    const { data, error} = await supabase
-      .from('profiles')
-      .update({ nickname: newNickname, updated_at: new Date().toISOString() })
-      .eq('id', user.id)
-      .select()
-      .single()
+    try {
+      console.log(`👤 [AuthContext] Updating nickname via Backend API...`)
 
-    if (!error) setProfile(data)
-    return { data, error }
+      const response = await fetch(`${API_URL}/api/profiles/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: newNickname })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to update nickname')
+      }
+
+      setProfile(json.data)
+      console.log(`✅ [AuthContext] Nickname updated in ${json.queryTime}ms`)
+
+      return { data: json.data, error: null }
+    } catch (error) {
+      console.error('❌ [AuthContext] Error updating nickname:', error)
+      return { data: null, error: error.message }
+    }
   }
 
+  // Update trading balance via Backend API
   const updateTradingBalance = async (newBalance, stats = {}) => {
     if (!user) return { error: 'Not authenticated' }
 
-    const updateData = {
-      trading_balance: newBalance,
-      updated_at: new Date().toISOString(),
-      ...stats // total_trades, winning_trades, total_pnl, all_time_high_balance, max_drawdown, last_trade_at 등
-    }
+    try {
+      console.log(`👤 [AuthContext] Updating trading balance via Backend API...`)
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updateData)
-      .eq('id', user.id)
-      .select()
-      .single()
+      const updateData = {
+        trading_balance: newBalance,
+        ...stats // total_trades, winning_trades, total_pnl, all_time_high_balance, max_drawdown, last_trade_at 등
+      }
 
-    if (!error) {
-      setProfile(data)
+      const response = await fetch(`${API_URL}/api/profiles/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const json = await response.json()
+
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to update trading balance')
+      }
+
+      setProfile(json.data)
+      console.log(`✅ [AuthContext] Trading balance updated in ${json.queryTime}ms`)
+
+      return { data: json.data, error: null }
+    } catch (error) {
+      console.error('❌ [AuthContext] Error updating trading balance:', error)
+      return { data: null, error: error.message }
     }
-    return { data, error }
   }
 
   return (

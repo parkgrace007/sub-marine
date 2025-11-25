@@ -14,6 +14,7 @@ import diagnosticRouter from './routes/diagnostic.js'
 import whaleDataRouter from './routes/whaleData.js'
 import alertsDataRouter from './routes/alertsData.js'
 import briefingsDataRouter from './routes/briefingsData.js'
+import profilesDataRouter from './routes/profilesData.js'
 import metricsCollector from './services/metricsCollector.js'
 
 dotenv.config()
@@ -249,6 +250,11 @@ app.use('/api/alerts', alertsDataRouter)
 // Mount briefings data router (proxy for frontend → supabase)
 // Handles market briefings / deep dive reports
 app.use('/api/briefings', briefingsDataRouter)
+
+// ===== PROFILES DATA ROUTES =====
+// Mount profiles data router (proxy for frontend → supabase)
+// Handles user profiles for auth context
+app.use('/api/profiles', profilesDataRouter)
 
 // Health check endpoint
 app.get('/health', healthCheckLimiter, (req, res) => {

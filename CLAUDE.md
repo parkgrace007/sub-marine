@@ -42,12 +42,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 시스템 아키텍처
 
 ```
-Frontend (React) ←→ Supabase (Realtime DB)
-                         ↑
-Backend (Node.js) ───────┘
-   ├── Whale Alert API (5분마다)
-   └── CoinGecko API (30초마다)
+Frontend (React) ←→ Backend API (Express) ←→ Supabase (PostgreSQL)
+      │                    │                      │
+      │  fetch/SSE         │  SERVICE_ROLE        │
+      │                    │                      │
+      └─ /api/whales ──────┤                      │
+      └─ /api/alerts ──────┤                      │
+      └─ /api/briefings ───┤                      │
+      └─ /api/market ──────┘                      │
+                                                  │
+                           Whale Alert API ───────┤ (5분마다)
+                           CoinGecko API ─────────┘ (30초마다)
 ```
+
+⚠️ **중요**: Frontend는 절대 Supabase 직접 호출 금지 (Render Free Tier 제약)
 
 ---
 
@@ -445,13 +453,47 @@ node backend/scripts/calculateSWSI.js
 - 폴링 방식 절대 금지
 - 구독 방식 유지
 
+### 8. Backend Proxy 필수 (Render Free Tier) - 2025-11-25 추가
+
+**절대 금지**: Frontend에서 Supabase 직접 호출
+**필수**: 모든 DB 요청은 Backend API를 통해 처리
+
+**이유**: Render Free Tier에서 Frontend ↔ Supabase 직접 연결 시 connection timeout 발생
+- ANON_KEY로는 connection pooler 우회 불가
+- SERVICE_ROLE key는 Backend에서만 사용 가능
+
+**올바른 아키텍처**:
+```
+Frontend → Backend API → Supabase (SERVICE_ROLE)
+         (fetch/SSE)    (supabase-js)
+```
+
+**Backend API 엔드포인트**:
+- `/api/whales` - 고래 데이터 (whaleData.js)
+- `/api/alerts` - 알림 데이터 (alertsData.js)
+- `/api/briefings` - 브리핑 데이터 (briefingsData.js)
+- `/api/market` - 시장 데이터 (marketData.js)
+
+**실시간 업데이트**: SSE (Server-Sent Events) 사용
+- `/api/whales/stream` - 고래 실시간
+- `/api/alerts/stream` - 알림 실시간
+- `/api/briefings/stream` - 브리핑 실시간
+
+**2025-11-25 장애 사례**:
+| 컴포넌트 | 문제 | 해결 |
+|---------|------|------|
+| 중요알림 LOG | Supabase 직접 호출 → 404 | /api/alerts Backend Proxy |
+| DEEP DIVE REPORT | Supabase 직접 호출 → 404 | /api/briefings Backend Proxy |
+
+**교훈**: 새 기능 추가 시 반드시 Backend API를 통해 DB 접근할 것
+
 ---
 
 ## 현재 상태
 
-**Phase**: Phase 8 완료 (UX 폴리싱 완료)
+**Phase**: Phase 9 진행 중 (Production Deployment)
 **진행률**: 100% (Core features complete)
-**마지막 업데이트**: 2025-11-22
+**마지막 업데이트**: 2025-11-25
 
 **완료된 주요 기능**:
 - ✅ Phase 0-8 (PRD 기준 100%)
@@ -460,6 +502,10 @@ node backend/scripts/calculateSWSI.js
 - ✅ Alert Dashboard (12 signals)
 - ✅ Custom whale tier system
 - ✅ Time-weighted whale analysis (2025-11-22)
+- ✅ Backend Proxy 전체 마이그레이션 (2025-11-25)
+  - /api/whales, /api/alerts, /api/briefings, /api/market
+  - SSE 실시간 스트림 지원
+  - 30-60초 캐싱으로 성능 최적화
 
 **다음 작업**:
 - Phase 9: Deployment (Render)
