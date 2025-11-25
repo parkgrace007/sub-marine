@@ -11,6 +11,7 @@ import { getLunarCrushData, clearCache as clearLunarCache } from './services/lun
 import { getNewsAPIData, clearCache as clearNewsCache, getNextRefreshTime, cleanupExistingArticles } from './services/newsapi.js'
 import adminRouter from './routes/admin.js'
 import diagnosticRouter from './routes/diagnostic.js'
+import whaleDataRouter from './routes/whaleData.js'
 import metricsCollector from './services/metricsCollector.js'
 
 dotenv.config()
@@ -49,8 +50,10 @@ const corsOptions = {
       // Development: Allow localhost variants
       allowedOrigins = [
         'http://localhost:5173',
+        'http://localhost:5174',
         'http://localhost:3000',
-        'http://127.0.0.1:5173'
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174'
       ]
     }
 
@@ -229,6 +232,11 @@ app.use('/api/admin', adminRouter)
 // Mount diagnostic router (all /api/diagnostic/* routes)
 // These endpoints help diagnose database connection and deployment issues
 app.use('/api/diagnostic', diagnosticRouter)
+
+// ===== WHALE DATA ROUTES =====
+// Mount whale data router (proxy for frontend → supabase)
+// This bypasses frontend direct connection issues with SERVICE_ROLE key
+app.use('/api/whales', whaleDataRouter)
 
 // Health check endpoint
 app.get('/health', healthCheckLimiter, (req, res) => {
