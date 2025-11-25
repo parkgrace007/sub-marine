@@ -7,14 +7,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Check frontend/.env')
 }
 
-// Create Supabase client with ANON key (read-only + auth)
+// Create Supabase client with ANON key (for AUTH ONLY)
+// NOTE: Do NOT use supabase client for data queries - use Backend API instead
+// Reason: Render Free Tier has connection issues with direct Supabase calls
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionUrl: true,
-    flowType: 'implicit' // Fixed: Use implicit flow to avoid PKCE race condition blocking queries
+    flowType: 'implicit' // Use implicit flow for OAuth
   },
+  // Disable realtime since we use Backend SSE instead
   realtime: {
     params: {
       eventsPerSecond: 10
@@ -22,31 +25,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Test Supabase connection on initialization (ALWAYS - including production)
-console.log('🔍 Testing Supabase connection...')
-console.log('   ENV.DEV:', import.meta.env.DEV)
-console.log('   ENV.MODE:', import.meta.env.MODE)
-console.log('   ENV.VITE_DEV_MODE:', import.meta.env.VITE_DEV_MODE)
-console.log('   SUPABASE_URL:', supabaseUrl)
-console.log('   ANON_KEY:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'MISSING')
-
-supabase.from('whale_events').select('count', { count: 'exact', head: true })
-  .then(({ count, error }) => {
-    if (error) {
-      console.error('❌ Supabase connection test FAILED:', error.message)
-      console.error('   URL:', supabaseUrl)
-      console.error('   Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'MISSING')
-      console.error('   Full error:', error)
-      alert('⚠️ Database connection failed. Check console for details.')
-    } else {
-      console.log('✅ Supabase connection test PASSED')
-      console.log(`   Connected to: ${supabaseUrl}`)
-      console.log(`   whale_events table has ${count} rows`)
-    }
-  })
-  .catch(err => {
-    console.error('❌ Supabase connection test ERROR:', err)
-    alert('⚠️ Database connection error. Check console for details.')
-  })
+// Log configuration (no direct DB query - that would timeout on Render Free Tier)
+console.log('🔐 Supabase Auth client initialized')
+console.log('   URL:', supabaseUrl)
+console.log('   Mode:', import.meta.env.MODE)
 
 export default supabase

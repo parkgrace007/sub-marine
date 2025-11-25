@@ -13,25 +13,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Debug: Check URL for OAuth tokens
+    const urlHash = window.location.hash
+    console.log('🔐 [AuthContext] Initializing...')
+    console.log('   URL hash present:', urlHash.length > 0)
+    console.log('   API_URL:', API_URL)
+    if (urlHash.includes('access_token')) {
+      console.log('   ✅ OAuth tokens detected in URL hash')
+    }
+
     // 현재 세션 확인
     supabase.auth.getSession()
-      .then(({ data: { session } }) => {
+      .then(({ data: { session }, error }) => {
+        console.log('🔐 [AuthContext] getSession result:', {
+          hasSession: !!session,
+          userId: session?.user?.id?.substring(0, 8) || 'none',
+          error: error?.message || 'none'
+        })
+
         setUser(session?.user ?? null)
         if (session?.user) {
           fetchProfile(session.user.id)
         } else {
+          console.log('🔐 [AuthContext] No session found, user is logged out')
           setLoading(false)
         }
       })
       .catch((error) => {
-        console.error('Error getting session:', error)
-        setLoading(false) // 에러 발생 시에도 loading 해제
+        console.error('❌ [AuthContext] getSession error:', error)
+        setLoading(false)
       })
 
     // Auth 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔐 [AuthContext] Auth state changed:', event)
+        console.log('🔐 [AuthContext] Auth state changed:', {
+          event,
+          hasSession: !!session,
+          userId: session?.user?.id?.substring(0, 8) || 'none'
+        })
+
         setUser(session?.user ?? null)
         if (session?.user) {
           await fetchProfile(session.user.id)
@@ -44,7 +65,7 @@ export const AuthProvider = ({ children }) => {
 
     // 안전장치: 5초 후에도 loading이 true면 강제로 false 설정
     const timeout = setTimeout(() => {
-      console.warn('Auth loading timeout - forcing loading to false')
+      console.warn('⚠️ [AuthContext] Auth loading timeout - forcing loading to false')
       setLoading(false)
     }, 5000)
 
