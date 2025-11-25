@@ -239,6 +239,84 @@ router.get('/stream', (req, res) => {
 })
 
 /**
+ * POST /api/briefings/refresh
+ * Delete invalid briefings (with NaN data) and generate new one
+ * Requires ADMIN_TOKEN header
+ */
+router.post('/refresh', async (req, res) => {
+  try {
+    // Check admin token
+    const token = req.headers['x-admin-token']
+    if (token !== process.env.ADMIN_TOKEN) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized - invalid admin token'
+      })
+    }
+
+    console.log('🔄 [BriefingsAPI] Admin refresh requested')
+
+    // 1. Delete briefings with NaN data
+    const { data: invalidBriefings, error: selectError } = await supabase
+      .from('market_briefings')
+      .select('id, metadata')
+
+    if (selectError) {
+      throw new Error(`Select error: ${selectError.message}`)
+    }
+
+    // Find briefings with NaN in metadata
+    const invalidIds = invalidBriefings
+      .filter(b => {
+        const meta = b.metadata
+        return meta && (
+          meta.btc_price === 'NaN' ||
+          meta.price_change_24h === 'NaN' ||
+          meta.btc_volume_24h === 'NaN'
+        )
+      })
+      .map(b => b.id)
+
+    let deletedCount = 0
+    if (invalidIds.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('market_briefings')
+        .delete()
+        .in('id', invalidIds)
+
+      if (deleteError) {
+        throw new Error(`Delete error: ${deleteError.message}`)
+      }
+      deletedCount = invalidIds.length
+      console.log(`   🗑️ Deleted ${deletedCount} invalid briefings`)
+    }
+
+    // 2. Import and run briefing service
+    const briefingService = (await import('../services/briefingService.js')).default
+    const newBriefing = await briefingService.generateBriefing()
+
+    // Clear cache
+    cache.clear()
+
+    res.json({
+      success: true,
+      message: `Deleted ${deletedCount} invalid briefings and generated new one`,
+      deletedCount,
+      newBriefing: {
+        id: newBriefing.id,
+        created_at: newBriefing.created_at
+      }
+    })
+  } catch (error) {
+    console.error('❌ [BriefingsAPI] Refresh error:', error.message)
+    res.status(500).json({
+      success: false,
+      error: error.message
+    })
+  }
+})
+
+/**
  * GET /api/briefings/health
  * Health check for briefings API
  */
