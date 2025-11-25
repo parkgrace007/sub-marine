@@ -3,9 +3,11 @@
  *
  * Purpose: Monitor RSI, MACD, BB indicators and generate logs on changes
  * Uses: useMarketData for real-time data, logGenerator for template-based logs
+ * Supports bilingual output (ko/en) based on current i18n language
  */
 
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useMarketData } from './useMarketData'
 import {
   generateRSILog,
@@ -22,6 +24,10 @@ import {
  * @returns {object} Market data from useMarketData
  */
 export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGenerated) {
+  const { i18n } = useTranslation()
+  // Get current language ('ko' or 'en')
+  const lang = i18n.language === 'en' || i18n.language?.startsWith('en-') ? 'en' : 'ko'
+
   // Subscribe to real-time market data
   const marketData = useMarketData(timeframe, symbol)
 
@@ -46,7 +52,7 @@ export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGen
 
     // Skip first run (no previous value to compare)
     if (prevRSI !== null && prevValuesRef.current.initialized) {
-      const log = generateRSILog(currentRSI, prevRSI)
+      const log = generateRSILog(currentRSI, prevRSI, lang)
       if (log && onLogGenerated) {
         onLogGenerated(log)
       }
@@ -54,7 +60,7 @@ export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGen
 
     // Update previous value
     prevValuesRef.current.rsi = currentRSI
-  }, [marketData.rsi_average, marketData.loading, marketData.error, onLogGenerated])
+  }, [marketData.rsi_average, marketData.loading, marketData.error, onLogGenerated, lang])
 
   // Monitor MACD changes
   useEffect(() => {
@@ -69,7 +75,7 @@ export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGen
 
     // Skip first run
     if (prevHistogram !== null && prevValuesRef.current.initialized) {
-      const log = generateMACDLog(currentHistogram, prevHistogram, currentMacdLine, prevMacdLine)
+      const log = generateMACDLog(currentHistogram, prevHistogram, currentMacdLine, prevMacdLine, lang)
       if (log && onLogGenerated) {
         onLogGenerated(log)
       }
@@ -83,7 +89,8 @@ export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGen
     marketData.macd_line,
     marketData.loading,
     marketData.error,
-    onLogGenerated
+    onLogGenerated,
+    lang
   ])
 
   // Monitor Bollinger Bands changes
@@ -109,7 +116,7 @@ export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGen
 
     // Skip first run
     if (prevWidth !== null && prevValuesRef.current.initialized) {
-      const log = generateBBLog(currentWidth, prevWidth, currentPosition, prevPosition)
+      const log = generateBBLog(currentWidth, prevWidth, currentPosition, prevPosition, lang)
       if (log && onLogGenerated) {
         onLogGenerated(log)
       }
@@ -126,7 +133,8 @@ export function useIndicatorLogger(timeframe = '1h', symbol = '통합', onLogGen
     marketData.bb_lower,
     marketData.loading,
     marketData.error,
-    onLogGenerated
+    onLogGenerated,
+    lang
   ])
 
   // Mark as initialized after first data load
