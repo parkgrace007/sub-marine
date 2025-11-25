@@ -18,6 +18,44 @@ const profilesApiLimiter = rateLimit({
 })
 
 /**
+ * GET /api/profiles/health
+ * Health check for profiles API
+ * NOTE: Must be defined BEFORE /:userId route to avoid "health" being treated as userId
+ */
+router.get('/health', async (req, res) => {
+  try {
+    const startTime = Date.now()
+
+    const { count, error } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+
+    const duration = Date.now() - startTime
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        status: 'unhealthy',
+        error: error.message
+      })
+    }
+
+    res.json({
+      success: true,
+      status: 'healthy',
+      rowCount: count,
+      queryTime: duration
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 'error',
+      error: error.message
+    })
+  }
+})
+
+/**
  * GET /api/profiles/:userId
  * Fetch a user's profile by ID
  */
@@ -231,43 +269,6 @@ router.post('/:userId', profilesApiLimiter, async (req, res) => {
     console.error('❌ [ProfilesAPI] Error:', error)
     res.status(500).json({
       success: false,
-      error: error.message
-    })
-  }
-})
-
-/**
- * GET /api/profiles/health
- * Health check for profiles API
- */
-router.get('/health', async (req, res) => {
-  try {
-    const startTime = Date.now()
-
-    const { count, error } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-
-    const duration = Date.now() - startTime
-
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        status: 'unhealthy',
-        error: error.message
-      })
-    }
-
-    res.json({
-      success: true,
-      status: 'healthy',
-      rowCount: count,
-      queryTime: duration
-    })
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      status: 'error',
       error: error.message
     })
   }
