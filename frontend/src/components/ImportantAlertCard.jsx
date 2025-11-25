@@ -1,10 +1,11 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react'
+import React, { useMemo, useEffect, useState, useCallback } from 'react'
 import { useMarketData } from '../hooks/useMarketData'
 import { useWhaleData } from '../hooks/useWhaleData'
 import { transformToComboData } from '../utils/alertComboTransformer'
 import { ALERT_COMBOS } from '../constants/SubMarine_AlertCombos'
 import soundManager from '../utils/SoundManager'
 import CoinIcon from './CoinIcon'
+import { useAlertStream } from '../hooks/useAlertStream'
 
 // Backend API URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -26,11 +27,30 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
   // Track S-001 WHALE_SURGE alerts (2025-11-22)
   const [whaleSurgeAlert, setWhaleSurgeAlert] = useState(null)
   const [playedAlertIds, setPlayedAlertIds] = useState(new Set())
-  const eventSourceRef = useRef(null)
 
-  // Fetch S-001 alerts from Backend API
+  // Handle new alert from shared SSE stream (only S-001)
+  const handleNewAlert = useCallback((alert) => {
+    // Only handle S-001 WHALE_SURGE alerts
+    if (alert.signal_type === 'S-001') {
+      console.log('🚨 [ImportantAlertCard] S-001 WHALE SURGE detected:', alert)
+      setWhaleSurgeAlert(alert)
+
+      // Play critical alert sound (only once per alert)
+      setPlayedAlertIds(prev => {
+        if (!prev.has(alert.id)) {
+          soundManager.play('alert-critical')
+          return new Set([...prev, alert.id])
+        }
+        return prev
+      })
+    }
+  }, [])
+
+  // Subscribe to shared SSE stream
+  useAlertStream(handleNewAlert)
+
+  // Fetch initial S-001 alerts from Backend API
   useEffect(() => {
-    // Fetch latest S-001 alert (within last 10 minutes)
     async function fetchLatestSurgeAlert() {
       try {
         console.log('🚨 [ImportantAlertCard] Fetching S-001 alerts via Backend API...')
@@ -59,10 +79,13 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
           setWhaleSurgeAlert(alert)
 
           // Play sound for new alerts (only once per alert)
-          if (!playedAlertIds.has(alert.id)) {
-            soundManager.play('alert-critical')
-            setPlayedAlertIds(prev => new Set([...prev, alert.id]))
-          }
+          setPlayedAlertIds(prev => {
+            if (!prev.has(alert.id)) {
+              soundManager.play('alert-critical')
+              return new Set([...prev, alert.id])
+            }
+            return prev
+          })
         } else {
           setWhaleSurgeAlert(null)
         }
@@ -73,63 +96,7 @@ function ImportantAlertCard({ timeframe = '1h', symbol = '통합' }) {
       }
     }
 
-    // Connect SSE for real-time S-001 alerts
-    function connectSSE() {
-      console.log('🔴 [SSE/ImportantAlertCard] Connecting to alert stream...')
-
-      const eventSource = new EventSource(`${API_URL}/api/alerts/stream`)
-      eventSourceRef.current = eventSource
-
-      eventSource.addEventListener('connected', () => {
-        console.log('✅ [SSE/ImportantAlertCard] Connected')
-      })
-
-      eventSource.addEventListener('alert', (event) => {
-        try {
-          const alert = JSON.parse(event.data)
-
-          // Only handle S-001 WHALE_SURGE alerts
-          if (alert.signal_type === 'S-001') {
-            console.log('🚨 [SSE/ImportantAlertCard] S-001 WHALE SURGE detected:', alert)
-            setWhaleSurgeAlert(alert)
-
-            // Play critical alert sound
-            if (!playedAlertIds.has(alert.id)) {
-              soundManager.play('alert-critical')
-              setPlayedAlertIds(prev => new Set([...prev, alert.id]))
-            }
-          }
-        } catch (e) {
-          console.error('❌ [SSE/ImportantAlertCard] Parse error:', e)
-        }
-      })
-
-      eventSource.addEventListener('ping', () => {
-        // Heartbeat received
-      })
-
-      eventSource.onerror = (err) => {
-        console.error('❌ [SSE/ImportantAlertCard] Error:', err)
-
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close()
-          eventSourceRef.current = null
-        }
-
-        // Reconnect after 5 seconds
-        setTimeout(connectSSE, 5000)
-      }
-    }
-
     fetchLatestSurgeAlert()
-    connectSSE()
-
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
-        eventSourceRef.current = null
-      }
-    }
   }, [])
 
   // Detect active combo

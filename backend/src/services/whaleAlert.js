@@ -229,18 +229,35 @@ class WhaleAlertService {
   /**
    * Transform Whale Alert data to whale_events schema
    * NEW FORMAT: { type: "alert", amounts: [{symbol, amount, value_usd}], from, to, transaction: {hash, ...} }
+   *
+   * FIX (2025-11-25): Handle both object and string formats from API
+   * - String format: "Binance" or "unknown wallet"
+   * - Object format: { owner: 'Unknown wallet', owner_type: 'unknown' }
    */
   transformAlert(alert) {
     // Extract first amount (usually only one, but API supports multiple)
     const primaryAmount = alert.amounts?.[0] || {}
 
-    // Parse from/to - can be exchange name or "unknown wallet"
-    const fromStr = alert.from || 'unknown wallet'
-    const toStr = alert.to || 'unknown wallet'
+    // Parse from/to - handle both object and string formats
+    const fromOwnerData = alert.from || {}
+    const toOwnerData = alert.to || {}
 
-    // Determine owner types
-    const fromOwnerType = this.parseOwnerType(fromStr)
-    const toOwnerType = this.parseOwnerType(toStr)
+    // Extract owner string: object.owner or string directly
+    const fromStr = typeof fromOwnerData === 'object'
+      ? (fromOwnerData.owner || 'unknown wallet')
+      : (fromOwnerData || 'unknown wallet')
+
+    const toStr = typeof toOwnerData === 'object'
+      ? (toOwnerData.owner || 'unknown wallet')
+      : (toOwnerData || 'unknown wallet')
+
+    // Extract API's owner_type hint (if object format)
+    const fromOwnerTypeHint = typeof fromOwnerData === 'object' ? fromOwnerData.owner_type : null
+    const toOwnerTypeHint = typeof toOwnerData === 'object' ? toOwnerData.owner_type : null
+
+    // Determine owner types: prefer API hint, fallback to parsing
+    const fromOwnerType = this.mapApiOwnerType(fromOwnerTypeHint) ?? this.parseOwnerType(fromStr)
+    const toOwnerType = this.mapApiOwnerType(toOwnerTypeHint) ?? this.parseOwnerType(toStr)
 
     // Determine flow type
     const flowType = this.determineFlowType(fromOwnerType, toOwnerType)
@@ -274,19 +291,66 @@ class WhaleAlertService {
   }
 
   /**
+   * Map Whale Alert API's owner_type to internal format (2025-11-25)
+   * @param {string} apiOwnerType - API's owner_type value ('unknown', 'exchange', 'contract', etc.)
+   * @returns {string|null} - 'exchange', 'contract', or null (private wallet)
+   */
+  mapApiOwnerType(apiOwnerType) {
+    if (!apiOwnerType) return null
+
+    const normalized = apiOwnerType.toLowerCase().trim()
+
+    // API sends 'unknown' or 'wallet' for private wallets
+    if (normalized === 'unknown' || normalized === 'wallet') {
+      return null
+    }
+
+    // API sends 'exchange' for exchanges
+    if (normalized === 'exchange') {
+      return 'exchange'
+    }
+
+    // API sends 'contract', 'defi' for smart contracts
+    if (normalized === 'contract' || normalized === 'defi') {
+      return 'contract'
+    }
+
+    // Unknown API value - return null to let parseOwnerType handle it
+    return null
+  }
+
+  /**
    * Parse owner type from Whale Alert string format (2025-11-20: Enhanced pattern matching)
    * Examples: "Binance" → exchange, "unknown wallet" → null, "Aave" → contract
    *
    * ROOT CAUSE FIX: Previous simple logic didn't recognize new exchange names
    * like "Stake", "Coinbase Institutional", "Aave", "HTX", "Abraxas"
    * causing all transactions to be classified as 'internal' and filtered out.
+   *
+   * FIX (2025-11-25): Added safety checks for object inputs and more flexible wallet patterns
    */
   parseOwnerType(ownerStr) {
+    // Safety check: if object was passed instead of string, return null
+    if (typeof ownerStr === 'object') {
+      console.warn('⚠️ parseOwnerType received object instead of string:', ownerStr)
+      return null
+    }
+
     // Normalize: lowercase and trim
     const normalized = (ownerStr || '').toLowerCase().trim()
 
-    // Private wallet patterns (return null)
-    if (!normalized || normalized === 'unknown wallet' || normalized === 'unknown' || normalized === '') {
+    // Invalid input handling (including "[object Object]")
+    if (!normalized || normalized.startsWith('[object')) {
+      return null
+    }
+
+    // Private wallet patterns (return null) - more flexible matching
+    if (normalized === '' ||
+        normalized === 'unknown' ||
+        normalized === 'unknown wallet' ||
+        normalized.includes('unknown wallet') ||  // Handle variations like "Unknown Wallet 1"
+        normalized === 'private wallet' ||
+        normalized === 'wallet') {
       return null
     }
 
