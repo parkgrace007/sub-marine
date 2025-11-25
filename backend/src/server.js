@@ -9,7 +9,6 @@ import WhaleRestFallback from './services/whaleRestFallback.js'
 import scheduler from './services/scheduler.js'
 import { getLunarCrushData, clearCache as clearLunarCache } from './services/lunarcrush.js'
 import { getNewsAPIData, clearCache as clearNewsCache, getNextRefreshTime, cleanupExistingArticles } from './services/newsapi.js'
-import adminRouter from './routes/admin.js'
 import diagnosticRouter from './routes/diagnostic.js'
 import whaleDataRouter from './routes/whaleData.js'
 import alertsDataRouter from './routes/alertsData.js'
@@ -230,10 +229,6 @@ function analyzeSentiment(title) {
   if (hasBearish && !hasBullish) return 'bearish'
   return 'neutral'
 }
-
-// ===== ADMIN ROUTES =====
-// Mount admin router (all /api/admin/* routes)
-app.use('/api/admin', adminRouter)
 
 // ===== DIAGNOSTIC ROUTES =====
 // Mount diagnostic router (all /api/diagnostic/* routes)
