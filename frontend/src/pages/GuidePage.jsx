@@ -390,7 +390,7 @@ function GuidePage() {
                       <span className="px-2 py-1 bg-success text-white text-xs rounded font-bold">LONG</span>
                     </div>
                     <p className="text-sm text-surface-600 mb-3">
-                      극단적 저점 + 대형 고래 매수 = 역사적 저가 매수 기회
+                      극단적 저점 + 대형 고래 유입 = 역사적 저가 매수 기회
                     </p>
                     <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm space-y-1">
                       <div className="flex items-start gap-2">
@@ -399,7 +399,7 @@ function GuidePage() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-500">✓</span>
-                        <span>고래 순매수 $30M 이상</span>
+                        <span>고래 순유입 $30M 이상</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-500">✓</span>
@@ -415,7 +415,7 @@ function GuidePage() {
                       <span className="px-2 py-1 bg-danger text-white text-xs rounded font-bold">SHORT</span>
                     </div>
                     <p className="text-sm text-surface-600 mb-3">
-                      극단적 고점 + 대형 고래 매도 = 대형 하락 직전
+                      극단적 고점 + 대형 고래 유출 = 대형 하락 직전
                     </p>
                     <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm space-y-1">
                       <div className="flex items-start gap-2">
@@ -424,7 +424,7 @@ function GuidePage() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-500">✓</span>
-                        <span>고래 순매도 $30M 이상</span>
+                        <span>고래 순유출 $30M 이상</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-500">✓</span>
@@ -440,7 +440,7 @@ function GuidePage() {
                       <span className="px-2 py-1 bg-success text-white text-xs rounded font-bold">LONG</span>
                     </div>
                     <p className="text-sm text-surface-600 mb-3">
-                      변동성 압축 → 상단 돌파 + 고래 매수 = 폭발적 상승
+                      변동성 압축 → 상단 돌파 + 고래 유입 = 폭발적 상승
                     </p>
                     <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm space-y-1">
                       <div className="flex items-start gap-2">
@@ -453,7 +453,7 @@ function GuidePage() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-500">✓</span>
-                        <span>MACD 강한 상승 모멘텀 + 고래 매수 $20M+</span>
+                        <span>MACD 강한 상승 모멘텀 + 고래 유입 $20M+</span>
                       </div>
                     </div>
                   </div>
@@ -465,7 +465,7 @@ function GuidePage() {
                       <span className="px-2 py-1 bg-danger text-white text-xs rounded font-bold">SHORT</span>
                     </div>
                     <p className="text-sm text-surface-600 mb-3">
-                      변동성 압축 → 하단 돌파 + 고래 매도 = 급락 시작
+                      변동성 압축 → 하단 돌파 + 고래 유출 = 급락 시작
                     </p>
                     <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm space-y-1">
                       <div className="flex items-start gap-2">
@@ -478,7 +478,7 @@ function GuidePage() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-red-500">✓</span>
-                        <span>MACD 강한 하락 모멘텀 + 고래 매도 $20M+</span>
+                        <span>MACD 강한 하락 모멘텀 + 고래 유출 $20M+</span>
                       </div>
                     </div>
                   </div>
@@ -498,7 +498,7 @@ function GuidePage() {
                       <span className="px-2 py-1 bg-success text-white text-xs rounded font-bold">LONG</span>
                     </div>
                     <p className="text-sm text-surface-600 mb-3">
-                      가격 하락 중 고래는 매수 = 스마트 머니 축적 (시간 가중 분석 적용)
+                      가격 하락 중 고래는 유입 = 스마트 머니 축적 (시간 가중 분석 적용)
                     </p>
                     <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm space-y-1">
                       <div className="flex items-start gap-2">
@@ -507,7 +507,7 @@ function GuidePage() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-orange-500">✓</span>
-                        <span>고래 순매수 $30M 이상</span>
+                        <span>고래 순유입 $30M 이상</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-orange-500">✓</span>
@@ -523,7 +523,7 @@ function GuidePage() {
                       <span className="px-2 py-1 bg-danger text-white text-xs rounded font-bold">SHORT</span>
                     </div>
                     <p className="text-sm text-surface-600 mb-3">
-                      가격 상승 중 고래는 매도 = 스마트 머니 출구 전략
+                      가격 상승 중 고래는 유출 = 스마트 머니 출구 전략
                     </p>
                     <div className="bg-white dark:bg-gray-800 p-3 rounded text-sm space-y-1">
                       <div className="flex items-start gap-2">
@@ -532,7 +532,7 @@ function GuidePage() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-orange-500">✓</span>
-                        <span>고래 순매도 $30M 이상</span>
+                        <span>고래 순유출 $30M 이상</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-orange-500">✓</span>
@@ -608,27 +608,6 @@ function GuidePage() {
                   </div>
                 </div>
 
-                {/* Sound System */}
-                <div className="card p-6">
-                  <h3 className="text-xl font-bold text-surface-600 mb-4">🔊 사운드 시스템</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/10 rounded">
-                      <span className="px-2 py-1 bg-red-500 text-white text-xs rounded font-bold">S</span>
-                      <span className="text-surface-600">Critical 사운드 (T7 고래 소리) - 즉시 확인 필요</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/10 rounded">
-                      <span className="px-2 py-1 bg-orange-500 text-white text-xs rounded font-bold">A</span>
-                      <span className="text-surface-600">High Priority 사운드 (T5-T6 고래 소리)</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/10 rounded">
-                      <span className="px-2 py-1 bg-yellow-500 text-white text-xs rounded font-bold">B</span>
-                      <span className="text-surface-600">Medium 사운드 (T3-T4 고래 소리)</span>
-                    </div>
-                    <p className="text-surface-500 mt-4">
-                      💡 음소거 버튼은 메인 페이지 상단 필터 바에 있습니다. 설정은 자동 저장됩니다.
-                    </p>
-                  </div>
-                </div>
               </section>
             </>
           )}
