@@ -15,6 +15,7 @@ import whaleDataRouter from './routes/whaleData.js'
 import alertsDataRouter from './routes/alertsData.js'
 import briefingsDataRouter from './routes/briefingsData.js'
 import profilesDataRouter from './routes/profilesData.js'
+import visitorsRouter from './routes/visitors.js'
 import metricsCollector from './services/metricsCollector.js'
 
 dotenv.config()
@@ -255,6 +256,11 @@ app.use('/api/briefings', briefingsDataRouter)
 // Mount profiles data router (proxy for frontend → supabase)
 // Handles user profiles for auth context
 app.use('/api/profiles', profilesDataRouter)
+
+// ===== VISITORS TRACKING ROUTES =====
+// Mount visitors router (realtime visitor tracking)
+// Handles visitor logs and active sessions
+app.use('/api/visitors', visitorsRouter)
 
 // Health check endpoint
 app.get('/health', healthCheckLimiter, (req, res) => {

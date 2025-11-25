@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../utils/supabase'
 import AdminLayout from '../../components/admin/AdminLayout'
+import VisitorWidget from '../../components/admin/VisitorWidget'
 
 // API URL from environment variable or fallback to localhost for development
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -256,6 +257,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Visitor Tracking Widget */}
+        <VisitorWidget />
 
         {/* Refresh Button */}
         <div className="text-center">
