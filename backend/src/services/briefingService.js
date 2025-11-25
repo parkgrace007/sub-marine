@@ -35,27 +35,42 @@ class BriefingService {
 
   /**
    * 1️⃣ Fetch external market data from 3 free sources
-   * - CoinGecko: Top 10 cryptocurrencies by market cap (no auth required)
+   * - CoinGecko: Top 10 cryptocurrencies by market cap (no auth required) + BTC fallback
    * - Alternative.me: Fear & Greed Index
-   * - Binance: BTC price & volume
+   * - Binance: BTC price & volume (primary)
    */
   async fetchExternalData() {
     try {
       console.log('📡 [Briefing] Fetching external market data...')
 
       // A. CoinGecko - Top 10 cryptocurrencies by market cap (Free, no API key)
+      // Also used as fallback for BTC data if Binance fails
       let topCoins = []
+      let coinGeckoBtc = null // Store BTC data from CoinGecko as fallback
       try {
         const coinsResponse = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h')
         const coinsData = await coinsResponse.json()
 
-        topCoins = coinsData.slice(0, 10).map(coin => ({
-          name: coin.name,
-          symbol: coin.symbol.toUpperCase(),
-          price: coin.current_price,
-          change_24h: coin.price_change_percentage_24h?.toFixed(2) || '0',
-          market_cap_rank: coin.market_cap_rank
-        }))
+        topCoins = coinsData.slice(0, 10).map(coin => {
+          const coinInfo = {
+            name: coin.name,
+            symbol: coin.symbol.toUpperCase(),
+            price: coin.current_price,
+            change_24h: coin.price_change_percentage_24h?.toFixed(2) || '0',
+            market_cap_rank: coin.market_cap_rank
+          }
+
+          // Extract BTC data for fallback
+          if (coin.symbol.toLowerCase() === 'btc') {
+            coinGeckoBtc = {
+              price: coin.current_price,
+              change24h: coin.price_change_percentage_24h,
+              volume24h: coin.total_volume
+            }
+          }
+
+          return coinInfo
+        })
       } catch (coinsError) {
         console.warn(`⚠️  [Briefing] Failed to fetch top coins: ${coinsError.message}`)
         console.warn(`   Continuing without top coins data...`)
@@ -66,8 +81,10 @@ class BriefingService {
       const fngData = await fngResponse.json()
       const sentiment = fngData.data?.[0] || { value: 'N/A', value_classification: 'Unknown' }
 
-      // C. Binance - BTC 24h stats
+      // C. Binance - BTC 24h stats (Primary source)
       let btcData = { price: 'N/A', change24h: 'N/A', volume24h: 'N/A' }
+      let btcSource = 'none'
+
       try {
         const priceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
         const priceData = await priceResponse.json()
@@ -85,6 +102,7 @@ class BriefingService {
               change24h: change.toFixed(2),
               volume24h: (volume * price / 1e9).toFixed(2)
             }
+            btcSource = 'binance'
           } else {
             console.warn('⚠️  [Briefing] Binance returned invalid numbers')
           }
@@ -95,9 +113,28 @@ class BriefingService {
         console.warn(`⚠️  [Briefing] Failed to fetch Binance data: ${binanceError.message}`)
       }
 
+      // D. Fallback to CoinGecko BTC data if Binance failed
+      if (btcData.price === 'N/A' && coinGeckoBtc) {
+        console.log('🔄 [Briefing] Using CoinGecko as fallback for BTC data...')
+
+        const price = parseFloat(coinGeckoBtc.price)
+        const change = parseFloat(coinGeckoBtc.change24h)
+        const volume = parseFloat(coinGeckoBtc.volume24h)
+
+        if (!isNaN(price) && !isNaN(change) && !isNaN(volume)) {
+          btcData = {
+            price: price.toFixed(0),
+            change24h: change.toFixed(2),
+            volume24h: (volume / 1e9).toFixed(2) // CoinGecko returns volume in USD, not BTC
+          }
+          btcSource = 'coingecko'
+          console.log('✅ [Briefing] CoinGecko fallback successful')
+        }
+      }
+
       // Validate we have at least BTC price before proceeding
       if (btcData.price === 'N/A') {
-        throw new Error('Failed to fetch BTC price from Binance API - cannot generate briefing without price data')
+        throw new Error('Failed to fetch BTC price from both Binance and CoinGecko APIs - cannot generate briefing without price data')
       }
 
       const marketData = {
@@ -110,7 +147,7 @@ class BriefingService {
       }
 
       console.log('✅ [Briefing] External data fetched successfully')
-      console.log(`   BTC: $${marketData.btc.price} (${marketData.btc.change24h}%)`)
+      console.log(`   BTC: $${marketData.btc.price} (${marketData.btc.change24h}%) [source: ${btcSource}]`)
       console.log(`   Sentiment: ${marketData.sentiment.classification} (${marketData.sentiment.value})`)
       console.log(`   Top coins fetched: ${marketData.topCoins.length}`)
 
