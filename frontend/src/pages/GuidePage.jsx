@@ -93,10 +93,10 @@ function GuidePage() {
                     <h4 className="font-semibold text-blue-600 mb-3">🎯 왜 시간 가중이 필요한가?</h4>
                     <div className="text-sm text-surface-600 space-y-3">
                       <p className="font-medium text-red-600">
-                        ❌ 문제: 과거 고래 매수 + 현재 가격 하락 → 거짓 신호
+                        ❌ 문제: 과거 고래 Inflow + 현재 가격 하락 → 거짓 신호
                       </p>
                       <p className="text-surface-600">
-                        12시간 전 고래가 큰 매수를 했지만, 지금은 가격이 하락 중이라면?
+                        12시간 전 고래가 대규모 Inflow(거래소→지갑)를 했지만, 지금은 가격이 하락 중이라면?
                         오래된 데이터가 현재 분석을 왜곡시킵니다.
                       </p>
 
@@ -144,11 +144,14 @@ function GuidePage() {
                     <div className="text-sm text-surface-600 space-y-2">
                       <p className="font-medium">상황: BTC 가격이 지금 하락 중</p>
                       <ul className="space-y-1 ml-4">
-                        <li>• 12시간 전: $200M 매수했음 (하지만 14%만 반영 = $28M)</li>
-                        <li>• 2시간 전: $100M 매도했음 (72% 반영 = -$72M)</li>
+                        <li>• 12시간 전: $200M Inflow (거래소→지갑, 상승 압력) → 14%만 반영 = <span className="text-success font-semibold">+$28M</span></li>
+                        <li>• 2시간 전: $100M Outflow (지갑→거래소, 하락 압력) → 72% 반영 = <span className="text-danger font-semibold">-$72M</span></li>
                       </ul>
-                      <p className="font-bold text-success mt-2">
-                        → 결과: 실제로는 매도 우세! 최근 흐름이 더 중요합니다.
+                      <p className="font-bold text-danger mt-2">
+                        → 순 영향: +$28M - $72M = <span className="text-danger">-$44M</span> (하락 압력 우세!)
+                      </p>
+                      <p className="text-surface-500 text-xs mt-1">
+                        과거 Inflow보다 최근 Outflow가 더 큰 영향을 미칩니다.
                       </p>
                     </div>
                   </div>
