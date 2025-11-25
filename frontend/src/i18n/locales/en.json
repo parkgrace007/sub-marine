@@ -156,6 +156,366 @@
     "days": "days"
   },
 
+  "events": {
+    "title": "Events & Benefits",
+    "subtitle": "Ongoing events and special offers",
+    "currentEvents": "Current Events",
+    "currentEventsDesc": "Check out ongoing events and promotions.",
+    "airdrops": "Airdrops",
+    "airdropsDesc": "Get the latest airdrop information and how to participate.",
+    "stakingRewards": "Staking Rewards",
+    "stakingRewardsDesc": "Check out staking events and special reward programs.",
+    "communityContests": "Community Contests",
+    "communityContestsDesc": "Participate in community events and competitions.",
+    "referralProgram": "Referral Program",
+    "referralProgramDesc": "Invite friends and earn rewards.",
+    "specialOffers": "Special Offers",
+    "specialOffersDesc": "Exclusive benefits and discounts for VIP users.",
+    "comingSoon": "Events Page Coming Soon",
+    "comingSoonDesc": "We will provide various events and benefits information. Don't miss airdrops, staking rewards, community events!"
+  },
+
+  "news": {
+    "title": "News & Reports",
+    "loading": "Loading news...",
+    "empty": "Loading news",
+    "emptyDesc": "Latest cryptocurrency news will appear shortly."
+  },
+
+  "guide": {
+    "pageTitle": "SubMarine Complete Guide",
+    "pageSubtitle": "From whale tracking to alert systems and trading simulator - master all features",
+    "tabs": {
+      "whale": "Whale Tiers",
+      "rsi": "RSI",
+      "macd": "MACD",
+      "bb": "Bollinger Bands",
+      "alerts": "Alert System",
+      "filters": "Filters/Settings",
+      "trading": "Trading"
+    },
+    "whale": {
+      "tierTitle": "Whale Tier System",
+      "tierDesc": "Classifies large transactions over $10M into 7 tiers. SubMarine's custom linear system.",
+      "flowTitle": "Flow Type (Transaction Direction)",
+      "flowDesc": "Classifies whale transaction directions into 5 types to understand market impact.",
+      "timeWeighted": {
+        "title": "Time-Weighted Analysis (Updated 2025-11-22)",
+        "whyNeeded": "Why is time weighting needed?",
+        "problem": "Problem: Past whale Inflow + Current price decline → False signal",
+        "problemDesc": "If whales made large Inflows (exchange→wallet) 12 hours ago, but prices are now falling? Old data distorts current analysis.",
+        "solution": "Solution: Higher weight for recent transactions",
+        "solutionDesc": "1 hour ago transactions get 85%, 6 hours ago 37%, 12 hours ago only 14%. This aligns price changes with whale activity.",
+        "impactTitle": "Impact by Time",
+        "hour1": "1 hour ago",
+        "hour1Pct": "85%",
+        "hour1Desc": "Very high impact - Recent whale activity",
+        "hour6": "6 hours ago",
+        "hour6Pct": "37%",
+        "hour6Desc": "Medium impact - Some reference value",
+        "hour12": "12 hours ago",
+        "hour12Pct": "14%",
+        "hour12Desc": "Low impact - Old data",
+        "example": "Practical Example",
+        "exampleSituation": "Situation: BTC price is currently falling",
+        "exampleLine1": "12h ago: $200M Inflow (exchange→wallet, bullish) → 14% reflected =",
+        "exampleLine2": "2h ago: $100M Outflow (wallet→exchange, bearish) → 72% reflected =",
+        "exampleResult": "→ Net impact: +$28M - $72M =",
+        "exampleNote": "Recent Outflow has greater impact than past Inflow.",
+        "keyPoint": "Key Point:",
+        "keyPointDesc": "Time-weighted analysis accurately captures whale activity \"momentum\". It minimizes the impact of old data and provides analysis that is temporally aligned with current market conditions."
+      }
+    },
+    "rsi": {
+      "title": "RSI (Relative Strength Index)",
+      "desc": "Relative Strength Index. Classifies 0-100 range into 10 levels for precise overbought/oversold detection.",
+      "tableTitle": "RSI 10-Level Classification",
+      "formulaTitle": "RSI Formula",
+      "period": "Period: 14 (Standard)",
+      "values": "Values: Close price based",
+      "formula1": "RS = Average Gain (14) / Average Loss (14)",
+      "formula2": "RSI = 100 - (100 / (1 + RS))",
+      "note1": "RSI = 100: Only gains for 14 days",
+      "note2": "RSI = 0: Only losses for 14 days",
+      "note3": "RSI = 50: Equal gains and losses",
+      "divergenceTitle": "RSI Divergence",
+      "bearishTitle": "Bearish Divergence",
+      "bearishDesc1": "Price: Higher High",
+      "bearishDesc2": "RSI: Lower High",
+      "bearishResult": "→ Uptrend weakening, correction imminent",
+      "bullishTitle": "Bullish Divergence",
+      "bullishDesc1": "Price: Lower Low",
+      "bullishDesc2": "RSI: Higher Low",
+      "bullishResult": "→ Downtrend weakening, bounce imminent"
+    },
+    "macd": {
+      "title": "MACD (Moving Average Convergence Divergence)",
+      "desc": "Moving Average Convergence Divergence. Classifies momentum strength into 7 levels based on Histogram.",
+      "tableTitle": "MACD 7-Level Classification",
+      "formulaTitle": "MACD Formula",
+      "fast": "Fast Period: 12 (EMA)",
+      "slow": "Slow Period: 26 (EMA)",
+      "signal": "Signal Period: 9 (EMA)",
+      "formula1": "MACD Line = EMA(12) - EMA(26)",
+      "formula2": "Signal Line = EMA(MACD Line, 9)",
+      "formula3": "Histogram = MACD Line - Signal Line",
+      "crossTitle": "MACD Crossover Signals",
+      "goldenTitle": "Golden Cross",
+      "goldenDesc1": "MACD Line > Signal Line",
+      "goldenDesc2": "(Histogram > 0)",
+      "goldenResult": "→ Buy signal (bullish momentum starts)",
+      "deathTitle": "Death Cross",
+      "deathDesc1": "MACD Line < Signal Line",
+      "deathDesc2": "(Histogram < 0)",
+      "deathResult": "→ Sell signal (bearish momentum starts)"
+    },
+    "bb": {
+      "title": "Bollinger Bands",
+      "desc": "Volatility indicator. Analyzes market conditions using BB Width and Price Position.",
+      "widthTableTitle": "BB Width 7 Levels",
+      "positionTableTitle": "Price Position 5 Levels",
+      "formulaTitle": "BB Formula",
+      "period": "Period: 20 (SMA)",
+      "stdDev": "Std Dev: 2",
+      "formula1": "BB_Middle = SMA(20)",
+      "formula2": "BB_Upper = SMA(20) + (2 × StdDev)",
+      "formula3": "BB_Lower = SMA(20) - (2 × StdDev)",
+      "formula4": "BB_Width% = (BB_Upper - BB_Lower) / BB_Middle × 100",
+      "patternTitle": "BB Patterns",
+      "squeezeTitle": "Bollinger Squeeze",
+      "squeezeDesc": "BB Width < 2% (Level 1-2)",
+      "squeezeNote": "Extremely low volatility → Big move imminent. Follow breakout direction immediately",
+      "expansionTitle": "Bollinger Expansion",
+      "expansionDesc": "BB Width > 6% (Level 6-7)",
+      "expansionNote": "Volatility surge → Strong trend. Trend-following strategy valid (watch for overheating)",
+      "upperWalkTitle": "Upper Walking",
+      "upperWalkDesc": "Price stays near BB_Upper (3+ days)",
+      "upperWalkNote": "Strong uptrend continuing. Early: enter, Late: tight stop-loss",
+      "lowerWalkTitle": "Lower Walking",
+      "lowerWalkDesc": "Price stays near BB_Lower (3+ days)",
+      "lowerWalkNote": "Strong downtrend continuing. Early: enter, Late: tight stop-loss"
+    },
+    "alertsSection": {
+      "title": "Alert System",
+      "desc": "12 key alert combinations capture all important market moments. Prioritized as S tier (most critical) → A tier (high) → B tier (medium).",
+      "sTier": {
+        "title": "Critical Alerts (4) - Immediate Response Required",
+        "s01": {
+          "name": "ABYSSAL SCOOP (Deep Sea Pickup)",
+          "desc": "Extreme low + Large whale inflow = Historic buying opportunity",
+          "cond1": "RSI extremely low (oversold)",
+          "cond2": "Net whale inflow $30M+",
+          "cond3": "Large whale participation ($100M+)"
+        },
+        "s02": {
+          "name": "LEVIATHAN DUMP",
+          "desc": "Extreme high + Large whale outflow = Major drop imminent",
+          "cond1": "RSI extremely high (overbought)",
+          "cond2": "Net whale outflow $30M+",
+          "cond3": "Mega whale participation ($200M+)"
+        },
+        "s03": {
+          "name": "WHALE TORPEDO",
+          "desc": "Volatility compression → Upper breakout + Whale inflow = Explosive rise",
+          "cond1": "Bollinger Bands extremely narrow (quiet state)",
+          "cond2": "Price breaks upper band",
+          "cond3": "Strong MACD bullish momentum + Whale inflow $20M+"
+        },
+        "s04": {
+          "name": "HULL CRACK",
+          "desc": "Volatility compression → Lower breakout + Whale outflow = Crash begins",
+          "cond1": "Bollinger Bands extremely narrow",
+          "cond2": "Price breaks lower band",
+          "cond3": "Strong MACD bearish momentum + Whale outflow $20M+"
+        }
+      },
+      "aTier": {
+        "title": "High Priority Alerts (3) - High Profit Potential",
+        "a01": {
+          "name": "SMART DIVERGENCE",
+          "desc": "Price falling but whales inflowing = Smart money accumulation (time-weighted analysis applied)",
+          "cond1": "Price declining (last 6 hours)",
+          "cond2": "Net whale inflow $30M+",
+          "cond3": "Mega whale participation ($200M+) + RSI at low levels"
+        },
+        "a02": {
+          "name": "EXIT DIVERGENCE",
+          "desc": "Price rising but whales outflowing = Smart money exit strategy",
+          "cond1": "Price rising (last 6 hours)",
+          "cond2": "Net whale outflow $30M+",
+          "cond3": "Mega whale participation ($200M+) + RSI at high levels"
+        },
+        "a03": {
+          "name": "FULL THROTTLE",
+          "desc": "Upper band walking + Strong MACD = Sustained uptrend",
+          "cond1": "Price near upper Bollinger Band",
+          "cond2": "Very strong MACD bullish momentum",
+          "cond3": "RSI in bullish zone (60-80)"
+        }
+      },
+      "bTier": {
+        "title": "Medium Priority Alerts (3) - Reference",
+        "b01": {
+          "name": "BB SQUEEZE",
+          "desc": "Extremely low volatility = Big move imminent, enter after direction confirmed"
+        },
+        "b02": {
+          "name": "RSI OVERBOUGHT",
+          "desc": "RSI overheated = Correction possible, consider taking profits on longs"
+        },
+        "b03": {
+          "name": "MACD GOLDEN CROSS",
+          "desc": "MACD turns bullish = Upward momentum starts, confirm with other indicators"
+        }
+      },
+      "long": "LONG",
+      "short": "SHORT",
+      "wait": "Wait",
+      "caution": "Caution"
+    },
+    "filtersSection": {
+      "title": "Filters & Settings",
+      "desc": "Timeframe, symbol selection, and hidden developer tools - complete settings guide",
+      "timeframe": {
+        "title": "Timeframe Selection",
+        "1h": "1h (1 hour)",
+        "1hDesc": "Short-term trading, day trading. Whale lifespan: 3 hours. Indicator sensitivity: High (volatile)",
+        "4h": "4h (4 hours)",
+        "4hDesc": "Swing trading. Whale lifespan: 12 hours. Indicator sensitivity: Medium (balanced)",
+        "8h": "8h (8 hours)",
+        "8hDesc": "Position trading. Whale lifespan: 24 hours. Indicator sensitivity: Low (stable)",
+        "1d": "1d (1 day)",
+        "1dDesc": "Long-term trend analysis. Whale lifespan: 30 days. Indicator sensitivity: Very low (big picture)",
+        "tip": "Timeframe Selection Tips",
+        "tipDesc1": "Shorter timeframe = More signals, more noise",
+        "tipDesc2": "Longer timeframe = Fewer signals, but higher reliability",
+        "tipDesc3": "Recommended: Start with 4h timeframe (balanced)"
+      },
+      "symbol": {
+        "title": "Symbol Filter",
+        "btc": "BTC",
+        "btcDesc": "Bitcoin only",
+        "eth": "ETH",
+        "ethDesc": "Ethereum only",
+        "bnb": "BNB",
+        "bnbDesc": "Binance Coin",
+        "sol": "SOL",
+        "solDesc": "Solana",
+        "xrp": "XRP",
+        "xrpDesc": "Ripple",
+        "all": "All (Combined)",
+        "allDesc": "All coins combined",
+        "warning": "Symbol Filter Notes",
+        "warningDesc1": "Individual symbol: Track whale activity for that coin only",
+        "warningDesc2": "All (Combined): Integrated whale activity across all crypto",
+        "warningDesc3": "Combined mode useful for overall market sentiment",
+        "warningDesc4": "For specific coin trading, select individual symbol"
+      },
+      "mute": {
+        "title": "Mute Settings",
+        "desc": "Toggle alert sounds on/off with the 🔊/🔇 button in the filter bar at the top of the main page.",
+        "note1": "Settings auto-saved to browser localStorage",
+        "note2": "Alerts still display on screen when muted",
+        "note3": "Only sound is blocked, features work normally"
+      }
+    },
+    "tradingSection": {
+      "title": "Trading Simulator",
+      "desc": "Practice virtual trading with real Binance data. No real money is used!",
+      "warning": {
+        "title": "Important: This is a Simulator",
+        "point1": "Uses virtual USDT, not real money",
+        "point2": "Not connected to real exchanges",
+        "point3": "All profits/losses are virtual",
+        "point4": "For practice purposes only",
+        "point5": "Real trading may require different strategies"
+      },
+      "overview": {
+        "title": "Trading Simulator Overview",
+        "provided": "Features Provided",
+        "providedList": ["Real-time Binance price data", "Market / Limit orders", "Long / Short positions", "1-125x leverage", "Real-time PnL calculation", "User ranking system"],
+        "notProvided": "Features Not Provided",
+        "notProvidedList": ["Real money deposit/withdrawal", "Real exchange connection", "Slippage simulation", "Funding costs", "Actual order execution delay", "Liquidation simulation"]
+      },
+      "howTo": {
+        "title": "How to Trade",
+        "step1Title": "Login Required",
+        "step1Desc": "Click the login button on the trading page to create an account. Starting balance: 10,000 USDT (virtual)",
+        "step2Title": "Check the Chart",
+        "step2Desc": "View real-time BTC/USDT price on the left chart.",
+        "step2Intervals": "Interval options: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 12h, 1d",
+        "step2Colors": "Green candle = Up, Red candle = Down",
+        "step3Title": "Select Order Type",
+        "step3Market": "Market",
+        "step3MarketDesc": "Execute immediately at current price",
+        "step3Limit": "Limit",
+        "step3LimitDesc": "Place order at desired price",
+        "step4Title": "Select Long / Short",
+        "step4Long": "Long (Buy)",
+        "step4LongDesc": "Expect price to rise. Ex: $80,000 → $85,000 (+$5,000 profit)",
+        "step4Short": "Short (Sell)",
+        "step4ShortDesc": "Expect price to fall. Ex: $80,000 → $75,000 (+$5,000 profit)",
+        "step5Title": "Set Leverage (1-125x)",
+        "step5Desc": "Adjust leverage with the slider. Higher leverage = higher profits but also higher losses!",
+        "step5Example": "Leverage Example:",
+        "step5Example1": "1x: 100 USDT → 100 USDT position (1% price increase = 1 USDT profit)",
+        "step5Example2": "10x: 100 USDT → 1,000 USDT position (1% price increase = 10 USDT profit)",
+        "step5Example3": "100x: 100 USDT → 10,000 USDT position (1% price increase = 100 USDT profit)",
+        "step6Title": "Enter Quantity",
+        "step6Desc": "Enter the BTC quantity to trade. Use the slider to select 25% / 50% / 75% / 100% of your balance.",
+        "step6MaxBuy": "Max Buy Formula:",
+        "step6Formula": "Max Buy = (Balance × Leverage) / Current Price",
+        "step6Example": "Ex: 1,000 USDT × 10x / $80,000 = 0.125 BTC",
+        "step7Title": "Execute Order",
+        "step7Desc": "Click Long or Short button to execute. Market orders fill immediately, Limit orders wait in Orders tab."
+      },
+      "positionManagement": {
+        "title": "Position Management",
+        "positionsTab": "Positions",
+        "positionsDesc": "Shows currently held position list",
+        "entryPrice": "Entry Price: Entry price",
+        "currentPrice": "Current Price: Real-time updated",
+        "size": "Size: Position size (BTC)",
+        "leverage": "Leverage: Used leverage",
+        "pnl": "PnL: Profit and Loss - Real-time calculation",
+        "close": "Close: Close position button",
+        "ordersTab": "Orders",
+        "ordersDesc": "Shows pending Limit orders",
+        "ordersNote1": "Auto-fills when price reaches limit",
+        "ordersNote2": "Cancel orders with Cancel button",
+        "ordersNote3": "Market orders execute immediately, not shown here",
+        "historyTab": "History",
+        "historyDesc": "Past trade records and PnL history",
+        "historyNote1": "All closed position records",
+        "historyNote2": "View cumulative PnL",
+        "historyNote3": "Analyze trading patterns",
+        "pnlCalc": "PnL Calculation Method",
+        "pnlLong": "Long: Profit when price rises, loss when falls",
+        "pnlShort": "Short: Profit when price falls, loss when rises",
+        "pnlNote": "※ Higher leverage = larger PnL swings"
+      },
+      "ranking": {
+        "title": "Ranking System",
+        "desc": "Compete with other users on returns! Climb to the top of the leaderboard.",
+        "note1": "Ranked by Total Profit",
+        "note2": "Real-time Supabase sync",
+        "note3": "Nickname changes available",
+        "note4": "Top 50 leaderboard displayed"
+      },
+      "riskWarning": {
+        "title": "Risk Warning",
+        "risk1Title": "1. This is a simulator",
+        "risk1Desc": "Completely different from real exchanges. Real trading has slippage, fees, funding costs, and liquidation risk.",
+        "risk2Title": "2. Leverage risk",
+        "risk2Desc": "High leverage amplifies losses too. High leverage in real trading can result in instant liquidation.",
+        "risk3Title": "3. For practice only",
+        "risk3Desc": "Profits in the simulator don't guarantee the same results in real trading. Study thoroughly before real trading.",
+        "risk4Title": "4. Not investment advice",
+        "risk4Desc": "This tool is provided for educational purposes. Investment decisions are your own responsibility."
+      }
+    }
+  },
+
   "footer": {
     "copyright": "© 2024 SubMarine. All rights reserved.",
     "disclaimer": "This service is not investment advice."

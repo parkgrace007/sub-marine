@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import NewsCard from '../components/NewsCard'
 import { useNews } from '../hooks/useNews'
@@ -13,6 +14,7 @@ import { Newspaper } from 'lucide-react'
  * - 12-hour cache (2 API calls/day)
  */
 function NewsPage() {
+  const { t } = useTranslation()
   const { data, loading, error } = useNews(true)
 
   const { articles } = data
@@ -23,7 +25,7 @@ function NewsPage() {
       <div className="max-w-[1440px] mx-auto relative p-6">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">📰 뉴스 · 리포트</h1>
+          <h1 className="text-3xl font-bold mb-2">{t('news.title')}</h1>
         </div>
 
         {/* Loading State - Skeleton Loader */}
@@ -46,9 +48,9 @@ function NewsPage() {
         {!loading && !error && articles.length === 0 && (
           <div className="text-center py-20">
             <Newspaper size={64} className="mx-auto text-surface-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2 text-surface-600">뉴스를 불러오는 중입니다</h3>
+            <h3 className="text-xl font-semibold mb-2 text-surface-600">{t('news.empty')}</h3>
             <p className="text-surface-500">
-              잠시 후 자동으로 최신 암호화폐 뉴스가 표시됩니다.
+              {t('news.emptyDesc')}
             </p>
           </div>
         )}

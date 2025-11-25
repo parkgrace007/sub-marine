@@ -156,6 +156,366 @@
     "days": "일"
   },
 
+  "events": {
+    "title": "이벤트 혜택",
+    "subtitle": "진행 중인 이벤트 및 특별 혜택 안내",
+    "currentEvents": "진행 중 이벤트",
+    "currentEventsDesc": "현재 진행 중인 이벤트와 프로모션을 확인하세요.",
+    "airdrops": "에어드랍",
+    "airdropsDesc": "최신 에어드랍 정보와 참여 방법을 안내합니다.",
+    "stakingRewards": "스테이킹 보상",
+    "stakingRewardsDesc": "스테이킹 이벤트 및 특별 보상 프로그램을 확인하세요.",
+    "communityContests": "커뮤니티 콘테스트",
+    "communityContestsDesc": "커뮤니티 이벤트와 경쟁 대회에 참여하세요.",
+    "referralProgram": "추천 프로그램",
+    "referralProgramDesc": "친구를 초대하고 보상을 받으세요.",
+    "specialOffers": "특별 혜택",
+    "specialOffersDesc": "VIP 사용자를 위한 독점 혜택과 할인을 제공합니다.",
+    "comingSoon": "이벤트 페이지 준비 중",
+    "comingSoonDesc": "다양한 이벤트와 혜택 정보를 제공할 예정입니다. 에어드랍, 스테이킹 보상, 커뮤니티 이벤트 등을 놓치지 마세요!"
+  },
+
+  "news": {
+    "title": "뉴스 · 리포트",
+    "loading": "뉴스 로딩 중...",
+    "empty": "뉴스를 불러오는 중입니다",
+    "emptyDesc": "잠시 후 자동으로 최신 암호화폐 뉴스가 표시됩니다."
+  },
+
+  "guide": {
+    "pageTitle": "SubMarine 완전 가이드",
+    "pageSubtitle": "고래 추적부터 알림 시스템, 트레이딩 시뮬레이터까지 - 모든 기능 완벽 마스터",
+    "tabs": {
+      "whale": "고래 티어",
+      "rsi": "RSI",
+      "macd": "MACD",
+      "bb": "Bollinger Bands",
+      "alerts": "알림 시스템",
+      "filters": "필터/설정",
+      "trading": "트레이딩"
+    },
+    "whale": {
+      "tierTitle": "고래 티어 시스템",
+      "tierDesc": "$10M 이상의 대형 거래를 7단계 티어로 분류합니다. SubMarine만의 커스텀 리니어 시스템입니다.",
+      "flowTitle": "Flow Type (거래 방향)",
+      "flowDesc": "고래 거래의 방향성을 5가지로 분류하여 시장 영향을 파악합니다.",
+      "timeWeighted": {
+        "title": "시간 가중 분석 (2025-11-22 업데이트)",
+        "whyNeeded": "왜 시간 가중이 필요한가?",
+        "problem": "문제: 과거 고래 Inflow + 현재 가격 하락 → 거짓 신호",
+        "problemDesc": "12시간 전 고래가 대규모 Inflow(거래소→지갑)를 했지만, 지금은 가격이 하락 중이라면? 오래된 데이터가 현재 분석을 왜곡시킵니다.",
+        "solution": "해결: 최근 거래일수록 더 높은 가중치",
+        "solutionDesc": "1시간 전 거래는 85%, 6시간 전은 37%, 12시간 전은 14%만 반영합니다. 이렇게 하면 가격 변화와 고래 활동이 정확히 맞아떨어집니다.",
+        "impactTitle": "시간별 영향력",
+        "hour1": "1시간 전",
+        "hour1Pct": "85%",
+        "hour1Desc": "매우 높은 영향력 - 최근 고래 활동",
+        "hour6": "6시간 전",
+        "hour6Pct": "37%",
+        "hour6Desc": "중간 영향력 - 어느 정도 참고",
+        "hour12": "12시간 전",
+        "hour12Pct": "14%",
+        "hour12Desc": "낮은 영향력 - 오래된 데이터",
+        "example": "실전 예시",
+        "exampleSituation": "상황: BTC 가격이 지금 하락 중",
+        "exampleLine1": "12시간 전: $200M Inflow (거래소→지갑, 상승 압력) → 14%만 반영 =",
+        "exampleLine2": "2시간 전: $100M Outflow (지갑→거래소, 하락 압력) → 72% 반영 =",
+        "exampleResult": "→ 순 영향: +$28M - $72M =",
+        "exampleNote": "과거 Inflow보다 최근 Outflow가 더 큰 영향을 미칩니다.",
+        "keyPoint": "핵심:",
+        "keyPointDesc": "시간 가중 분석은 고래 활동의 \"모멘텀\"을 정확히 포착합니다. 과거 데이터의 영향을 최소화하여 현재 시장 상황과 시간적으로 일치하는 분석을 제공합니다."
+      }
+    },
+    "rsi": {
+      "title": "RSI (Relative Strength Index)",
+      "desc": "상대강도지수. 0-100 범위를 10단계로 분류하여 과매수/과매도를 정밀하게 판단합니다.",
+      "tableTitle": "RSI 10단계 레벨 분류",
+      "formulaTitle": "RSI 계산 공식",
+      "period": "Period: 14 (표준)",
+      "values": "Values: 종가 기준",
+      "formula1": "RS = Average Gain (14) / Average Loss (14)",
+      "formula2": "RSI = 100 - (100 / (1 + RS))",
+      "note1": "RSI = 100: 14일간 상승만 발생",
+      "note2": "RSI = 0: 14일간 하락만 발생",
+      "note3": "RSI = 50: 상승/하락 동일",
+      "divergenceTitle": "RSI 다이버전스",
+      "bearishTitle": "약세 다이버전스 (Bearish)",
+      "bearishDesc1": "가격: 고점 상승 (Higher High)",
+      "bearishDesc2": "RSI: 고점 하락 (Lower High)",
+      "bearishResult": "→ 상승 추세 약화, 조정 임박",
+      "bullishTitle": "강세 다이버전스 (Bullish)",
+      "bullishDesc1": "가격: 저점 하락 (Lower Low)",
+      "bullishDesc2": "RSI: 저점 상승 (Higher Low)",
+      "bullishResult": "→ 하락 추세 약화, 반등 임박"
+    },
+    "macd": {
+      "title": "MACD (Moving Average Convergence Divergence)",
+      "desc": "이동평균 수렴확산 지수. Histogram 기준 7단계로 모멘텀 강도를 분류합니다.",
+      "tableTitle": "MACD 7단계 레벨 분류",
+      "formulaTitle": "MACD 계산 공식",
+      "fast": "Fast Period: 12 (EMA)",
+      "slow": "Slow Period: 26 (EMA)",
+      "signal": "Signal Period: 9 (EMA)",
+      "formula1": "MACD Line = EMA(12) - EMA(26)",
+      "formula2": "Signal Line = EMA(MACD Line, 9)",
+      "formula3": "Histogram = MACD Line - Signal Line",
+      "crossTitle": "MACD 교차 신호",
+      "goldenTitle": "골든크로스 (Golden Cross)",
+      "goldenDesc1": "MACD Line > Signal Line",
+      "goldenDesc2": "(Histogram > 0)",
+      "goldenResult": "→ 매수 신호 (상승 모멘텀 시작)",
+      "deathTitle": "데드크로스 (Death Cross)",
+      "deathDesc1": "MACD Line < Signal Line",
+      "deathDesc2": "(Histogram < 0)",
+      "deathResult": "→ 매도 신호 (하락 모멘텀 시작)"
+    },
+    "bb": {
+      "title": "Bollinger Bands (볼린저 밴드)",
+      "desc": "변동성을 측정하는 지표. BB Width와 Price Position으로 시장 상태를 파악합니다.",
+      "widthTableTitle": "BB Width 7단계 레벨",
+      "positionTableTitle": "Price Position 5단계",
+      "formulaTitle": "BB 계산 공식",
+      "period": "Period: 20 (SMA)",
+      "stdDev": "Std Dev: 2",
+      "formula1": "BB_Middle = SMA(20)",
+      "formula2": "BB_Upper = SMA(20) + (2 × StdDev)",
+      "formula3": "BB_Lower = SMA(20) - (2 × StdDev)",
+      "formula4": "BB_Width% = (BB_Upper - BB_Lower) / BB_Middle × 100",
+      "patternTitle": "BB 패턴",
+      "squeezeTitle": "Bollinger Squeeze",
+      "squeezeDesc": "BB Width < 2% (Level 1-2)",
+      "squeezeNote": "변동성 극도로 낮음 → 대형 움직임 직전. 브레이크아웃 방향 즉시 추종 권장",
+      "expansionTitle": "Bollinger Expansion",
+      "expansionDesc": "BB Width > 6% (Level 6-7)",
+      "expansionNote": "변동성 급증 → 강한 트렌드. 트렌드 추종 전략 유효 (과열 경계)",
+      "upperWalkTitle": "상단 Walking",
+      "upperWalkDesc": "Price가 BB_Upper 근처 유지 (3일+)",
+      "upperWalkNote": "강력한 상승 트렌드 지속. 초기: 진입, 후기: 손절가 타이트 관리",
+      "lowerWalkTitle": "하단 Walking",
+      "lowerWalkDesc": "Price가 BB_Lower 근처 유지 (3일+)",
+      "lowerWalkNote": "강력한 하락 트렌드 지속. 초기: 진입, 후기: 손절가 타이트 관리"
+    },
+    "alertsSection": {
+      "title": "알림 시스템",
+      "desc": "12가지 핵심 알림 조합으로 시장의 모든 중요 순간을 포착합니다. S tier (가장 중요) → A tier (높음) → B tier (중간) 우선순위로 분류됩니다.",
+      "sTier": {
+        "title": "Critical Alerts (4개) - 즉시 대응 필요",
+        "s01": {
+          "name": "ABYSSAL SCOOP (심해 줍기)",
+          "desc": "극단적 저점 + 대형 고래 유입 = 역사적 저가 매수 기회",
+          "cond1": "RSI 극도로 낮음 (과매도 상태)",
+          "cond2": "고래 순유입 $30M 이상",
+          "cond3": "큰 규모의 고래 참여 ($100M+)"
+        },
+        "s02": {
+          "name": "LEVIATHAN DUMP (리바이어던 투하)",
+          "desc": "극단적 고점 + 대형 고래 유출 = 대형 하락 직전",
+          "cond1": "RSI 극도로 높음 (과매수 상태)",
+          "cond2": "고래 순유출 $30M 이상",
+          "cond3": "초대형 고래 참여 ($200M+)"
+        },
+        "s03": {
+          "name": "WHALE TORPEDO (고래 어뢰 발사)",
+          "desc": "변동성 압축 → 상단 돌파 + 고래 유입 = 폭발적 상승",
+          "cond1": "볼린저 밴드 극도로 좁음 (조용한 상태)",
+          "cond2": "가격이 상단 밴드 돌파",
+          "cond3": "MACD 강한 상승 모멘텀 + 고래 유입 $20M+"
+        },
+        "s04": {
+          "name": "HULL CRACK (선체 붕괴)",
+          "desc": "변동성 압축 → 하단 돌파 + 고래 유출 = 급락 시작",
+          "cond1": "볼린저 밴드 극도로 좁음",
+          "cond2": "가격이 하단 밴드 돌파",
+          "cond3": "MACD 강한 하락 모멘텀 + 고래 유출 $20M+"
+        }
+      },
+      "aTier": {
+        "title": "High Priority Alerts (3개) - 높은 수익 가능성",
+        "a01": {
+          "name": "SMART DIVERGENCE (스마트 다이버전스)",
+          "desc": "가격 하락 중 고래는 유입 = 스마트 머니 축적 (시간 가중 분석 적용)",
+          "cond1": "가격 하락 중 (최근 6시간 기준)",
+          "cond2": "고래 순유입 $30M 이상",
+          "cond3": "초대형 고래 참여 ($200M+) + RSI 저점권"
+        },
+        "a02": {
+          "name": "EXIT DIVERGENCE (출구 다이버전스)",
+          "desc": "가격 상승 중 고래는 유출 = 스마트 머니 출구 전략",
+          "cond1": "가격 상승 중 (최근 6시간 기준)",
+          "cond2": "고래 순유출 $30M 이상",
+          "cond3": "초대형 고래 참여 ($200M+) + RSI 고점권"
+        },
+        "a03": {
+          "name": "FULL THROTTLE (전속력 상승)",
+          "desc": "상단 밴드 워킹 + 강력한 MACD = 지속적 상승 트렌드",
+          "cond1": "가격이 볼린저 밴드 상단 근처 유지",
+          "cond2": "MACD 매우 강한 상승 모멘텀",
+          "cond3": "RSI 강세 구간 (60-80)"
+        }
+      },
+      "bTier": {
+        "title": "Medium Priority Alerts (3개) - 참고용",
+        "b01": {
+          "name": "BB SQUEEZE (볼린저 스퀴즈)",
+          "desc": "변동성 극도로 낮음 = 큰 움직임 직전 신호, 방향 확인 후 진입"
+        },
+        "b02": {
+          "name": "RSI OVERBOUGHT (RSI 과매수)",
+          "desc": "RSI 과열 상태 = 조정 가능성, 롱 포지션 익절 고려"
+        },
+        "b03": {
+          "name": "MACD GOLDEN CROSS (MACD 골든크로스)",
+          "desc": "MACD 상승 전환 = 상승 모멘텀 시작, 다른 지표와 함께 확인"
+        }
+      },
+      "long": "LONG",
+      "short": "SHORT",
+      "wait": "대기",
+      "caution": "경계"
+    },
+    "filtersSection": {
+      "title": "필터 & 설정",
+      "desc": "타임프레임, 심볼 선택, 그리고 숨겨진 개발자 도구까지 - 모든 설정 완벽 가이드",
+      "timeframe": {
+        "title": "타임프레임 선택",
+        "1h": "1h (1시간)",
+        "1hDesc": "단기 트레이딩, 데이 트레이딩. 고래 수명: 3시간. 지표 민감도: 높음 (변동성 큼)",
+        "4h": "4h (4시간)",
+        "4hDesc": "스윙 트레이딩. 고래 수명: 12시간. 지표 민감도: 중간 (균형)",
+        "8h": "8h (8시간)",
+        "8hDesc": "포지션 트레이딩. 고래 수명: 24시간. 지표 민감도: 낮음 (안정적)",
+        "1d": "1d (1일)",
+        "1dDesc": "장기 트렌드 분석. 고래 수명: 30일. 지표 민감도: 매우 낮음 (큰 흐름)",
+        "tip": "타임프레임 선택 팁",
+        "tipDesc1": "짧은 타임프레임 = 더 많은 신호, 노이즈도 많음",
+        "tipDesc2": "긴 타임프레임 = 적은 신호, 하지만 신뢰도 높음",
+        "tipDesc3": "추천: 4h 타임프레임으로 시작 (중간 균형)"
+      },
+      "symbol": {
+        "title": "심볼 필터",
+        "btc": "BTC",
+        "btcDesc": "비트코인 전용",
+        "eth": "ETH",
+        "ethDesc": "이더리움 전용",
+        "bnb": "BNB",
+        "bnbDesc": "바이낸스 코인",
+        "sol": "SOL",
+        "solDesc": "솔라나",
+        "xrp": "XRP",
+        "xrpDesc": "리플",
+        "all": "통합 (ALL)",
+        "allDesc": "모든 코인 통합",
+        "warning": "심볼 필터 주의사항",
+        "warningDesc1": "개별 심볼: 해당 코인만의 고래 활동 추적",
+        "warningDesc2": "통합 (ALL): 전체 암호화폐 시장 고래 활동 통합",
+        "warningDesc3": "통합 모드는 시장 전체 감정을 파악할 때 유용",
+        "warningDesc4": "특정 코인 트레이딩 시에는 개별 심볼 선택 권장"
+      },
+      "mute": {
+        "title": "음소거 설정",
+        "desc": "메인 페이지 상단 필터 바에서 🔊/🔇 버튼으로 알림 사운드를 끄고 켤 수 있습니다.",
+        "note1": "설정은 브라우저 localStorage에 자동 저장됩니다",
+        "note2": "음소거해도 알림은 계속 화면에 표시됩니다",
+        "note3": "사운드만 차단되며 기능은 정상 작동합니다"
+      }
+    },
+    "tradingSection": {
+      "title": "트레이딩 시뮬레이터",
+      "desc": "실제 Binance 데이터로 가상 거래를 연습하세요. 실제 돈은 사용되지 않습니다!",
+      "warning": {
+        "title": "중요: 이것은 시뮬레이터입니다",
+        "point1": "실제 돈이 아닌 가상 USDT를 사용합니다",
+        "point2": "실제 거래소와 연결되지 않습니다",
+        "point3": "손실/수익 모두 가상입니다",
+        "point4": "연습용으로만 사용하세요",
+        "point5": "실전 거래 시 다른 전략이 필요할 수 있습니다"
+      },
+      "overview": {
+        "title": "트레이딩 시뮬레이터 개요",
+        "provided": "제공되는 기능",
+        "providedList": ["실시간 Binance 가격 데이터", "Market / Limit 주문", "Long / Short 포지션", "1-125x 레버리지", "실시간 손익 계산", "사용자 랭킹 시스템"],
+        "notProvided": "제공되지 않는 기능",
+        "notProvidedList": ["실제 돈 입출금", "실제 거래소 연결", "슬리피지 시뮬레이션", "펀딩 비용", "실제 주문 체결 지연", "청산 시뮬레이션"]
+      },
+      "howTo": {
+        "title": "거래 방법",
+        "step1Title": "로그인 필수",
+        "step1Desc": "트레이딩 페이지에서 로그인 버튼을 클릭하여 계정을 만드세요. 초기 잔액: 10,000 USDT (가상)",
+        "step2Title": "차트 확인",
+        "step2Desc": "왼쪽 차트에서 BTC/USDT 실시간 가격을 확인하세요.",
+        "step2Intervals": "인터벌 선택: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 12h, 1d",
+        "step2Colors": "초록색 캔들 = 상승, 빨간색 캔들 = 하락",
+        "step3Title": "주문 유형 선택",
+        "step3Market": "Market (시장가)",
+        "step3MarketDesc": "현재 가격에 즉시 체결",
+        "step3Limit": "Limit (지정가)",
+        "step3LimitDesc": "원하는 가격에 주문 대기",
+        "step4Title": "Long / Short 선택",
+        "step4Long": "Long (매수)",
+        "step4LongDesc": "가격이 상승할 것으로 예상. 예: $80,000 → $85,000 (+$5,000 수익)",
+        "step4Short": "Short (매도)",
+        "step4ShortDesc": "가격이 하락할 것으로 예상. 예: $80,000 → $75,000 (+$5,000 수익)",
+        "step5Title": "레버리지 설정 (1-125x)",
+        "step5Desc": "슬라이더로 레버리지를 조절하세요. 레버리지가 높을수록 수익도 크지만 손실도 큽니다!",
+        "step5Example": "레버리지 예시:",
+        "step5Example1": "1x: 100 USDT → 100 USDT 포지션 (가격 1% 상승 = 1 USDT 수익)",
+        "step5Example2": "10x: 100 USDT → 1,000 USDT 포지션 (가격 1% 상승 = 10 USDT 수익)",
+        "step5Example3": "100x: 100 USDT → 10,000 USDT 포지션 (가격 1% 상승 = 100 USDT 수익)",
+        "step6Title": "수량 입력",
+        "step6Desc": "거래할 BTC 수량을 입력하세요. 하단 슬라이더로 보유 자산의 25% / 50% / 75% / 100% 선택 가능합니다.",
+        "step6MaxBuy": "Max Buy 계산식:",
+        "step6Formula": "Max Buy = (잔액 × 레버리지) / 현재 가격",
+        "step6Example": "예: 1,000 USDT × 10x / $80,000 = 0.125 BTC",
+        "step7Title": "주문 실행",
+        "step7Desc": "Long 또는 Short 버튼을 클릭하여 주문을 실행하세요. Market 주문은 즉시 체결되며, Limit 주문은 Orders 탭에 대기합니다."
+      },
+      "positionManagement": {
+        "title": "포지션 관리",
+        "positionsTab": "포지션 (Positions)",
+        "positionsDesc": "현재 보유 중인 포지션 목록 표시",
+        "entryPrice": "Entry Price: 진입 가격",
+        "currentPrice": "Current Price: 현재 가격 (실시간 업데이트)",
+        "size": "Size: 포지션 크기 (BTC)",
+        "leverage": "Leverage: 사용 레버리지",
+        "pnl": "PnL: 손익 (Profit and Loss) - 실시간 계산",
+        "close": "Close: 포지션 청산 버튼",
+        "ordersTab": "주문 (Orders)",
+        "ordersDesc": "대기 중인 Limit 주문 목록 표시",
+        "ordersNote1": "가격이 지정가에 도달하면 자동 체결",
+        "ordersNote2": "Cancel 버튼으로 주문 취소 가능",
+        "ordersNote3": "Market 주문은 즉시 체결되므로 여기 표시 안 됨",
+        "historyTab": "히스토리 (History)",
+        "historyDesc": "과거 거래 내역 및 손익 기록",
+        "historyNote1": "모든 청산된 포지션의 기록",
+        "historyNote2": "손익 누적 확인 가능",
+        "historyNote3": "거래 패턴 분석에 활용",
+        "pnlCalc": "손익 계산 방식",
+        "pnlLong": "롱(매수): 가격이 올라가면 수익, 내려가면 손실",
+        "pnlShort": "숏(매도): 가격이 내려가면 수익, 올라가면 손실",
+        "pnlNote": "※ 레버리지가 높을수록 손익 변동폭이 커집니다"
+      },
+      "ranking": {
+        "title": "랭킹 시스템",
+        "desc": "다른 사용자와 수익률을 겨루세요! 상위 랭커가 되어보세요.",
+        "note1": "총 수익 (Total Profit) 기준 순위",
+        "note2": "실시간 Supabase 동기화",
+        "note3": "닉네임 변경 가능",
+        "note4": "상위 50명 리더보드 표시"
+      },
+      "riskWarning": {
+        "title": "위험 경고",
+        "risk1Title": "1. 이것은 시뮬레이터입니다",
+        "risk1Desc": "실제 거래소와 완전히 다릅니다. 실전에서는 슬리피지, 수수료, 펀딩 비용, 청산 위험이 있습니다.",
+        "risk2Title": "2. 레버리지 위험",
+        "risk2Desc": "높은 레버리지는 손실도 증폭시킵니다. 실전에서 고레버리지 사용 시 즉시 청산될 수 있습니다.",
+        "risk3Title": "3. 연습용으로만 사용하세요",
+        "risk3Desc": "시뮬레이터에서 수익이 나도 실전에서 같은 결과를 보장하지 않습니다. 실전 거래 전 충분한 학습이 필요합니다.",
+        "risk4Title": "4. 투자 권유 아님",
+        "risk4Desc": "이 도구는 교육 목적으로 제공됩니다. 투자 결정은 본인의 책임입니다."
+      }
+    }
+  },
+
   "footer": {
     "copyright": "© 2024 SubMarine. All rights reserved.",
     "disclaimer": "이 서비스는 투자 조언이 아닙니다."
