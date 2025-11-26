@@ -18,7 +18,8 @@
   "nav": {
     "home": "Home",
     "whaleAlerts": "Whale Alerts",
-    "trading": "Trading",
+    "trading": "Trading Game",
+    "tradingNew": "NEW",
     "events": "Events",
     "news": "News",
     "guide": "Guide"
@@ -57,7 +58,55 @@
     "from": "From",
     "to": "To",
     "time": "Time",
-    "tier": "Tier"
+    "tier": "Tier",
+    "ownerTypes": {
+      "exchange": "Exchange",
+      "wallet": "Wallet",
+      "contract": "Smart Contract",
+      "unknown": "Unknown"
+    },
+    "tiers": {
+      "1": "Small Whale",
+      "2": "Small-Medium Whale",
+      "3": "Medium Whale",
+      "4": "Large Whale",
+      "5": "Mega Whale",
+      "6": "Ultra Whale",
+      "7": "Legendary Whale"
+    },
+    "flowLabels": {
+      "inflow": "Exchange Inflow",
+      "outflow": "Exchange Outflow"
+    },
+    "transactionTypes": {
+      "mint": "Mint",
+      "burn": "Burn"
+    },
+    "feed": {
+      "title": "LIVE TRANSACTIONS",
+      "stats": {
+        "volume24h": "VOL (24h)",
+        "largeWhales": "LG WHALES",
+        "netFlow": "NET FLOW"
+      },
+      "filters": {
+        "all": "All",
+        "inflow": "Inflow",
+        "outflow": "Outflow",
+        "special": "Special",
+        "defi": "DeFi",
+        "exchange": "Exch"
+      },
+      "emptyState": {
+        "title": "No transactions yet",
+        "subtitle": "Waiting for whale activity..."
+      },
+      "status": {
+        "live": "LIVE",
+        "offline": "OFFLINE",
+        "txs": "TXS"
+      }
+    }
   },
 
   "alerts": {
@@ -169,6 +218,11 @@
       "point2": "Not connected to real exchanges",
       "point3": "For practice purposes only",
       "dontShowAgain": "Don't show again"
+    },
+    "loginBonus": {
+      "title": "🎁 Login Bonus",
+      "description": "Login to receive 10,000 trading points!",
+      "loginButton": "Login with Google"
     },
     "orderPanel": {
       "placeOrder": "Place Order",

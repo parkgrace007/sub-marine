@@ -16,7 +16,7 @@ function Header() {
   const navLinks = [
     { path: '/', label: t('nav.home') },
     { path: '/whale-alerts', label: t('nav.whaleAlerts') },
-    { path: '/trading', label: t('nav.trading') },
+    { path: '/trading', label: t('nav.trading'), badge: t('nav.tradingNew') },
     { path: '/news', label: t('nav.news') },
     { path: '/events', label: t('nav.events') },
     { path: '/guide', label: t('nav.guide') }
@@ -45,7 +45,7 @@ function Header() {
                     key={link.path}
                     to={link.path}
                     className={`
-                      relative px-3 py-2 text-sm font-medium transition-all duration-300 whitespace-nowrap
+                      relative px-3 py-2 text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1
                       ${isActive
                         ? 'text-primary'
                         : 'text-surface-500 hover:text-surface-600'
@@ -53,6 +53,11 @@ function Header() {
                     `}
                   >
                     {link.label}
+                    {link.badge && (
+                      <span className="px-1.5 py-0.5 text-[9px] font-bold bg-danger text-white rounded-sm animate-pulse">
+                        {link.badge}
+                      </span>
+                    )}
                     {/* Active Indicator Line */}
                     <span className={`
                       absolute bottom-0 left-0 w-full h-[2px] bg-primary transform transition-transform duration-300
@@ -196,7 +201,7 @@ function Header() {
                       to={link.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={`
-                        px-4 py-3 rounded-md text-sm font-medium transition-all duration-200
+                        px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2
                         ${isActive
                           ? 'bg-primary/10 text-primary border-l-2 border-primary'
                           : 'text-surface-500 hover:bg-surface-200 hover:text-surface-600'
@@ -204,6 +209,11 @@ function Header() {
                       `}
                     >
                       {link.label}
+                      {link.badge && (
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold bg-danger text-white rounded-sm animate-pulse">
+                          {link.badge}
+                        </span>
+                      )}
                     </Link>
                   )
                 })}

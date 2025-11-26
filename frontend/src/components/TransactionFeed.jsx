@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWhaleData } from '../hooks/useWhaleData'
 import TransactionRow from './TransactionRow'
 
@@ -18,8 +19,10 @@ function StatItem({ label, value, prefix = '', color = 'text-surface-600' }) {
 
 /**
  * TransactionFeed - Live transaction feed at bottom of screen
+ * Supports bilingual display: Korean / English
  */
 function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, maxItems = 200 }) {
+  const { t } = useTranslation()
   const [isPaused, setIsPaused] = useState(false)
   const [filter, setFilter] = useState('all')
   const { whales: transactions, loading, error } = useWhaleData(timeframe, flowTypes)
@@ -88,36 +91,36 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, ma
       <div className="flex items-center justify-between px-4 py-3 border-b border-surface-300 bg-surface-200/50">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success animate-pulse' : 'bg-danger'}`} />
-          <h2 className="font-display font-bold text-surface-600 tracking-wide text-sm">LIVE TRANSACTIONS</h2>
+          <h2 className="font-display font-bold text-surface-600 tracking-wide text-sm">{t('whale.feed.title')}</h2>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1 text-surface-500 font-mono">
             <span>{processedCount.toLocaleString()}</span>
-            <span className="text-[10px] opacity-70">TXS</span>
+            <span className="text-[10px] opacity-70">{t('whale.feed.status.txs')}</span>
           </div>
           <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${isConnected ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-            {isConnected ? 'LIVE' : 'OFFLINE'}
+            {isConnected ? t('whale.feed.status.live') : t('whale.feed.status.offline')}
           </div>
         </div>
       </div>
 
       {/* Stats Bar */}
       <div className="grid grid-cols-3 divide-x divide-surface-300 border-b border-surface-300 bg-surface-100/50">
-        <StatItem label="VOL (24h)" value={stats.volume24h} prefix="$" />
-        <StatItem label="LG WHALES" value={stats.largeWhales} />
-        <StatItem label="NET FLOW" value={stats.netFlow} prefix="$" color={stats.netFlow > 0 ? 'text-success' : stats.netFlow < 0 ? 'text-danger' : 'text-surface-500'} />
+        <StatItem label={t('whale.feed.stats.volume24h')} value={stats.volume24h} prefix="$" />
+        <StatItem label={t('whale.feed.stats.largeWhales')} value={stats.largeWhales} />
+        <StatItem label={t('whale.feed.stats.netFlow')} value={stats.netFlow} prefix="$" color={stats.netFlow > 0 ? 'text-success' : stats.netFlow < 0 ? 'text-danger' : 'text-surface-500'} />
       </div>
 
       {/* Filter Buttons */}
       <div className="flex items-center gap-1 p-2 border-b border-surface-300 bg-surface-100">
         {[
-          { key: 'all', label: 'All', icon: '🌐', isImage: false },
-          { key: 'inflow', label: 'Inflow', icon: '/icons/inflow.png', isImage: true },
-          { key: 'outflow', label: 'Outflow', icon: '/icons/outflow.png', isImage: true },
-          { key: 'special', label: 'Special', icon: '/icons/mint.png', isImage: true },
-          { key: 'defi', label: 'DeFi', icon: '🌐', isImage: false },
-          { key: 'exchange', label: 'Exch', icon: '/icons/transfer.png', isImage: true }
-        ].map(({ key, label, icon, isImage }) => (
+          { key: 'all', labelKey: 'whale.feed.filters.all', icon: '🌐', isImage: false },
+          { key: 'inflow', labelKey: 'whale.feed.filters.inflow', icon: '/icons/inflow.png', isImage: true },
+          { key: 'outflow', labelKey: 'whale.feed.filters.outflow', icon: '/icons/outflow.png', isImage: true },
+          { key: 'special', labelKey: 'whale.feed.filters.special', icon: '/icons/mint.png', isImage: true },
+          { key: 'defi', labelKey: 'whale.feed.filters.defi', icon: '🌐', isImage: false },
+          { key: 'exchange', labelKey: 'whale.feed.filters.exchange', icon: '/icons/transfer.png', isImage: true }
+        ].map(({ key, labelKey, icon, isImage }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
@@ -128,10 +131,10 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, ma
                 : 'bg-surface-300 text-surface-600 border-surface-400 hover:bg-surface-400'
               }
                 `}
-            title={`${label} (${stats[key]})`}
+            title={`${t(labelKey)} (${stats[key]})`}
           >
             {isImage ? (
-              <img src={icon} alt={label} className="w-3.5 h-3.5 object-contain" />
+              <img src={icon} alt={t(labelKey)} className="w-3.5 h-3.5 object-contain" />
             ) : (
               <span>{icon}</span>
             )}
@@ -154,8 +157,8 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, ma
         {filteredTransactions.length === 0 && !loading && (
           <div className="text-center text-mist opacity-40 py-8">
             <div className="text-4xl mb-2 animate-bounce">🌊</div>
-            <div className="text-sm font-display">No transactions yet</div>
-            <div className="text-xs mt-1 font-mono">Waiting for whale activity...</div>
+            <div className="text-sm font-display">{t('whale.feed.emptyState.title')}</div>
+            <div className="text-xs mt-1 font-mono">{t('whale.feed.emptyState.subtitle')}</div>
           </div>
         )}
 

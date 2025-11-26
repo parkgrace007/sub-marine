@@ -1,50 +1,26 @@
 import React, { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import whaleSprites from '../utils/WhaleSprites'
 import CoinIcon from './CoinIcon'
 import ExchangeIcon from './ExchangeIcon'
 
-// 거래소 이름 한글화 매핑
-const EXCHANGE_NAME_KR = {
-  'Binance': '바이낸스',
-  'Coinbase': '코인베이스',
-  'Coinbase Institutional': '코인베이스',
-  'Kraken': '크라켄',
-  'OKX': 'OKX',
-  'Bybit': '바이비트',
-  'Huobi': '후오비',
-  'HTX': '후오비',
-  'Bitfinex': '비트파이넥스',
-  'KuCoin': '쿠코인',
-  'Gate.io': '게이트아이오',
-  'Upbit': '업비트',
-  'Bithumb': '빗썸',
-  'Gemini': '제미니',
-  'Bitstamp': '비트스탬프',
-  'Crypto.com': '크립토닷컴',
-  'FTX': 'FTX',
-  'Robinhood': '로빈후드',
-  'unknown': '거래소'
-}
-
-// 소유자 라벨 한글화 (이모지 없음)
-const getOwnerLabelKR = (owner) => {
-  if (!owner) return '개인지갑'
-  return EXCHANGE_NAME_KR[owner] || owner
-}
-
 /**
  * WhaleTooltip - Displays detailed whale transaction information
  * Enhanced with sprite animation and user-friendly information
+ * Supports bilingual display: Korean (translated) / English (raw API data)
  */
 function WhaleTooltip({ whale, position, onClose }) {
+  const { t, i18n } = useTranslation()
+  const isKorean = i18n.language === 'ko' || i18n.language?.startsWith('ko-')
+
   const canvasRef = useRef(null)
   const frameIndexRef = useRef(0)
   const animationRef = useRef(null)
 
   if (!whale) return null
 
-  const metadata = whale.metadata || {}
-  const { blockchain, symbol, amount, amountUSD, hash, fromOwner, toOwner, fromOwnerType, toOwnerType } = metadata
+  const whaleMetadata = whale.metadata || {}
+  const { blockchain, symbol, amount, amountUSD, hash, fromOwner, toOwner, fromOwnerType, toOwnerType } = whaleMetadata
 
   // Format large numbers
   const formatNumber = (num) => {
@@ -54,18 +30,23 @@ function WhaleTooltip({ whale, position, onClose }) {
     return num?.toFixed(2) || '0'
   }
 
-  // Get tier name
-  const getTierName = (tier) => {
-    const names = {
-      1: '소형 고래',      // $10M-$20M (Small)
-      2: '중소형 고래',    // $20M-$50M (Small-Medium)
-      3: '중형 고래',      // $50M-$100M (Medium)
-      4: '대형 고래',      // $100M-$200M (Large)
-      5: '메가 고래',      // $200M-$500M (Mega)
-      6: '울트라 고래',    // $500M-$1B (Ultra)
-      7: '레전더리 고래'   // $1B+ (Legendary)
+  // Get owner label: Korean uses translation, English uses raw API data
+  const getOwnerLabel = (owner) => {
+    if (!owner) {
+      return isKorean ? t('whale.ownerTypes.wallet') : 'Wallet'
     }
-    return names[tier] || 'Unknown'
+    if (isKorean) {
+      return t(`whale.exchanges.${owner}`, { defaultValue: owner })
+    }
+    return owner // English: raw API data
+  }
+
+  // Get tier name: Korean uses translation, English uses tier number
+  const getTierName = (tier) => {
+    if (isKorean) {
+      return t(`whale.tiers.${tier}`, { defaultValue: `Tier ${tier}` })
+    }
+    return t(`whale.tiers.${tier}`, { defaultValue: `Tier ${tier}` })
   }
 
   // Truncate hash
@@ -90,16 +71,16 @@ function WhaleTooltip({ whale, position, onClose }) {
     const ctx = canvas.getContext('2d')
     const tier = whale.tier
     const spriteImage = whaleSprites.getImage(tier)
-    const metadata = whaleSprites.getMetadata(tier)
+    const spriteMetadata = whaleSprites.getMetadata(tier)
 
     // Calculate frame dimensions
-    const frameWidth = spriteImage.width / metadata.columns
-    const frameHeight = spriteImage.height / metadata.rows
+    const frameWidth = spriteImage.width / spriteMetadata.columns
+    const frameHeight = spriteImage.height / spriteMetadata.rows
 
     // Animation loop
     const animate = () => {
       // Update frame index
-      frameIndexRef.current = (frameIndexRef.current + 0.15) % metadata.frames
+      frameIndexRef.current = (frameIndexRef.current + 0.15) % spriteMetadata.frames
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -177,14 +158,14 @@ function WhaleTooltip({ whale, position, onClose }) {
 
           {/* Transaction Info */}
           <div className="flex-1 min-w-0">
-            {/* FROM → TO (한글화) */}
+            {/* FROM → TO */}
             <div className="flex items-center gap-1 text-xs mb-1">
               <div className="flex items-center gap-1 truncate max-w-[90px]">
                 {fromOwnerType === 'exchange' && fromOwner && (
                   <ExchangeIcon name={fromOwner} size={14} />
                 )}
                 <span className="text-surface-600 opacity-80 font-medium truncate">
-                  {getOwnerLabelKR(fromOwner)}
+                  {getOwnerLabel(fromOwner)}
                 </span>
               </div>
               <span className="text-surface-600 opacity-40 flex-shrink-0">→</span>
@@ -193,19 +174,19 @@ function WhaleTooltip({ whale, position, onClose }) {
                   <ExchangeIcon name={toOwner} size={14} />
                 )}
                 <span className="text-surface-600 opacity-80 font-medium truncate">
-                  {getOwnerLabelKR(toOwner)}
+                  {getOwnerLabel(toOwner)}
                 </span>
               </div>
             </div>
 
-            {/* INFLOW/OUTFLOW Badge (이모지 제거) */}
+            {/* INFLOW/OUTFLOW Badge */}
             <div className="flex items-center gap-2">
               <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${
                 whale.type === 'inflow'
                   ? 'bg-success/20 text-success'
                   : 'bg-danger/20 text-danger'
               }`}>
-                {whale.type === 'inflow' ? '거래소 유입' : '거래소 유출'}
+                {whale.type === 'inflow' ? t('whale.flowLabels.inflow') : t('whale.flowLabels.outflow')}
               </span>
             </div>
           </div>
