@@ -542,18 +542,10 @@ export const useTradingStore = create()(
                 return persistedState
             },
             onRehydrateStorage: () => (state) => {
-                // Check cache TTL (15 minutes)
-                if (state && state._cacheTimestamp) {
-                    const cacheAge = Date.now() - state._cacheTimestamp
-                    const maxAge = 15 * 60 * 1000 // 15 minutes
-
-                    if (cacheAge > maxAge) {
-                        console.log(`🧹 Cache expired (${Math.floor(cacheAge / 60000)} minutes old), clearing...`)
-                        localStorage.removeItem('trading-storage-v2')
-                        window.location.reload()
-                    } else {
-                        console.log(`✅ Cache valid (${Math.floor(cacheAge / 60000)} minutes old)`)
-                    }
+                // Cache TTL removed - positions should persist until manually closed
+                // Version migration handles breaking changes
+                if (state) {
+                    console.log(`✅ Trading store rehydrated (${state.positions?.length || 0} positions)`)
                 }
             }
         }

@@ -21,15 +21,7 @@ export const RankingTable = () => {
   const { user } = useAuth();
   const { rankings, userRank, loading, error } = useRanking();
 
-  // 로그인 필요
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center h-40 text-surface-500">
-        <Lock size={32} className="mb-2 opacity-50" />
-        <p className="text-sm">{t('trading.rankingTable.loginToView')}</p>
-      </div>
-    );
-  }
+  // 비로그인 시에도 랭킹 표시 (로그인 유도 메시지만 추가)
 
   // 로딩 중
   if (loading) {

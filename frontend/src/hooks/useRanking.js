@@ -44,12 +44,6 @@ export const useRanking = () => {
 
       setRankings(rankedData);
 
-      // 현재 사용자의 순위 찾기
-      if (user) {
-        const currentUserRanking = rankedData.find(r => r.user_id === user.id);
-        setUserRank(currentUserRanking);
-      }
-
     } catch (err) {
       console.error('[useRanking] Error fetching rankings:', err);
       setError(err.message);
@@ -58,10 +52,20 @@ export const useRanking = () => {
     }
   };
 
-  // 초기 데이터 로드
+  // 초기 데이터 로드 (비로그인 시에도 랭킹 조회)
   useEffect(() => {
     fetchRankings();
-  }, [user?.id]);
+  }, []);
+
+  // 로그인 상태 변경 시 현재 사용자 순위 업데이트
+  useEffect(() => {
+    if (user && rankings.length > 0) {
+      const currentUserRanking = rankings.find(r => r.user_id === user.id);
+      setUserRank(currentUserRanking || null);
+    } else {
+      setUserRank(null);
+    }
+  }, [user, rankings]);
 
   // Supabase Realtime 구독 (user_rankings 테이블 변경 감지)
   useEffect(() => {
