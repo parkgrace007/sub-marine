@@ -90,6 +90,8 @@ function MainPage() {
           id: alert.id,
           timestamp: alert.created_at,
           type: alert.type,
+          signal_key: alert.signal_key,
+          params: alert.params,
           message: alert.message,
           value: alert.value
         }))
@@ -139,6 +141,8 @@ function MainPage() {
             id: alert.id,
             timestamp: alert.created_at,
             type: alert.type,
+            signal_key: alert.signal_key,
+            params: alert.params,
             message: alert.message,
             value: alert.value
           }
