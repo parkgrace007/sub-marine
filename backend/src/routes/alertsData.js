@@ -133,13 +133,13 @@ router.get('/', alertsApiLimiter, async (req, res) => {
 router.get('/indicators', alertsApiLimiter, async (req, res) => {
   try {
     const timeframe = req.query.timeframe || '1h'
-    const symbol = req.query.symbol || 'BTC'
+    const symbol = req.query.symbol // No default - allow fetching all symbols
     const limit = parseInt(req.query.limit) || 100
 
-    console.log(`📊 [AlertsAPI/Indicators] Request: timeframe=${timeframe}, symbol=${symbol}, limit=${limit}`)
+    console.log(`📊 [AlertsAPI/Indicators] Request: timeframe=${timeframe}, symbol=${symbol || 'ALL'}, limit=${limit}`)
 
     // Check cache
-    const cacheKey = getCacheKey('indicator_alerts', { timeframe, symbol, limit })
+    const cacheKey = getCacheKey('indicator_alerts', { timeframe, symbol: symbol || 'ALL', limit })
     const cached = getFromCache(cacheKey)
     if (cached) {
       console.log(`   ✅ Cache hit (${Math.floor((Date.now() - cached.timestamp) / 1000)}s old)`)
@@ -162,7 +162,8 @@ router.get('/indicators', alertsApiLimiter, async (req, res) => {
     if (timeframe) {
       query = query.eq('timeframe', timeframe)
     }
-    if (symbol) {
+    // Only filter by symbol if specified (allow '통합'/ALL to fetch all)
+    if (symbol && symbol !== '통합') {
       query = query.eq('symbol', symbol)
     }
 
