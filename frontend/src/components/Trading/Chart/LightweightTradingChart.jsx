@@ -109,44 +109,48 @@ export const LightweightTradingChart = () => {
 
     return (
         <div className="w-full h-full bg-surface-200 rounded border border-surface-300 overflow-hidden flex flex-col relative">
-            {/* Header */}
-            <div className="flex justify-between items-center px-4 py-3 border-b border-surface-300 bg-surface-200">
-                <div className="flex items-center gap-4">
+            {/* Header - 반응형 */}
+            <div className="flex flex-col border-b border-surface-300 bg-surface-200">
+                {/* 상단: BTC/USDT + 타임프레임 */}
+                <div className="flex justify-between items-center px-3 lg:px-4 py-2">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold text-surface-600">BTC/USDT</h2>
-                        <span className="text-[10px] bg-surface-300 px-1.5 py-0.5 rounded text-surface-500 font-semibold">
+                        <h2 className="text-sm lg:text-lg font-bold text-surface-600">BTC/USDT</h2>
+                        <span className="text-[9px] lg:text-[10px] bg-surface-300 px-1 lg:px-1.5 py-0.5 rounded text-surface-500 font-semibold">
                             {t('trading.chart.perpetual')}
                         </span>
                     </div>
-                    <div className="h-4 w-[1px] bg-surface-300" />
-                    <div className="flex gap-4 text-xs">
-                        <div className="flex flex-col">
-                            <span className="text-surface-500">{t('trading.chart.high24h')}</span>
-                            <span className="text-surface-600 font-medium">--</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-surface-500">{t('trading.chart.low24h')}</span>
-                            <span className="text-surface-600 font-medium">--</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-surface-500">{t('trading.chart.vol24h')}</span>
-                            <span className="text-surface-600 font-medium">--</span>
-                        </div>
+                    {/* 타임프레임 버튼 */}
+                    <div className="flex gap-0.5 lg:gap-1">
+                        {['1m', '3m', '5m', '15m', '1h', '4h', '1d'].map((tf) => (
+                            <button
+                                key={tf}
+                                onClick={() => setInterval(tf)}
+                                className={`text-[10px] lg:text-[12px] px-2 lg:px-3 py-1 rounded transition-all font-medium whitespace-nowrap ${
+                                    tf === interval
+                                        ? 'text-primary font-bold bg-surface-300/50'
+                                        : 'text-surface-500 hover:text-surface-600 hover:bg-surface-300/30'
+                                }`}
+                            >
+                                {tf}
+                            </button>
+                        ))}
                     </div>
                 </div>
-                <div className="flex gap-1">
-                    {['1m', '3m', '5m', '15m', '1h', '4h', '1d'].map((tf) => (
-                        <button
-                            key={tf}
-                            onClick={() => setInterval(tf)}
-                            className={`text-[12px] px-3 py-1 rounded transition-all font-medium ${tf === interval
-                                ? 'text-primary font-bold bg-surface-300/50' // Active: Amber
-                                : 'text-surface-500 hover:text-surface-600 hover:bg-surface-300/30'
-                                }`}
-                        >
-                            {tf}
-                        </button>
-                    ))}
+
+                {/* 하단: 24시간 통계 - 데스크톱만 표시 */}
+                <div className="hidden lg:flex gap-4 px-4 pb-2 text-xs">
+                    <div className="flex flex-col">
+                        <span className="text-surface-500">{t('trading.chart.high24h')}</span>
+                        <span className="text-surface-600 font-medium">--</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-surface-500">{t('trading.chart.low24h')}</span>
+                        <span className="text-surface-600 font-medium">--</span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-surface-500">{t('trading.chart.vol24h')}</span>
+                        <span className="text-surface-600 font-medium">--</span>
+                    </div>
                 </div>
             </div>
 
