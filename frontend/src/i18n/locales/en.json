@@ -261,6 +261,37 @@
     "extremeGreed": "Extreme Greed"
   },
 
+  "indicatorLogs": {
+    "RSI_LEVEL_10": "⚠️ [RSI L10] Extreme overbought (RSI {val}). Market euphoria. 85%+ correction probability",
+    "RSI_LEVEL_9": "🚨 [RSI L9] Strong overbought (RSI {val}). Correction imminent, take partial profits.",
+    "RSI_LEVEL_8": "🔥 [RSI L8] Entering overbought (RSI {val}). Strong uptrend.",
+    "RSI_LEVEL_7": "📈 [RSI L7] Healthy bullish trend continues.",
+    "RSI_LEVEL_4": "📉 [RSI L4] Bearish trend continues.",
+    "RSI_LEVEL_3": "♻️ [RSI L3] Entering oversold (RSI {val}). Technical bounce zone.",
+    "RSI_LEVEL_2": "🌊 [RSI L2] Strong oversold (RSI {val}). Bounce imminent.",
+    "RSI_LEVEL_1": "💎 [RSI L1] Extreme oversold (RSI {val}). Market fear. Near bottom.",
+    "RSI_CROSS_UP_50": "↗️ RSI crossed above 50 (neutral line). Buyers taking control.",
+    "RSI_CROSS_DOWN_50": "↘️ RSI crossed below 50 (neutral line). Sellers taking control.",
+    "MACD_GOLDEN_CROSS": "📈 [MACD] Golden Cross detected. Short-term bullish momentum begins.",
+    "MACD_DEATH_CROSS": "📉 [MACD] Death Cross detected. Short-term bearish momentum begins.",
+    "MACD_ZERO_CROSS_UP": "🆙 MACD crossed above zero line. Bull Market entry signal.",
+    "MACD_ZERO_CROSS_DOWN": "⬇️ MACD crossed below zero line. Bear Market entry signal.",
+    "MACD_EXTREME_BULLISH": "🔥 [MACD L7] Extreme bullish momentum. Buying pressure exploding.",
+    "MACD_EXTREME_BEARISH": "❄️ [MACD L1] Extreme bearish momentum. Selling pressure exploding.",
+    "BB_EXTREME_SQUEEZE": "⚡️ [BB Width L1] Extreme Squeeze. Major volatility explosion imminent.",
+    "BB_STRONG_EXPANSION": "💥 [BB Width L6] Strong Expansion. Trend accelerating.",
+    "BB_BREAK_UPPER": "🚀 [BB L5] Price broke above upper band. Strong uptrend.",
+    "BB_BREAK_LOWER": "💧 [BB L1] Price broke below lower band. Strong downtrend.",
+    "WHALE_LEGENDARY": "🚨 [LEGENDARY] Tier 7 mega whale ($1B+) has moved! ({flow})",
+    "WHALE_INFLOW": "🟢 [Whale Inflow] Tier {tier} whale withdrew ${amount}M from exchange.",
+    "WHALE_OUTFLOW": "🔴 [Whale Outflow] Tier {tier} whale deposited ${amount}M to exchange.",
+    "WHALE_BUY": "🟢 [Whale Buy] Tier {tier} whale bought ${amount}M.",
+    "WHALE_SELL": "🔴 [Whale Sell] Tier {tier} whale sold ${amount}M.",
+    "WHALE_EXCHANGE": "⚪ [Whale Move] Tier {tier} whale moved ${amount}M between exchanges.",
+    "WHALE_INTERNAL": "⚪ [Whale Move] Tier {tier} moved ${amount}M between wallets.",
+    "WHALE_DEFI": "🟡 [Whale DeFi] Tier {tier} whale used ${amount}M in DeFi/contract."
+  },
+
   "indicators": {
     "rsi": {
       "extremeOversold": "Extreme Oversold",

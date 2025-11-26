@@ -19,8 +19,27 @@ function AlertLogTerminal({
   const previousAlertsRef = useRef([])
   const typingTimeoutRef = useRef(null)
 
-  // Get translated message based on signal_type
+  // Get translated message based on signal_key or signal_type
   const getTranslatedMessage = (alert) => {
+    // 1. First try signal_key (indicator logs from useIndicatorLogger)
+    if (alert.signal_key) {
+      const translationKey = `indicatorLogs.${alert.signal_key}`
+      let translated = t(translationKey, { defaultValue: '' })
+
+      if (translated) {
+        // Replace placeholders with actual values from params
+        if (alert.params) {
+          // Parse params if it's a string (from database)
+          const params = typeof alert.params === 'string' ? JSON.parse(alert.params) : alert.params
+          Object.entries(params).forEach(([key, value]) => {
+            translated = translated.replace(`{${key}}`, value)
+          })
+        }
+        return translated
+      }
+    }
+
+    // 2. Then try signal_type (combo alerts like S-01, A-01, etc.)
     if (alert.signal_type) {
       const titleKey = `alerts.types.${alert.signal_type}.title`
       const descKey = `alerts.types.${alert.signal_type}.desc`
@@ -32,6 +51,8 @@ function AlertLogTerminal({
         return `[${alert.signal_type}] ${translatedTitle}: ${translatedDesc}`
       }
     }
+
+    // 3. Fallback to original message (for backward compatibility)
     return alert.message
   }
 

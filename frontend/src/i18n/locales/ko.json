@@ -261,6 +261,37 @@
     "extremeGreed": "극단적 탐욕"
   },
 
+  "indicatorLogs": {
+    "RSI_LEVEL_10": "⚠️ [RSI L10] 극단적 과매수(RSI {val}). 시장 광기 상태. 조정 확률 85%+",
+    "RSI_LEVEL_9": "🚨 [RSI L9] 강한 과매수(RSI {val}). 조정 임박, 분할 익절 구간.",
+    "RSI_LEVEL_8": "🔥 [RSI L8] 과매수 진입(RSI {val}). 강한 상승 추세.",
+    "RSI_LEVEL_7": "📈 [RSI L7] 건강한 상승 추세(Bullish)가 지속 중입니다.",
+    "RSI_LEVEL_4": "📉 [RSI L4] 하락 추세(Bearish)가 지속 중입니다.",
+    "RSI_LEVEL_3": "♻️ [RSI L3] 과매도 진입(RSI {val}). 기술적 반등 고려 구간.",
+    "RSI_LEVEL_2": "🌊 [RSI L2] 강한 과매도(RSI {val}). 반등 임박.",
+    "RSI_LEVEL_1": "💎 [RSI L1] 극단적 과매도(RSI {val}). 시장 공포 상태. 바닥 근접.",
+    "RSI_CROSS_UP_50": "↗️ RSI가 중립선(50)을 상향 돌파했습니다. (매수 우위 전환)",
+    "RSI_CROSS_DOWN_50": "↘️ RSI가 중립선(50)을 하향 이탈했습니다. (매도 우위 전환)",
+    "MACD_GOLDEN_CROSS": "📈 [MACD] 골든크로스 발생. 단기 상승 모멘텀 시작.",
+    "MACD_DEATH_CROSS": "📉 [MACD] 데드크로스 발생. 단기 하락 모멘텀 시작.",
+    "MACD_ZERO_CROSS_UP": "🆙 MACD 0선 상향 돌파. 강세장(Bull Market) 진입 신호.",
+    "MACD_ZERO_CROSS_DOWN": "⬇️ MACD 0선 하향 이탈. 약세장(Bear Market) 진입 신호.",
+    "MACD_EXTREME_BULLISH": "🔥 [MACD L7] 극강 강세 모멘텀. 매수세 폭발.",
+    "MACD_EXTREME_BEARISH": "❄️ [MACD L1] 극강 약세 모멘텀. 매도세 폭발.",
+    "BB_EXTREME_SQUEEZE": "⚡️ [BB Width L1] 극강 수축(Extreme Squeeze). 대형 변동성 폭발 직전.",
+    "BB_STRONG_EXPANSION": "💥 [BB Width L6] 강한 확장(Expansion). 트렌드 가속화.",
+    "BB_BREAK_UPPER": "🚀 [BB L5] 가격이 밴드 상단을 돌파했습니다. 강한 상승세.",
+    "BB_BREAK_LOWER": "💧 [BB L1] 가격이 밴드 하단을 이탈했습니다. 강한 하락세.",
+    "WHALE_LEGENDARY": "🚨 [LEGENDARY] Tier 7 초대형 고래($1B+)가 움직였습니다! ({flow})",
+    "WHALE_INFLOW": "🟢 [Whale Inflow] Tier {tier} 고래가 ${amount}M 유입했습니다.",
+    "WHALE_OUTFLOW": "🔴 [Whale Outflow] Tier {tier} 고래가 ${amount}M 유출(입금)했습니다.",
+    "WHALE_BUY": "🟢 [Whale Buy] Tier {tier} 고래가 ${amount}M 매수했습니다.",
+    "WHALE_SELL": "🔴 [Whale Sell] Tier {tier} 고래가 ${amount}M 매도했습니다.",
+    "WHALE_EXCHANGE": "⚪ [Whale Move] Tier {tier} 고래가 거래소 간 ${amount}M 이동했습니다.",
+    "WHALE_INTERNAL": "⚪ [Whale Move] Tier {tier} 지갑 간 ${amount}M 이동했습니다.",
+    "WHALE_DEFI": "🟡 [Whale DeFi] Tier {tier} 고래가 DeFi/계약에 ${amount}M 사용했습니다."
+  },
+
   "indicators": {
     "rsi": {
       "extremeOversold": "극 과매도",

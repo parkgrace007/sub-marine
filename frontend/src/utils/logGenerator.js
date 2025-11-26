@@ -84,6 +84,8 @@ export function generateRSILog(rsiValue, prevValue, lang = 'ko') {
   if (prevValue < 50 && rsiValue >= 50) {
     const template = LOG_TEMPLATES.RSI.CROSS_UP_50
     return {
+      signal_key: 'RSI_CROSS_UP_50',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -92,6 +94,8 @@ export function generateRSILog(rsiValue, prevValue, lang = 'ko') {
   if (prevValue >= 50 && rsiValue < 50) {
     const template = LOG_TEMPLATES.RSI.CROSS_DOWN_50
     return {
+      signal_key: 'RSI_CROSS_DOWN_50',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -105,8 +109,11 @@ export function generateRSILog(rsiValue, prevValue, lang = 'ko') {
 
     // Only log for levels with templates (L1, L2, L3, L4, L7, L8, L9, L10)
     if (template) {
-      const text = replacePlaceholders(getLogText(template, lang), { val: rsiValue.toFixed(1) })
+      const params = { val: rsiValue.toFixed(1) }
+      const text = replacePlaceholders(getLogText(template, lang), params)
       return {
+        signal_key: `RSI_LEVEL_${currentLevel}`,
+        params,
         text,
         type: template.type,
         timestamp: new Date().toISOString()
@@ -136,6 +143,8 @@ export function generateMACDLog(histogram, prevHistogram, macdLine = null, prevM
   if (prevHistogram < 0 && histogram >= 0) {
     const template = LOG_TEMPLATES.MACD.GOLDEN_CROSS
     return {
+      signal_key: 'MACD_GOLDEN_CROSS',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -146,6 +155,8 @@ export function generateMACDLog(histogram, prevHistogram, macdLine = null, prevM
   if (prevHistogram >= 0 && histogram < 0) {
     const template = LOG_TEMPLATES.MACD.DEATH_CROSS
     return {
+      signal_key: 'MACD_DEATH_CROSS',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -157,6 +168,8 @@ export function generateMACDLog(histogram, prevHistogram, macdLine = null, prevM
     if (prevMacdLine < 0 && macdLine >= 0) {
       const template = LOG_TEMPLATES.MACD.ZERO_CROSS_UP
       return {
+        signal_key: 'MACD_ZERO_CROSS_UP',
+        params: {},
         text: getLogText(template, lang),
         type: template.type,
         timestamp: new Date().toISOString()
@@ -165,6 +178,8 @@ export function generateMACDLog(histogram, prevHistogram, macdLine = null, prevM
     if (prevMacdLine >= 0 && macdLine < 0) {
       const template = LOG_TEMPLATES.MACD.ZERO_CROSS_DOWN
       return {
+        signal_key: 'MACD_ZERO_CROSS_DOWN',
+        params: {},
         text: getLogText(template, lang),
         type: template.type,
         timestamp: new Date().toISOString()
@@ -179,6 +194,8 @@ export function generateMACDLog(histogram, prevHistogram, macdLine = null, prevM
   if (!wasExtremeBullish && isExtremeBullish) {
     const template = LOG_TEMPLATES.MACD.EXTREME_BULLISH
     return {
+      signal_key: 'MACD_EXTREME_BULLISH',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -190,6 +207,8 @@ export function generateMACDLog(histogram, prevHistogram, macdLine = null, prevM
   if (!wasExtremeBearish && isExtremeBearish) {
     const template = LOG_TEMPLATES.MACD.EXTREME_BEARISH
     return {
+      signal_key: 'MACD_EXTREME_BEARISH',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -251,6 +270,8 @@ export function generateBBLog(width, prevWidth, position = null, prevPosition = 
   if (currentWidthLevel === 1 && prevWidthLevel !== 1) {
     const template = LOG_TEMPLATES.BB.EXTREME_SQUEEZE
     return {
+      signal_key: 'BB_EXTREME_SQUEEZE',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -260,6 +281,8 @@ export function generateBBLog(width, prevWidth, position = null, prevPosition = 
   if (currentWidthLevel === 6 && prevWidthLevel !== 6) {
     const template = LOG_TEMPLATES.BB.STRONG_EXPANSION
     return {
+      signal_key: 'BB_STRONG_EXPANSION',
+      params: {},
       text: getLogText(template, lang),
       type: template.type,
       timestamp: new Date().toISOString()
@@ -275,6 +298,8 @@ export function generateBBLog(width, prevWidth, position = null, prevPosition = 
     if (currentPosLevel === 5 && prevPosLevel !== 5) {
       const template = LOG_TEMPLATES.BB.BREAK_UPPER
       return {
+        signal_key: 'BB_BREAK_UPPER',
+        params: {},
         text: getLogText(template, lang),
         type: template.type,
         timestamp: new Date().toISOString()
@@ -285,6 +310,8 @@ export function generateBBLog(width, prevWidth, position = null, prevPosition = 
     if (currentPosLevel === 1 && prevPosLevel !== 1) {
       const template = LOG_TEMPLATES.BB.BREAK_LOWER
       return {
+        signal_key: 'BB_BREAK_LOWER',
+        params: {},
         text: getLogText(template, lang),
         type: template.type,
         timestamp: new Date().toISOString()
@@ -330,10 +357,11 @@ export function generateWhaleLog(whale, lang = 'ko') {
   // Legendary (Tier 7) special handling
   if (tier === 7) {
     const template = LOG_TEMPLATES.WHALE.LEGENDARY
-    const text = replacePlaceholders(getLogText(template, lang), {
-      flow: flowType
-    })
+    const params = { flow: flowType }
+    const text = replacePlaceholders(getLogText(template, lang), params)
     return {
+      signal_key: 'WHALE_LEGENDARY',
+      params,
       text,
       type: template.type,
       timestamp: whale.timestamp || new Date().toISOString()
@@ -346,12 +374,12 @@ export function generateWhaleLog(whale, lang = 'ko') {
 
   if (!template) return null // Unknown flow type
 
-  const text = replacePlaceholders(getLogText(template, lang), {
-    tier,
-    amount: amountM
-  })
+  const params = { tier, amount: amountM }
+  const text = replacePlaceholders(getLogText(template, lang), params)
 
   return {
+    signal_key: `WHALE_${flowType}`,
+    params,
     text,
     type: template.type,
     timestamp: whale.timestamp || new Date().toISOString()

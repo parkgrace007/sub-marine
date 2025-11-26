@@ -203,11 +203,11 @@ router.get('/indicators', alertsApiLimiter, async (req, res) => {
 /**
  * POST /api/alerts/indicators
  * Create a new indicator alert
- * Body: { timeframe, symbol, type, message, value }
+ * Body: { timeframe, symbol, type, signal_key, params, message, value }
  */
 router.post('/indicators', alertsApiLimiter, async (req, res) => {
   try {
-    const { timeframe, symbol, type, message, value } = req.body
+    const { timeframe, symbol, type, signal_key, params, message, value } = req.body
 
     if (!timeframe || !symbol || !type || !message) {
       return res.status(400).json({
@@ -225,6 +225,8 @@ router.post('/indicators', alertsApiLimiter, async (req, res) => {
         timeframe,
         symbol,
         type,
+        signal_key: signal_key || null,
+        params: params || null,
         message,
         value: value || null
       })

@@ -196,6 +196,8 @@ function MainPage() {
           timeframe,
           symbol,
           type: log.type,
+          signal_key: log.signal_key,
+          params: log.params,
           message: log.text,
           value: log.value || null
         })
