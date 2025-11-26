@@ -123,6 +123,7 @@
         "subtitle": "고래 활동을 기다리는 중..."
       },
       "status": {
+        "connecting": "연결 중",
         "live": "실시간",
         "offline": "오프라인",
         "txs": "건"
@@ -411,6 +412,11 @@
       "fear": "공포",
       "extremeFear": "극도의 공포"
     }
+  },
+
+  "connection": {
+    "error": "연결 문제",
+    "retrying": "재연결 중..."
   },
 
   "errors": {

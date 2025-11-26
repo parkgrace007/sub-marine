@@ -81,16 +81,22 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, ma
     netFlow: '250K' // Example value
   }
 
-  // Assuming isConnected and processedCount are defined elsewhere or will be added
-  const isConnected = !loading && !error; // Example logic
-  const processedCount = activeTransactions.length; // Example logic
+  // Connection status: 3 states (connecting, live, offline)
+  // - connecting: loading data (yellow)
+  // - live: connected and data loaded (green)
+  // - offline: error occurred (red)
+  const connectionStatus = loading ? 'connecting' : (error ? 'offline' : 'live')
+  const processedCount = activeTransactions.length
 
   return (
     <div className="flex flex-col h-full bg-surface-200 border border-surface-300 rounded-md overflow-hidden shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-surface-300 bg-surface-200/50">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success animate-pulse' : 'bg-danger'}`} />
+          <div className={`w-2 h-2 rounded-full ${
+            connectionStatus === 'connecting' ? 'bg-warning animate-pulse' :
+            connectionStatus === 'live' ? 'bg-success animate-pulse' : 'bg-danger'
+          }`} />
           <h2 className="font-display font-bold text-surface-600 tracking-wide text-sm">{t('whale.feed.title')}</h2>
         </div>
         <div className="flex items-center gap-3 text-xs">
@@ -98,8 +104,12 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, ma
             <span>{processedCount.toLocaleString()}</span>
             <span className="text-[10px] opacity-70">{t('whale.feed.status.txs')}</span>
           </div>
-          <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${isConnected ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-            {isConnected ? t('whale.feed.status.live') : t('whale.feed.status.offline')}
+          <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+            connectionStatus === 'connecting' ? 'bg-warning/10 text-warning' :
+            connectionStatus === 'live' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
+          }`}>
+            {connectionStatus === 'connecting' ? t('whale.feed.status.connecting') :
+             connectionStatus === 'live' ? t('whale.feed.status.live') : t('whale.feed.status.offline')}
           </div>
         </div>
       </div>
@@ -148,9 +158,11 @@ function TransactionFeed({ timeframe, flowTypes = null, onTransactionsChange, ma
         ref={scrollRef}
         className="overflow-y-auto h-[calc(100%-52px)] px-4 py-2 space-y-1.5 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent"
       >
-        {error && (
-          <div className="bg-danger/10 border border-danger/50 px-4 py-3 text-sm text-danger rounded-sm">
-            <span className="font-bold">Error:</span> {error}
+        {/* Loading Spinner */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="w-8 h-8 border-2 border-surface-400 border-t-brand rounded-full animate-spin mb-2" />
+            <div className="text-xs text-surface-500 font-mono">{t('whale.feed.status.connecting')}</div>
           </div>
         )}
 

@@ -102,6 +102,7 @@
         "subtitle": "Waiting for whale activity..."
       },
       "status": {
+        "connecting": "CONNECTING",
         "live": "LIVE",
         "offline": "OFFLINE",
         "txs": "TXS"
@@ -390,6 +391,11 @@
       "fear": "Fear",
       "extremeFear": "Extreme Fear"
     }
+  },
+
+  "connection": {
+    "error": "Connection issue",
+    "retrying": "Reconnecting..."
   },
 
   "errors": {
